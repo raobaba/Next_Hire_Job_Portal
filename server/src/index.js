@@ -1,8 +1,27 @@
-const express = require("express");
-const Connection = require("./config/db");
-const app = express();
+const app = require("./app");
+const cloudinary = require("cloudinary").v2;
+const PORT = process.env.PORT || 3000;
 
-Connection();
-app.listen(3000, () => {
-  console.log("server is running on port 3000");
+// UncaughtException Error
+process.on("uncaughtException", (err) => {
+  console.log(`Error: ${err.message}`);
+  process.exit(1);
+});
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET_KEY,
+});
+
+const server = app.listen(PORT, () => {
+  console.log(`Server running on PORT http://localhost:${PORT}`);
+});
+
+// Unhandled Promise Rejection
+process.on("unhandledRejection", (err) => {
+  console.log(`Error: ${err.message}`);
+  server.close(() => {
+    process.exit(1);
+  });
 });
