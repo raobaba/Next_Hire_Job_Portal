@@ -92,8 +92,8 @@ const logoutUser = asyncErrorHandler(async (req, res, next) => {
 
 const updateProfile = asyncErrorHandler(async (req, res, next) => {
   const { fullname, email, phoneNumber, bio, skills } = req.body;
-  console.log(req.body)
-  const userId = req.user.id; 
+  console.log(req.body);
+  const userId = req.user.id;
 
   // Find the user by their ID
   let user = await User.findById(userId);
