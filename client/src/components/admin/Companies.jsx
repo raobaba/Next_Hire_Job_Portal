@@ -8,14 +8,20 @@ import { useNavigate } from "react-router-dom";
 // Sample static company data for demonstration
 const staticCompaniesData = [
   { id: 1, name: "TechCorp", location: "New York", industry: "Technology" },
-  { id: 2, name: "InnovateX", location: "San Francisco", industry: "Innovation" },
+  {
+    id: 2,
+    name: "InnovateX",
+    location: "San Francisco",
+    industry: "Innovation",
+  },
   { id: 3, name: "DevSolutions", location: "Austin", industry: "Software" },
   { id: 4, name: "BuildIt", location: "Seattle", industry: "Construction" },
 ];
 
 const Companies = () => {
   const [input, setInput] = useState("");
-  const [filteredCompanies, setFilteredCompanies] = useState(staticCompaniesData);
+  const [filteredCompanies, setFilteredCompanies] =
+    useState(staticCompaniesData);
   const navigate = useNavigate();
 
   useEffect(() => {
