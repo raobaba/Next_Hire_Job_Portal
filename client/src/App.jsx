@@ -9,6 +9,7 @@ import Profile from "./components/Profile";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Companies from "./components/admin/Companies";
 import CompanyCreate from "./components/admin/CompanyCreate";
+import CompanySetup from "./components/admin/CompanySetup";
 
 const appRouter = createBrowserRouter([
   {
@@ -52,6 +53,14 @@ const appRouter = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <CompanyCreate />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/companies/:id",
+    element: (
+      <ProtectedRoute>
+        <CompanySetup />
       </ProtectedRoute>
     ),
   },
