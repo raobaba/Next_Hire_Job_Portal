@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
+import ReactHelmet from "./ReactHelmet";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,13 +13,18 @@ const Navbar = () => {
 
   return (
     <div className="bg-white shadow-md w-full fixed top-0 left-0 z-50">
+      <ReactHelmet
+        title="Home - Next_Hire"
+        description="Welcome to Next_Hire – your one-stop platform to discover new job opportunities and connect with top employers. Whether you're looking to advance your career, explore job listings, or recruit top talent, our platform provides seamless navigation and powerful search tools to help you succeed. Start your job search or hiring process today!"
+        canonicalUrl="http://mysite.com/home"
+      />
       <div className="bg-white w-11/12 m-auto">
         <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4 lg:px-0">
           <h1 className="text-2xl font-bold text-gray-800">
-            <a href="/">
+            <Link to="/">
               {" "}
               Next<span className="text-[#F83002]">Hire</span>
-            </a>
+            </Link>
           </h1>
 
           {/* Hamburger Menu for Mobile */}

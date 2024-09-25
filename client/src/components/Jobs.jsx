@@ -3,6 +3,7 @@ import Navbar from "./shared/Navbar";
 import FilterCard from "./FilterCard";
 import Job from "./Job";
 import { motion } from "framer-motion";
+import ReactHelmet from "./shared/ReactHelmet";
 
 const allJobs = [
   {
@@ -169,6 +170,12 @@ const Jobs = () => {
   return (
     <div>
       <Navbar />
+      <ReactHelmet
+        title="Job Openings - Next_Hire"
+        description="Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire."
+        canonicalUrl="http://mysite.com/job"
+      />
+
       <div className="max-w-7xl mx-auto mt-20 px-4">
         <div className="flex flex-col md:flex-row gap-5">
           <div className="w-full md:w-1/4 lg:w-1/5">

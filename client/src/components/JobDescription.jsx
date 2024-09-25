@@ -3,6 +3,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+import ReactHelmet from "./shared/ReactHelmet";
 
 const mockJobData = [
   {
@@ -148,6 +149,12 @@ const JobDescription = () => {
 
   return (
     <div className="max-w-7xl mx-auto my-10 p-4 md:p-8">
+      <ReactHelmet
+        title="Job Details - Next_Hire"
+        description="Discover detailed information about the job role, responsibilities, qualifications, and how to apply. Learn more to see if this is the right opportunity for you."
+        canonicalUrl="http://mysite.com/job-details"
+      />
+
       <div className="flex flex-col md:flex-row items-start justify-between">
         <div className="flex-1">
           <h1 className="font-bold text-2xl md:text-3xl">{singleJob.title}</h1>

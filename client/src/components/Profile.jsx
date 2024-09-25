@@ -7,6 +7,7 @@ import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import AppliedJobTable from "./AppliedJobTable";
 import UpdateProfileDialog from "./UpdateProfileDialog";
+import ReactHelmet from "./shared/ReactHelmet";
 
 // Sample user data for demonstration purposes
 const sampleUser = {
@@ -30,6 +31,12 @@ const Profile = () => {
   return (
     <div className="min-h-screen mt-20 bg-gray-50">
       <Navbar />
+      <ReactHelmet
+        title="Profile - Next_Hire"
+        description="View and edit your profile details, including your resume, job preferences, and application history. Manage your career journey with Next_Hire."
+        canonicalUrl="http://mysite.com/profile"
+      />
+
       <div className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-2xl my-5 p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row justify-between">
           <div className="flex items-center gap-4 mb-4 sm:mb-0">

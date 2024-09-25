@@ -16,6 +16,7 @@ import { JOB_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import ReactHelmet from "../shared/ReactHelmet";
 
 const companyArray = [
   { _id: "1", name: "Company A" },
@@ -75,6 +76,12 @@ const PostJob = () => {
   return (
     <div>
       <Navbar />
+      <ReactHelmet
+        title="Post a Job - Next_Hire"
+        description="Easily post job openings to attract qualified candidates. Fill out the job details, including role, responsibilities, and requirements, to find the perfect fit for your team."
+        canonicalUrl="http://mysite.com/post-job"
+      />
+
       <div className="flex items-center justify-center w-screen my-5 px-4 mt-20 md:px-0">
         <form
           onSubmit={submitHandler}

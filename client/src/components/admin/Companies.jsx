@@ -4,6 +4,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import CompaniesTable from "./CompaniesTable";
 import { useNavigate } from "react-router-dom";
+import ReactHelmet from "../shared/ReactHelmet";
 
 // Sample static company data for demonstration
 const staticCompaniesData = [
@@ -35,6 +36,12 @@ const Companies = () => {
   return (
     <div>
       <Navbar />
+      <ReactHelmet
+        title="Companies - Next_Hire"
+        description="Explore a list of companies hiring in your area. Learn about company cultures, available positions, and how to apply. Find your next workplace with Next_Hire."
+        canonicalUrl="http://mysite.com/companies"
+      />
+
       <div className="max-w-6xl mx-auto my-10 p-4">
         <div className="flex flex-col md:flex-row items-center justify-between my-5">
           <Input

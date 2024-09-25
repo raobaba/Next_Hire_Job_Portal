@@ -10,6 +10,7 @@ import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { FaCircleUser } from "react-icons/fa6";
+import ReactHelmet from "../shared/ReactHelmet";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -63,6 +64,11 @@ const Signup = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
       <Navbar />
+      <ReactHelmet
+        title="Signup - Next_Hire"
+        description="Signup to access job opportunities and recruitments"
+        canonicalUrl="http://mysite.com/signup"
+      />
       <div className="bg-white rounded-lg shadow-lg mt-[100px] p-5 w-1/3">
         <h1 className="text-2xl font-bold mb-1 text-center">Sign Up</h1>
         <form onSubmit={submitHandler} className="grid grid-cols-1 gap-4">

@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "./shared/Navbar";
 import Job from "./Job";
+import ReactHelmet from "./shared/ReactHelmet";
 
 const allJobs = [
   {
@@ -37,6 +38,12 @@ const Browse = () => {
   return (
     <div>
       <Navbar />
+      <ReactHelmet
+        title="Browse Jobs - Next_Hire"
+        description="Browse a wide range of job openings across various industries and locations. Filter by role, experience, and more to find your ideal career opportunity."
+        canonicalUrl="http://mysite.com/browse"
+      />
+
       <div className="max-w-7xl mx-auto my-10 p-4">
         <h1 className="font-bold text-xl md:text-2xl my-6">
           Search Results ({allJobs.length})
