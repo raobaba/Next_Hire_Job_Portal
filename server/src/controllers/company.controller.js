@@ -14,7 +14,10 @@ const registerCompany = asyncErrorHandler(async (req, res, next) => {
 
   let company = await Company.findOne({ companyName });
   if (company) {
-    const error = new ErrorHandler("A company with this name already exists", 400);
+    const error = new ErrorHandler(
+      "A company with this name already exists",
+      400
+    );
     return error.sendError(res);
   }
 
@@ -76,11 +79,14 @@ const updateCompany = asyncErrorHandler(async (req, res, next) => {
 
   // Check if a new logo file is uploaded
   if (req.files && req.files.logo && req.files.logo.tempFilePath) {
-    const myCloud = await cloudinary.uploader.upload(req.files.logo.tempFilePath, {
-      folder: "logos",
-      width: 150,
-      crop: "scale",
-    });
+    const myCloud = await cloudinary.uploader.upload(
+      req.files.logo.tempFilePath,
+      {
+        folder: "logos",
+        width: 150,
+        crop: "scale",
+      }
+    );
 
     updateData.logo = {
       public_id: myCloud.public_id,

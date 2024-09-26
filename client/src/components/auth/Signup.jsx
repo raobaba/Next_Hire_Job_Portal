@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { RadioGroup } from "../ui/radio-group";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,7 +9,9 @@ import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { FaCircleUser } from "react-icons/fa6";
-import ReactHelmet from "../shared/ReactHelmet";
+import ReactHelmet from "@/components/shared/ReactHelmet";
+import JobSearch from "@/assets/job_search.png";
+import RegisterNavbar from "../shared/RegiserNavbar";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -62,117 +63,136 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
-      <Navbar />
+    <div className="flex flex-col md:flex-row gap-1 items-start justify-center min-h-screen overflow-hidden px-4">
+      <RegisterNavbar />
       <ReactHelmet
         title="Signup - Next_Hire"
         description="Signup to access job opportunities and recruitments"
         canonicalUrl="http://mysite.com/signup"
       />
-      <div className="bg-white rounded-lg shadow-lg mt-[100px] p-5 w-1/3">
-        <h1 className="text-2xl font-bold mb-1 text-center">Sign Up</h1>
-        <form onSubmit={submitHandler} className="grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label>Full Name</Label>
-              <Input
-                type="text"
-                value={input.fullname}
-                name="fullname"
-                onChange={changeEventHandler}
-                placeholder="John Doe"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={input.email}
-                name="email"
-                onChange={changeEventHandler}
-                placeholder="example@gmail.com"
-                className="mt-1"
-              />
+      {/* Static box with job-related text and green check marks */}
+      <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 md:h-[400px] sticky top-[100px] mb-8 md:mb-0 flex flex-col items-center">
+  <div className="w-40 h-40 border rounded-full overflow-hidden flex items-center justify-center mb-4">
+    <img
+      src={JobSearch}
+      alt="Job Search"
+      className="w-full h-full object-cover"
+    />
+  </div>
+  <h4 className="text-lg font-semibold mb-2">On Registering, You can:</h4>
+  <ul className="list-disc list-inside space-y-4">
+    <li className="flex items-center text-sm md:text-xs">
+      <span className="text-green-500 mr-2">✓</span>
+      <span>Build your profile and let recruiters find you</span>
+    </li>
+    <li className="flex items-center text-sm md:text-xs">
+      <span className="text-green-500 mr-2">✓</span>
+      <span>Get job postings delivered right to your email</span>
+    </li>
+    <li className="flex items-center text-sm md:text-xs">
+      <span className="text-green-500 mr-2">✓</span>
+      <span>Find a job and grow your career</span>
+    </li>
+  </ul>
+</div>
+
+
+      <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 max-h-[calc(100vh-100px)] overflow-y-auto hide-scrollbar">
+        <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
+        <form onSubmit={submitHandler}>
+          <div className="mb-4">
+            <Label>Full Name</Label>
+            <Input
+              type="text"
+              value={input.fullname}
+              name="fullname"
+              onChange={changeEventHandler}
+              placeholder="John Doe"
+              className="mt-1 w-full"
+            />
+          </div>
+          <div className="mb-4">
+            <Label>Email</Label>
+            <Input
+              type="email"
+              value={input.email}
+              name="email"
+              onChange={changeEventHandler}
+              placeholder="example@gmail.com"
+              className="mt-1 w-full"
+            />
+          </div>
+          <div className="mb-4">
+            <Label>Phone Number</Label>
+            <Input
+              type="text"
+              value={input.phoneNumber}
+              name="phoneNumber"
+              onChange={changeEventHandler}
+              placeholder="8080808080"
+              className="mt-1 w-full"
+            />
+          </div>
+          <div className="mb-4">
+            <Label>Password</Label>
+            <Input
+              type="password"
+              value={input.password}
+              name="password"
+              onChange={changeEventHandler}
+              placeholder="Enter your password"
+              className="mt-1 w-full"
+            />
+          </div>
+          <div className="mb-4">
+            <Label>Role</Label>
+            <div className="flex flex-row">
+              <div className="flex items-center mr-4">
+                <Input
+                  type="radio"
+                  name="role"
+                  value="student"
+                  onChange={changeEventHandler}
+                  className="mr-2"
+                />
+                <Label>Student</Label>
+              </div>
+              <div className="flex items-center">
+                <Input
+                  type="radio"
+                  name="role"
+                  value="recruiter"
+                  onChange={changeEventHandler}
+                  className="mr-2"
+                />
+                <Label>Recruiter</Label>
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <div>
-              <Label>Phone Number</Label>
-              <Input
-                type="text"
-                value={input.phoneNumber}
-                name="phoneNumber"
-                onChange={changeEventHandler}
-                placeholder="8080808080"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Password</Label>
-              <Input
-                type="password"
-                value={input.password}
-                name="password"
-                onChange={changeEventHandler}
-                placeholder="Enter your password"
-                className="mt-1"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <div>
-              <Label>Role</Label>
-              <RadioGroup className="flex flex-row">
-                <div className="flex items-center">
-                  <Input
-                    type="radio"
-                    name="role"
-                    value="student"
-                    onChange={changeEventHandler}
-                    className="mr-2"
+          <div className="mb-4">
+            <Label>Profile Picture</Label>
+            <div className="flex items-center">
+              <label className="cursor-pointer">
+                <Input
+                  accept="image/*"
+                  type="file"
+                  onChange={changeFileHandler}
+                  className="hidden"
+                />
+                <span className="mt-1 w-32 h-10 bg-blue-500 text-white flex items-center justify-center rounded-md cursor-pointer">
+                  Choose File
+                </span>
+              </label>
+              <div className="ml-2 w-12 h-12 border border-dashed border-gray-400 rounded-full flex items-center justify-center overflow-hidden">
+                {input.file ? (
+                  <img
+                    src={URL.createObjectURL(input.file)}
+                    alt="Uploaded Profile"
+                    className="w-full h-full object-cover rounded-full"
                   />
-                  <Label>Student</Label>
-                </div>
-                <div className="flex items-center">
-                  <Input
-                    type="radio"
-                    name="role"
-                    value="recruiter"
-                    onChange={changeEventHandler}
-                    className="mr-2"
-                  />
-                  <Label>Recruiter</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            <div>
-              <div className="mb-1">
-                <Label>Profile Picture</Label>
-                <div className="flex flex-row items-center">
-                  <label className="cursor-pointer">
-                    <Input
-                      accept="image/*"
-                      type="file"
-                      onChange={changeFileHandler}
-                      className="hidden" // Hide the default file input
-                    />
-                    <span className="mt-1 w-32 h-10 bg-blue-500 text-white flex items-center justify-center rounded-md cursor-pointer">
-                      Choose File
-                    </span>
-                  </label>
-                  <div className="mt-1 ml-2 border border-dashed border-gray-400 w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
-                    {input.file ? (
-                      <img
-                        src={URL.createObjectURL(input.file)} // Create a URL for the uploaded file
-                        alt="Uploaded Profile"
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <FaCircleUser className="text-gray-400 w-10 h-10" />
-                    )}
-                  </div>
-                </div>
+                ) : (
+                  <FaCircleUser className="text-gray-400 w-10 h-10" />
+                )}
               </div>
             </div>
           </div>
@@ -185,7 +205,7 @@ const Signup = () => {
               Signup
             </Button>
           )}
-          <div className="text-center mt-0">
+          <div className="text-center mt-4">
             <span>
               Already have an account?{" "}
               <Link to="/login" className="text-blue-600">
