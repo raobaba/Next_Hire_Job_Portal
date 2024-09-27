@@ -8,10 +8,12 @@ import axios from "axios";
 import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { FaCircleUser } from "react-icons/fa6";
+import { FaCircleUser, FaGoogle } from "react-icons/fa6";
 import ReactHelmet from "@/components/shared/ReactHelmet";
 import JobSearch from "@/assets/job_search.png";
 import RegisterNavbar from "../shared/RegiserNavbar";
+import Loader from "../shared/Loader";
+import { FcGoogle } from "react-icons/fc";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -72,30 +74,29 @@ const Signup = () => {
       />
       {/* Static box with job-related text and green check marks */}
       <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 md:h-[400px] sticky top-[100px] mb-8 md:mb-0 flex flex-col items-center">
-  <div className="w-40 h-40 border rounded-full overflow-hidden flex items-center justify-center mb-4">
-    <img
-      src={JobSearch}
-      alt="Job Search"
-      className="w-full h-full object-cover"
-    />
-  </div>
-  <h4 className="text-lg font-semibold mb-2">On Registering, You can:</h4>
-  <ul className="list-disc list-inside space-y-4">
-    <li className="flex items-center text-sm md:text-xs">
-      <span className="text-green-500 mr-2">✓</span>
-      <span>Build your profile and let recruiters find you</span>
-    </li>
-    <li className="flex items-center text-sm md:text-xs">
-      <span className="text-green-500 mr-2">✓</span>
-      <span>Get job postings delivered right to your email</span>
-    </li>
-    <li className="flex items-center text-sm md:text-xs">
-      <span className="text-green-500 mr-2">✓</span>
-      <span>Find a job and grow your career</span>
-    </li>
-  </ul>
-</div>
-
+        <div className="w-40 h-40 border rounded-full overflow-hidden flex items-center justify-center mb-4">
+          <img
+            src={JobSearch}
+            alt="Job Search"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <h4 className="text-lg font-semibold mb-2">On Registering, You can:</h4>
+        <ul className="list-disc list-inside space-y-4">
+          <li className="flex items-center text-sm md:text-xs">
+            <span className="text-green-500 mr-2">✓</span>
+            <span>Build your profile and let recruiters find you</span>
+          </li>
+          <li className="flex items-center text-sm md:text-xs">
+            <span className="text-green-500 mr-2">✓</span>
+            <span>Get job postings delivered right to your email</span>
+          </li>
+          <li className="flex items-center text-sm md:text-xs">
+            <span className="text-green-500 mr-2">✓</span>
+            <span>Find a job and grow your career</span>
+          </li>
+        </ul>
+      </div>
 
       <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 max-h-[calc(100vh-100px)] overflow-y-auto hide-scrollbar">
         <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
@@ -196,15 +197,12 @@ const Signup = () => {
               </div>
             </div>
           </div>
-          {loading ? (
-            <Button className="w-full">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
-            </Button>
-          ) : (
-            <Button type="submit" className="w-full">
-              Signup
-            </Button>
-          )}
+          {loading && <Loader />}
+
+          <Button type="submit" className="w-full">
+            Signup
+          </Button>
+
           <div className="text-center mt-4">
             <span>
               Already have an account?{" "}
@@ -212,6 +210,15 @@ const Signup = () => {
                 Login
               </Link>
             </span>
+          </div>
+          <p className="text-sm text-center items-center font-semibold mx-2">
+            Or
+          </p>
+          <div className="text-center flex items-center justify-center mt-6">
+            <Button className="flex items-center justify-center bg-gray-100 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition px-4 py-2">
+              <FaGoogle className="mr-2" />
+              <span>Continue with Google</span>
+            </Button>
           </div>
         </form>
       </div>

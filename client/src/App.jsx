@@ -13,7 +13,9 @@ import CompanySetup from "./components/admin/CompanySetup";
 import AdminJobs from "./components/admin/AdminJob";
 import PostJob from "./components/admin/PostJob";
 import Applicants from "./components/admin/Applicants";
+import ResetPassword from "./components/auth/ResetPassword";
 
+// Router setup
 const appRouter = createBrowserRouter([
   {
     path: "/",
@@ -26,6 +28,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/signup",
     element: <Signup />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ResetPassword />,
   },
   {
     path: "/jobs",
@@ -93,9 +99,11 @@ const appRouter = createBrowserRouter([
   },
 ]);
 
+// Main App component
 function App() {
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
+      {/* Flex column layout ensures full height */}
       <RouterProvider router={appRouter} />
     </div>
   );

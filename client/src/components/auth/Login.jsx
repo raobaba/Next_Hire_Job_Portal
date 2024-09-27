@@ -4,11 +4,10 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import ReactHelmet from "@/components/shared/ReactHelmet";
+import Loader from "../shared/Loader";
 
 const Login = () => {
   const [input, setInput] = useState({ email: "", password: "", role: "" });
@@ -19,24 +18,7 @@ const Login = () => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
-      if (res.data.success) {
-        toast.success(res.data.message);
-        navigate("/");
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const submitHandler = async (e) => {};
 
   return (
     <div className="flex flex-col md:flex-row gap-1 items-start justify-center min-h-screen overflow-hidden px-4">
@@ -131,15 +113,11 @@ const Login = () => {
               <Label>Recruiter</Label>
             </div>
           </div>
-          {loading ? (
-            <Button className="w-full">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
-            </Button>
-          ) : (
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
-          )}
+          {loading && <Loader />}
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
+
           <div className="text-center mt-4">
             <span>
               Don't have an account?{" "}
