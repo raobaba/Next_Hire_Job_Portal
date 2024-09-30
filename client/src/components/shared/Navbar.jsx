@@ -4,13 +4,14 @@ import { Link } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 import ReactHelmet from "./ReactHelmet";
 import { RiMenu2Fill } from "react-icons/ri";
+import NextHireLogo from "@/assets/NextHireLogo.png";
 import { FaUser, FaCog, FaShieldAlt, FaSignOutAlt } from "react-icons/fa";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const token = true; // Example token, replace with your authentication logic.
+  const token = false; // Example token, replace with your authentication logic.
 
   const toggleDropdown = () => {
     setIsDropDownOpen((prev) => !prev);
@@ -43,9 +44,16 @@ const Navbar = () => {
       />
       <div className="bg-white w-11/12 m-auto">
         <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4 lg:px-0">
-          <h1 className="text-2xl font-bold text-gray-800">
-            <Link to="/">
-              Next<span className="text-[#F83002]">Hire</span>
+          <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+            <Link to="/" className="flex items-center">
+              <img
+                src={NextHireLogo}
+                alt="NextHire Logo"
+                className="h-8 mr-2"
+              />
+              <span>
+                Next<span className="text-[#F83002]">Hire</span>
+              </span>
             </Link>
           </h1>
 
@@ -85,19 +93,36 @@ const Navbar = () => {
 
                 {/* Dropdown Menu */}
                 {isDropDownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-10">
+                  <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10">
                     <ul className="py-2">
                       <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        <FaUser className="mr-2" /> Profile
+                        <Link
+                          to="/profile"
+                          className="flex items-center w-full"
+                        >
+                          <FaUser className="mr-2" /> Profile
+                        </Link>
                       </li>
                       <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        <FaCog className="mr-2" /> Settings
+                        <Link
+                          to="/settings"
+                          className="flex items-center w-full"
+                        >
+                          <FaCog className="mr-2" /> Settings
+                        </Link>
                       </li>
                       <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        <FaShieldAlt className="mr-2" /> Privacy
+                        <Link
+                          to="/privacy"
+                          className="flex items-center w-full"
+                        >
+                          <FaShieldAlt className="mr-2" /> Privacy
+                        </Link>
                       </li>
                       <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        <FaSignOutAlt className="mr-2" /> Logout
+                        <Link to="/logout" className="flex items-center w-full">
+                          <FaSignOutAlt className="mr-2" /> Logout
+                        </Link>
                       </li>
                     </ul>
                   </div>

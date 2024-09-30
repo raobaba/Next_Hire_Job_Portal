@@ -7,6 +7,15 @@ const ErrorHandler = require("../utils/errorHandler");
 const registerCompany = asyncErrorHandler(async (req, res, next) => {
   const { companyName } = req.body;
 
+  // Check if the user is a Recruiter
+  // if (req.user.role !== "recruiter") {
+  //   const error = new ErrorHandler(
+  //     "Only Recruiters are allowed to register a company. Please update your account role to Recruiter to proceed.",
+  //     403
+  //   ); // 403: Forbidden
+  //   return error.sendError(res);
+  // }
+
   if (!companyName) {
     const error = new ErrorHandler("Company name is required", 400);
     return error.sendError(res);

@@ -7,7 +7,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const applyJob = asyncErrorHandler(async (req, res) => {
   try {
     const userId = req.user.id;
-    const jobId = req.params.id;
+    const jobId = req.params.jobId;
 
     if (!jobId) {
       return new ErrorHandler("Job ID is required", 400).sendError(res);
@@ -88,7 +88,7 @@ const getAppliedJobs = asyncErrorHandler(async (req, res) => {
 // Get applicants for a specific job
 const getApplicants = asyncErrorHandler(async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const jobId = req.params.jobId;
 
     const job = await Job.findById(jobId).populate({
       path: "applications",
@@ -119,7 +119,7 @@ const getApplicants = asyncErrorHandler(async (req, res) => {
 const updateStatus = asyncErrorHandler(async (req, res) => {
   try {
     const { status } = req.body;
-    const applicationId = req.params.id;
+    const applicationId = req.params.applicationId;
 
     if (!status) {
       return new ErrorHandler("Status is required", 400).sendError(res);

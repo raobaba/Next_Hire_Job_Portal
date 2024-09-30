@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -7,13 +6,11 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import { FaCircleUser, FaGoogle } from "react-icons/fa6";
 import ReactHelmet from "@/components/shared/ReactHelmet";
 import JobSearch from "@/assets/job_search.png";
 import RegisterNavbar from "../shared/RegiserNavbar";
 import Loader from "../shared/Loader";
-import { FcGoogle } from "react-icons/fc";
 
 const Signup = () => {
   const [input, setInput] = useState({

@@ -3,6 +3,7 @@ const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const sendToken = require("./../utils/sendToken");
 const ErrorHandler = require("../utils/errorHandler");
 const cloudinary = require("cloudinary");
+const cron = require("node-cron");
 
 // Register User
 const registerUser = asyncErrorHandler(async (req, res, next) => {
@@ -89,6 +90,22 @@ const logoutUser = asyncErrorHandler(async (req, res, next) => {
     message: "successfully Logged Out",
   });
 });
+
+// const getUser = asyncErrorHandler(async (req, res, next) => {
+//   cron.schedule("*/5 * * * * *", async () => {
+//     try {
+//       const userData = await User.find();
+//       console.log(userData);
+//     } catch (error) {
+//       console.error("Error fetching user data:", error);
+//     }
+//   });
+
+//   res.status(200).json({
+//     success: true,
+//     message: "User data will be logged every 5 seconds",
+//   });
+// });
 
 const updateProfile = asyncErrorHandler(async (req, res, next) => {
   const { fullname, email, phoneNumber, bio, skills } = req.body;

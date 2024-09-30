@@ -1,6 +1,7 @@
 const Job = require("../models/job.model");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const ErrorHandler = require("../utils/errorHandler");
+const { processJobAndNotifyUsers } = require("../services/openai.service");
 
 // Post Job
 const postJob = asyncErrorHandler(async (req, res) => {
@@ -11,7 +12,7 @@ const postJob = asyncErrorHandler(async (req, res) => {
     salary,
     location,
     jobType,
-    experienceLevel, // Change to experienceLevel
+    experienceLevel,
     position,
     companyId,
   } = req.body;
@@ -35,7 +36,7 @@ const postJob = asyncErrorHandler(async (req, res) => {
   const job = await Job.create({
     title,
     description,
-    requirements: requirements.split(",").map(req => req.trim()), // Trim requirements
+    requirements: requirements.split(",").map((req) => req.trim()),
     salary: Number(salary),
     location,
     jobType,
@@ -44,7 +45,7 @@ const postJob = asyncErrorHandler(async (req, res) => {
     company: companyId,
     created_by: userId,
   });
-
+  await processJobAndNotifyUsers(job);
   return res.status(201).json({
     message: "New job created successfully.",
     job,
@@ -65,7 +66,8 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     .populate("company")
     .sort({ createdAt: -1 });
 
-  if (jobs.length === 0) { // Change to check length
+  if (jobs.length === 0) {
+    // Change to check length
     const error = new ErrorHandler("Jobs Not Found", 404);
     return error.sendError(res);
   }
@@ -94,7 +96,8 @@ const getAdminJobs = asyncErrorHandler(async (req, res) => {
   const adminId = req.user.id; // Use req.user.id
   const jobs = await Job.find({ created_by: adminId }).populate("company");
 
-  if (jobs.length === 0) { // Change to check length
+  if (jobs.length === 0) {
+    // Change to check length
     const error = new ErrorHandler("Jobs Not Found", 404);
     return error.sendError(res);
   }

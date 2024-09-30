@@ -5,20 +5,35 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import ReactHelmet from "@/components/shared/ReactHelmet";
 import Loader from "../shared/Loader";
+import { FaGoogle } from "react-icons/fa6";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { app } from "@/services/firebase";
 
 const Login = () => {
   const [input, setInput] = useState({ email: "", password: "", role: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const changeEventHandler = (e) => {
-    setInput({ ...input, [e.target.name]: e.target.value });
-  };
-
   const submitHandler = async (e) => {};
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const handleGoogleSignup = async (e) => {
+    e.preventDefault();
+    console.log("Authenticaiton Initiated");
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const token = GoogleAuthProvider.credentialFromResult(result).accessToken;
+      console.log("User Info: ", user);
+      console.log("Access Token: ", token);
+      navigate("/");
+    } catch (error) {
+      console.log(error.code);
+      console.log(error.message);
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row gap-1 items-start justify-center min-h-screen overflow-hidden px-4">
@@ -75,7 +90,6 @@ const Login = () => {
               type="email"
               value={input.email}
               name="email"
-              onChange={changeEventHandler}
               placeholder="patel@gmail.com"
               className="mt-1"
             />
@@ -86,7 +100,6 @@ const Login = () => {
               type="password"
               value={input.password}
               name="password"
-              onChange={changeEventHandler}
               placeholder="Your password"
               className="mt-1"
             />
@@ -97,7 +110,6 @@ const Login = () => {
                 type="radio"
                 name="role"
                 value="student"
-                onChange={changeEventHandler}
                 className="mr-2"
               />
               <Label>Student</Label>
@@ -107,7 +119,6 @@ const Login = () => {
                 type="radio"
                 name="role"
                 value="recruiter"
-                onChange={changeEventHandler}
                 className="mr-2"
               />
               <Label>Recruiter</Label>
@@ -133,6 +144,19 @@ const Login = () => {
                 </Link>
               </span>
             </div>
+          </div>
+          <p className="text-sm text-center items-center font-semibold mx-2">
+            Or
+          </p>
+          <div className="text-center flex items-center justify-center mt-6">
+            <Button
+              type="button"
+              onClick={handleGoogleSignup}
+              className="flex items-center justify-center bg-gray-100 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition px-4 py-2"
+            >
+              <FaGoogle className="mr-2" />
+              <span>Continue with Google</span>
+            </Button>
           </div>
         </form>
       </div>

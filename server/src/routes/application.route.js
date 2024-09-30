@@ -9,11 +9,11 @@ const {
 
 const applicationRouter = express.Router();
 
-applicationRouter.route("/apply/:id").get(isAuthenticated, applyJob);
+applicationRouter.route("/apply/:jobId").post(isAuthenticated, applyJob);
 applicationRouter.route("/get").get(isAuthenticated, getAppliedJobs);
-applicationRouter.route("/:id/applicants").get(isAuthenticated, getApplicants);
+applicationRouter.route("/:jobId/applicants").get(isAuthenticated, getApplicants);
 applicationRouter
-  .route("/status/:id/update")
+  .route("/status/:applicationId/update")
   .post(isAuthenticated, updateStatus);
 
 module.exports = applicationRouter;
