@@ -1,6 +1,7 @@
 const Job = require("../models/job.model");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const ErrorHandler = require("../utils/errorHandler");
+const Company = require("../models/company.model");
 const { processJobAndNotifyUsers } = require("../services/openai.service");
 
 // Post Job
@@ -32,6 +33,12 @@ const postJob = asyncErrorHandler(async (req, res) => {
     const error = new ErrorHandler("Something is missing", 400);
     return error.sendError(res);
   }
+  const company = await Company.findById(companyId);
+  if (!company) {
+    const error = new ErrorHandler("Company not found", 404);
+    return error.sendError(res);
+  }
+  const companyName = company.companyName;
 
   const job = await Job.create({
     title,
@@ -45,7 +52,7 @@ const postJob = asyncErrorHandler(async (req, res) => {
     company: companyId,
     created_by: userId,
   });
-  await processJobAndNotifyUsers(job);
+  await processJobAndNotifyUsers(job, companyName);
   return res.status(201).json({
     message: "New job created successfully.",
     job,

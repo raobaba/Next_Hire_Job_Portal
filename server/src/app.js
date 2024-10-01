@@ -11,7 +11,6 @@ const companyRouter = require("./routes/company.route");
 const applicationRouter = require("./routes/application.route");
 
 const app = express();
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
