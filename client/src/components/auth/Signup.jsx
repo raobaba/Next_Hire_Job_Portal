@@ -1,63 +1,129 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { USER_API_END_POINT } from "@/utils/constant";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { FaCircleUser, FaGoogle } from "react-icons/fa6";
 import ReactHelmet from "@/components/shared/ReactHelmet";
 import JobSearch from "@/assets/job_search.png";
 import RegisterNavbar from "../shared/RegiserNavbar";
 import Loader from "../shared/Loader";
+import { registerUser } from "@/redux/slices/user.slice";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { app } from "@/services/firebase"; // Import Firebase app
 
 const Signup = () => {
-  const [input, setInput] = useState({
-    fullname: "",
-    email: "",
-    phoneNumber: "",
-    password: "",
-    role: "",
-    file: null,
-  });
+  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const changeEventHandler = (e) => {
-    setInput({ ...input, [e.target.name]: e.target.value });
-  };
-
+  // Handle profile picture change
   const changeFileHandler = (e) => {
-    setInput({ ...input, file: e.target.files?.[0] });
+    setAvatar(e.target.files[0]);
   };
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("fullname", input.fullname);
-    formData.append("email", input.email);
-    formData.append("phoneNumber", input.phoneNumber);
-    formData.append("password", input.password);
-    formData.append("role", input.role);
-    if (input.file) {
-      formData.append("file", input.file);
+  // Form validation function
+  const validateForm = () => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email pattern
+    const phonePattern = /^[0-9]{10}$/; // Simple phone validation for 10 digits
+
+    if (!fullname || !email || !phoneNumber || !password || !role) {
+      toast.error("Please fill in all fields.");
+      return false;
     }
 
-    try {
-      setLoading(true);
-      const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true,
+    if (!emailPattern.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return false;
+    }
+
+    if (!phonePattern.test(phoneNumber)) {
+      toast.error("Please enter a valid 10-digit phone number.");
+      return false;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return false;
+    }
+
+    return true;
+  };
+
+  // Handle form submission
+  const submitHandler = (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return; // Validate before submission
+
+    const formData = new FormData();
+    formData.append("fullname", fullname);
+    formData.append("email", email);
+    formData.append("phoneNumber", phoneNumber);
+    formData.append("password", password);
+    formData.append("role", role);
+    formData.append("avatar", avatar);
+
+    setLoading(true);
+
+    dispatch(registerUser(formData))
+      .then((res) => {
+        setLoading(false);
+        if (res?.meta?.requestStatus === "fulfilled") {
+          toast.success("Signup successful!");
+          navigate("/"); // Redirect to homepage
+        } else {
+          toast.error("Something went wrong! Please try again.");
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        toast.error("Signup failed! Please try again.");
       });
-      if (res.data.success) {
-        toast.success(res.data.message);
-        navigate("/login");
-      }
+  };
+
+  // Google Signup Handler
+  const handleGoogleSignup = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const token = GoogleAuthProvider.credentialFromResult(result).accessToken;
+
+      // Dispatch Google login information to the Redux store or backend
+      dispatch(registerUser({ email: user.email, token }))
+        .then((res) => {
+          setLoading(false);
+          if (res?.meta?.requestStatus === "fulfilled") {
+            toast.success("Google Signup successful!");
+            navigate("/");
+          } else {
+            toast.error("Error signing up with Google.");
+          }
+        })
+        .catch((err) => {
+          setLoading(false);
+          toast.error("Google Signup failed. Please try again.");
+        });
     } catch (error) {
-      toast.error(error.response?.data?.message || "An error occurred");
-    } finally {
       setLoading(false);
+      console.error("Error during Google signup: ", error);
+      toast.error("Google Signup failed. Please try again.");
     }
   };
 
@@ -69,7 +135,6 @@ const Signup = () => {
         description="Signup to access job opportunities and recruitments"
         canonicalUrl="http://mysite.com/signup"
       />
-      {/* Static box with job-related text and green check marks */}
       <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 md:h-[400px] sticky top-[100px] mb-8 md:mb-0 flex flex-col items-center">
         <div className="w-40 h-40 border rounded-full overflow-hidden flex items-center justify-center mb-4">
           <img
@@ -96,50 +161,63 @@ const Signup = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 max-h-[calc(100vh-100px)] overflow-y-auto hide-scrollbar">
-        <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
+        <h1 className="text-2xl font-bold text-center mt-2">Sign Up</h1>
+        <div className="text-center flex items-center justify-center mt-2">
+          <Button
+            className="bg-red-600 text-white flex items-center mr-2"
+            onClick={handleGoogleSignup}
+            disabled={loading} // Disable button while loading
+          >
+            <FaGoogle className="mr-2" />
+            Continue with Google
+          </Button>
+        </div>
+        <div className="text-center my-2">
+          <span className="text-gray-500">or</span>
+        </div>
         <form onSubmit={submitHandler}>
           <div className="mb-4">
             <Label>Full Name</Label>
             <Input
               type="text"
-              value={input.fullname}
-              name="fullname"
-              onChange={changeEventHandler}
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
               placeholder="John Doe"
               className="mt-1 w-full"
+              required
             />
           </div>
           <div className="mb-4">
             <Label>Email</Label>
             <Input
               type="email"
-              value={input.email}
-              name="email"
-              onChange={changeEventHandler}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="example@gmail.com"
               className="mt-1 w-full"
+              required
             />
           </div>
           <div className="mb-4">
             <Label>Phone Number</Label>
             <Input
               type="text"
-              value={input.phoneNumber}
-              name="phoneNumber"
-              onChange={changeEventHandler}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="8080808080"
               className="mt-1 w-full"
+              required
             />
           </div>
           <div className="mb-4">
             <Label>Password</Label>
             <Input
               type="password"
-              value={input.password}
-              name="password"
-              onChange={changeEventHandler}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               className="mt-1 w-full"
+              required
             />
           </div>
           <div className="mb-4">
@@ -150,8 +228,9 @@ const Signup = () => {
                   type="radio"
                   name="role"
                   value="student"
-                  onChange={changeEventHandler}
+                  onChange={(e) => setRole(e.target.value)}
                   className="mr-2"
+                  required
                 />
                 <Label>Student</Label>
               </div>
@@ -160,8 +239,9 @@ const Signup = () => {
                   type="radio"
                   name="role"
                   value="recruiter"
-                  onChange={changeEventHandler}
+                  onChange={(e) => setRole(e.target.value)}
                   className="mr-2"
+                  required
                 />
                 <Label>Recruiter</Label>
               </div>
@@ -182,9 +262,9 @@ const Signup = () => {
                 </span>
               </label>
               <div className="ml-2 w-12 h-12 border border-dashed border-gray-400 rounded-full flex items-center justify-center overflow-hidden">
-                {input.file ? (
+                {avatar ? (
                   <img
-                    src={URL.createObjectURL(input.file)}
+                    src={URL.createObjectURL(avatar)}
                     alt="Uploaded Profile"
                     className="w-full h-full object-cover rounded-full"
                   />
@@ -195,8 +275,7 @@ const Signup = () => {
             </div>
           </div>
           {loading && <Loader />}
-
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full" disabled={loading}>
             Signup
           </Button>
 
@@ -207,15 +286,6 @@ const Signup = () => {
                 Login
               </Link>
             </span>
-          </div>
-          <p className="text-sm text-center items-center font-semibold mx-2">
-            Or
-          </p>
-          <div className="text-center flex items-center justify-center mt-6">
-            <Button className="flex items-center justify-center bg-gray-100 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition px-4 py-2">
-              <FaGoogle className="mr-2" />
-              <span>Continue with Google</span>
-            </Button>
           </div>
         </form>
       </div>

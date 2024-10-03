@@ -1,37 +1,103 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import ReactHelmet from "@/components/shared/ReactHelmet";
 import Loader from "../shared/Loader";
 import { FaGoogle } from "react-icons/fa6";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from "@/services/firebase";
+import { loginUser } from "@/redux/slices/user.slice";
+
+// Email validation regex pattern
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Login = () => {
-  const [input, setInput] = useState({ email: "", password: "", role: "" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const submitHandler = async (e) => {};
+  // Basic form validation
+  const validateForm = () => {
+    if (!email || !password || !role) {
+      toast.error("Please fill in all fields.");
+      return false;
+    }
+    if (!emailPattern.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return false;
+    }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return false;
+    }
+    return true;
+  };
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+
+    // Validate form before submission
+    if (!validateForm()) return;
+
+    const formData = { email, password, role };
+
+    setLoading(true);
+
+    dispatch(loginUser(formData))
+      .then((res) => {
+        setLoading(false);
+        if (res?.payload?.status === 200) {
+          toast.success("Login successful!");
+          navigate("/"); // Redirect on success
+        } else {
+          console.log(res);
+          toast.error(res?.payload?.message || "Something went wrong");
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        toast.error("Login failed! Please try again.");
+      });
+  };
+
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
+
   const handleGoogleSignup = async (e) => {
     e.preventDefault();
-    console.log("Authenticaiton Initiated");
+    setLoading(true);
+
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const token = GoogleAuthProvider.credentialFromResult(result).accessToken;
-      console.log("User Info: ", user);
-      console.log("Access Token: ", token);
-      navigate("/");
+
+      dispatch(loginUser({ email: user.email, token }))
+        .then((res) => {
+          setLoading(false);
+          if (res?.meta?.requestStatus === "fulfilled") {
+            toast.success("Google login successful!");
+            navigate("/");
+          } else {
+            toast.error("Error logging in with Google.");
+          }
+        })
+        .catch((err) => {
+          setLoading(false);
+          toast.error("Google Login failed. Please try again.");
+        });
     } catch (error) {
-      console.log(error.code);
-      console.log(error.message);
+      setLoading(false);
+      console.error("Error during Google login: ", error);
+      toast.error("Google Login failed. Please try again.");
     }
   };
 
@@ -44,7 +110,6 @@ const Login = () => {
         canonicalUrl="http://mysite.com/login"
       />
 
-      {/* Static box with job-related text and green check marks */}
       <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 md:h-[400px] sticky top-[100px] mb-8 md:mb-0">
         <h2 className="text-lg md:text-xl font-semibold mb-4">
           New to <span className="text-black">Next</span>
@@ -80,16 +145,30 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Scrollable login form with hidden scrollbar */}
       <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 max-h-[calc(100vh-100px)] overflow-y-auto hide-scrollbar">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+        <h1 className="text-2xl font-bold text-center mt-2">Login</h1>
+
+        <div className="text-center flex items-center justify-center mt-2">
+          <Button
+            className="bg-red-600 text-white flex items-center mr-2"
+            onClick={handleGoogleSignup}
+          >
+            <FaGoogle className="mr-2" />
+            Continue with Google
+          </Button>
+        </div>
+
+        <div className="text-center my-2">
+          <span className="text-gray-500">or</span>
+        </div>
+
         <form onSubmit={submitHandler}>
           <div className="mb-4">
             <Label>Email</Label>
             <Input
               type="email"
-              value={input.email}
-              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="patel@gmail.com"
               className="mt-1"
             />
@@ -98,8 +177,8 @@ const Login = () => {
             <Label>Password</Label>
             <Input
               type="password"
-              value={input.password}
-              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Your password"
               className="mt-1"
             />
@@ -110,6 +189,8 @@ const Login = () => {
                 type="radio"
                 name="role"
                 value="student"
+                checked={role === "student"}
+                onChange={(e) => setRole(e.target.value)}
                 className="mr-2"
               />
               <Label>Student</Label>
@@ -119,12 +200,16 @@ const Login = () => {
                 type="radio"
                 name="role"
                 value="recruiter"
+                checked={role === "recruiter"}
+                onChange={(e) => setRole(e.target.value)}
                 className="mr-2"
               />
               <Label>Recruiter</Label>
             </div>
           </div>
+
           {loading && <Loader />}
+
           <Button type="submit" className="w-full">
             Login
           </Button>
@@ -144,19 +229,6 @@ const Login = () => {
                 </Link>
               </span>
             </div>
-          </div>
-          <p className="text-sm text-center items-center font-semibold mx-2">
-            Or
-          </p>
-          <div className="text-center flex items-center justify-center mt-6">
-            <Button
-              type="button"
-              onClick={handleGoogleSignup}
-              className="flex items-center justify-center bg-gray-100 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition px-4 py-2"
-            >
-              <FaGoogle className="mr-2" />
-              <span>Continue with Google</span>
-            </Button>
           </div>
         </form>
       </div>

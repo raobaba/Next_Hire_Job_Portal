@@ -1,17 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { FiMenu, FiX } from "react-icons/fi";
 import ReactHelmet from "./ReactHelmet";
+import { toast } from "react-toastify";
 import { RiMenu2Fill } from "react-icons/ri";
 import NextHireLogo from "@/assets/NextHireLogo.png";
+import { getProfilePic, getToken } from "@/utils/constant";
 import { FaUser, FaCog, FaShieldAlt, FaSignOutAlt } from "react-icons/fa";
+import { logoutUser } from "@/redux/slices/user.slice";
+import { useDispatch } from "react-redux";
 
 const Navbar = () => {
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const token = false; // Example token, replace with your authentication logic.
+  const token = getToken(); // Example token, replace with your authentication logic.
+  const profilePic = getProfilePic();
+  const navigate = useNavigate(); // Use useNavigate to redirect
 
   const toggleDropdown = () => {
     setIsDropDownOpen((prev) => !prev);
@@ -34,6 +42,31 @@ const Navbar = () => {
       document.removeEventListener("mousedown", closeDropdown);
     };
   }, []);
+
+  const handleLogOut = () => {
+    setIsLoading(true); // Set loading state to true
+    dispatch(logoutUser()) // Call the action creator
+      .then((res) => {
+        console.log(res);
+        if (res?.meta?.requestStatus === "fulfilled") {
+          localStorage.removeItem("token"); // Clear the token
+          localStorage.removeItem("profile"); // Clear the profile
+          toast.success("Successfully logged out!"); // Success toast
+          navigate("/login"); // Redirect to login page
+        } else {
+          toast.error(
+            "Logout failed: " + (res?.payload?.message || "Unknown error")
+          ); // Error toast
+        }
+      })
+      .catch((error) => {
+        console.error("Error during logout:", error);
+        toast.error("Error during logout: " + error.message); // Error toast
+      })
+      .finally(() => {
+        setIsLoading(false); // Reset loading state
+      });
+  };
 
   return (
     <div className="bg-white shadow-md w-full fixed top-0 left-0 z-50">
@@ -80,14 +113,18 @@ const Navbar = () => {
             {token ? (
               <div className="relative inline-block" ref={dropdownRef}>
                 <div
-                  className="py-1 flex items-center px-3 border rounded-2xl cursor-pointer hover:bg-gray-200"
+                  className="py-1 flex items-center px-2 border rounded-2xl cursor-pointer hover:bg-gray-200"
                   onClick={toggleDropdown}
                 >
                   <span>
                     <RiMenu2Fill />
                   </span>
-                  <div className="w-6 h-6 bg-gray-300 rounded-full overflow-hidden ml-4">
-                    {/* Example: <img src="profile-pic-url.jpg" alt="Profile" className="w-full h-full object-cover" /> */}
+                  <div className="w-6 h-6 bg-gray-300 rounded-full overflow-hidden ml-3">
+                    <img
+                      src={profilePic}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
 
@@ -95,7 +132,7 @@ const Navbar = () => {
                 {isDropDownOpen && (
                   <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10">
                     <ul className="py-2">
-                      <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                      <li className="flex items-center w-11/12 m-auto rounded-xl px-4 py-2 hover:bg-gray-100 cursor-pointer">
                         <Link
                           to="/profile"
                           className="flex items-center w-full"
@@ -103,7 +140,7 @@ const Navbar = () => {
                           <FaUser className="mr-2" /> Profile
                         </Link>
                       </li>
-                      <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                      <li className="flex items-center w-11/12 m-auto rounded-xl px-4 py-2 hover:bg-gray-100 cursor-pointer">
                         <Link
                           to="/settings"
                           className="flex items-center w-full"
@@ -111,7 +148,7 @@ const Navbar = () => {
                           <FaCog className="mr-2" /> Settings
                         </Link>
                       </li>
-                      <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                      <li className="flex items-center w-11/12 m-auto rounded-xl px-4 py-2 hover:bg-gray-100 cursor-pointer">
                         <Link
                           to="/privacy"
                           className="flex items-center w-full"
@@ -119,8 +156,11 @@ const Navbar = () => {
                           <FaShieldAlt className="mr-2" /> Privacy
                         </Link>
                       </li>
-                      <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        <Link to="/logout" className="flex items-center w-full">
+                      <li
+                        onClick={handleLogOut}
+                        className="flex items-center w-11/12 m-auto rounded-xl px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        <Link className="flex items-center w-full">
                           <FaSignOutAlt className="mr-2" /> Logout
                         </Link>
                       </li>

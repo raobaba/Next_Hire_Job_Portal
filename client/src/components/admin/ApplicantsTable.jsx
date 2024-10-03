@@ -11,25 +11,12 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
-import { APPLICATION_API_END_POINT } from "@/utils/constant";
 
 const shortlistingStatus = ["Accepted", "Rejected"];
 
 const ApplicantsTable = ({ applicants, loading }) => {
   const statusHandler = async (status, id) => {
-    try {
-      const res = await axios.post(
-        `${APPLICATION_API_END_POINT}/status/${id}/update`,
-        { status },
-        { withCredentials: true }
-      );
-      if (res.data.success) {
-        toast.success(res.data.message);
-      }
-    } catch (error) {
-      toast.error(error.response.data.message);
-    }
+   
   };
 
   if (loading) return <p>Loading...</p>;

@@ -10,8 +10,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
-import axios from "axios";
-import { USER_API_END_POINT } from "@/utils/constant";
+
 import { toast } from "sonner";
 
 const UpdateProfileDialog = ({ open, setOpen, user }) => {
@@ -48,29 +47,7 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     if (input.file) {
       formData.append("file", input.file);
     }
-    try {
-      setLoading(true);
-      const res = await axios.post(
-        `${USER_API_END_POINT}/profile/update`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true,
-        }
-      );
-      if (res.data.success) {
-        toast.success(res.data.message);
-        // Optionally, you could also handle user data update here
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data.message || "An error occurred");
-    } finally {
-      setLoading(false);
-      setOpen(false); // Close the dialog after submission
-    }
+
   };
 
   return (
