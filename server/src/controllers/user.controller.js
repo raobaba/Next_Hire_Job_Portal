@@ -3,6 +3,7 @@ const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const sendToken = require("./../utils/sendToken");
 const ErrorHandler = require("../utils/errorHandler");
 const cloudinary = require("cloudinary");
+const Job = require("../models/job.model");
 const cron = require("node-cron");
 
 // Register User
@@ -87,25 +88,10 @@ const logoutUser = asyncErrorHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
+    status: 200,
     message: "successfully Logged Out",
   });
 });
-
-// const getUser = asyncErrorHandler(async (req, res, next) => {
-//   cron.schedule("*/5 * * * * *", async () => {
-//     try {
-//       const userData = await User.find();
-//       console.log(userData);
-//     } catch (error) {
-//       console.error("Error fetching user data:", error);
-//     }
-//   });
-
-//   res.status(200).json({
-//     success: true,
-//     message: "User data will be logged every 5 seconds",
-//   });
-// });
 
 const updateProfile = asyncErrorHandler(async (req, res, next) => {
   const { fullname, email, phoneNumber, bio, skills } = req.body;
@@ -159,6 +145,7 @@ const updateProfile = asyncErrorHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
+    status:200,
     message: "Profile updated successfully",
     data: {
       user,
@@ -166,9 +153,89 @@ const updateProfile = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
+// Retrieve User Search History
+const getUserSearchHistory = asyncErrorHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  const user = await User.findById(userId).select("searchHistory"); // Select only searchHistory
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  return res.status(200).json({
+    success: true,
+    status:200,
+    searchHistory: user.searchHistory,
+  });
+});
+
+// Clear User Search History
+const clearUserSearchHistory = asyncErrorHandler(async (req, res) => {
+  const userId = req.user.id; // Get user ID from request
+
+  await User.findByIdAndUpdate(
+    userId,
+    { searchHistory: [] }, // Clear searchHistory by setting it to an empty array
+    { new: true } // Return the updated document
+  );
+
+  return res.status(200).json({
+    success: true,
+    status:200,
+    message: "Search history cleared successfully.",
+  });
+});
+
+const recommendJobsToUsers = async () => {
+  const users = await User.find().populate("jobRecommendations");
+
+  for (const user of users) {
+    const keywords = user.searchHistory;
+
+    if (keywords.length > 0) {
+      // Use $regex for partial matching of keywords in job fields
+      const jobQuery = {
+        $or: keywords.map((keyword) => ({
+          $or: [
+            { title: { $regex: keyword, $options: "i" } }, // Partial match in title
+            { description: { $regex: keyword, $options: "i" } }, // Partial match in description
+            { requirements: { $regex: keyword, $options: "i" } }, // Partial match in requirements
+            { location: { $regex: keyword, $options: "i" } }, // Partial match in location
+            { jobType: { $regex: keyword, $options: "i" } }, // Partial match in job type
+          ],
+        })),
+      };
+
+      // Find jobs matching the updated query
+      const jobs = await Job.find(jobQuery);
+
+      // Extract job IDs from the retrieved jobs
+      const jobIds = jobs.map((job) => job._id);
+      console.log(jobIds);
+      // Update user's job recommendations
+      user.jobRecommendations = Array.from(
+        new Set([...user.jobRecommendations, ...jobIds])
+      ); // Avoid duplicates
+      await user.save(); // Save updated user
+    }
+  }
+};
+
+cron.schedule("0 * * * *", async () => {
+  console.log("Running job recommendation task...");
+  try {
+    await recommendJobsToUsers();
+  } catch (error) {
+    console.error("Error in cron job:", error);
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   updateProfile,
+  getUserSearchHistory,
+  clearUserSearchHistory,
 };

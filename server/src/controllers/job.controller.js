@@ -1,4 +1,5 @@
 const Job = require("../models/job.model");
+const User = require("../models/user.model");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const ErrorHandler = require("../utils/errorHandler");
 const Company = require("../models/company.model");
@@ -57,24 +58,38 @@ const postJob = asyncErrorHandler(async (req, res) => {
     message: "New job created successfully.",
     job,
     success: true,
+    status: 200,
   });
 });
 
-// Get All Jobs
 const getAllJobs = asyncErrorHandler(async (req, res) => {
-  const keyword = req.query.keyword || "";
-  const query = {
-    $or: [
-      { title: { $regex: keyword, $options: "i" } },
-      { description: { $regex: keyword, $options: "i" } },
-    ],
-  };
+  const { title, description } = req.query; // Destructure title and description from query parameters
+  const userId = req.user.id; // Get user ID from request
+  const keyword = title || description || ""; // Use title or description for search
+
+  if (keyword) {
+    // Only update the search history if a keyword is provided
+    await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { searchHistory: keyword } }, // Use $addToSet to avoid duplicates
+      { new: true } // Return the updated document
+    );
+  }
+
+  // Construct the query based on the presence of title and description
+  const query = {};
+  if (title) {
+    query.title = { $regex: title, $options: "i" }; // Match title case-insensitively
+  }
+  if (description) {
+    query.description = { $regex: description, $options: "i" }; // Match description case-insensitively
+  }
+
   const jobs = await Job.find(query)
     .populate("company")
     .sort({ createdAt: -1 });
 
   if (jobs.length === 0) {
-    // Change to check length
     const error = new ErrorHandler("Jobs Not Found", 404);
     return error.sendError(res);
   }
@@ -82,6 +97,7 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
   return res.status(200).json({
     jobs,
     success: true,
+    status: 200,
   });
 });
 
@@ -95,7 +111,7 @@ const getJobById = asyncErrorHandler(async (req, res) => {
     return error.sendError(res);
   }
 
-  return res.status(200).json({ job, success: true });
+  return res.status(200).json({ job, success: true, status: 200 });
 });
 
 // Get Admin Jobs
@@ -112,6 +128,7 @@ const getAdminJobs = asyncErrorHandler(async (req, res) => {
   return res.status(200).json({
     jobs,
     success: true,
+    status: 200,
   });
 });
 

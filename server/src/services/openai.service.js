@@ -6,7 +6,7 @@ async function processJobAndNotifyUsers(job, companyName) {
   try {
     const {
       title,
-      description, // Include the job description
+      description, 
       requirements,
       salary,
       location,

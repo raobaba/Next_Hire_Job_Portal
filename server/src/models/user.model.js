@@ -42,6 +42,17 @@ const userSchema = new mongoose.Schema(
         },
       },
     },
+    jobRecommendations: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Job",
+      },
+    ],
+    searchHistory: [
+      {
+        type: String,
+      },
+    ],
     createdAt: {
       type: Date,
       default: Date.now,

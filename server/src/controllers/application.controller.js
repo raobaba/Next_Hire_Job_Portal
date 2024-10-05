@@ -43,12 +43,14 @@ const applyJob = asyncErrorHandler(async (req, res) => {
     return res.status(201).json({
       message: "Job applied successfully.",
       success: true,
+      status: 200,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       message: "Internal server error",
       success: false,
+      status: 500,
     });
   }
 });
@@ -75,12 +77,14 @@ const getAppliedJobs = asyncErrorHandler(async (req, res) => {
     return res.status(200).json({
       applications,
       success: true,
+      status: 200,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       message: "Internal server error",
       success: false,
+      status: 500,
     });
   }
 });
@@ -105,12 +109,14 @@ const getApplicants = asyncErrorHandler(async (req, res) => {
     return res.status(200).json({
       applicants: job.applications,
       success: true,
+      status: 200,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       message: "Internal server error",
       success: false,
+      status: 200,
     });
   }
 });
@@ -137,12 +143,14 @@ const updateStatus = asyncErrorHandler(async (req, res) => {
     return res.status(200).json({
       message: "Status updated successfully.",
       success: true,
+      status: 200,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       message: "Internal server error",
       success: false,
+      status: 500,
     });
   }
 });

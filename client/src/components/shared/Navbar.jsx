@@ -48,7 +48,7 @@ const Navbar = () => {
     dispatch(logoutUser()) // Call the action creator
       .then((res) => {
         console.log(res);
-        if (res?.meta?.requestStatus === "fulfilled") {
+        if (res?.payload?.status === 200) {
           localStorage.removeItem("token"); // Clear the token
           localStorage.removeItem("profile"); // Clear the profile
           toast.success("Successfully logged out!"); // Success toast

@@ -79,7 +79,7 @@ const Signup = () => {
     dispatch(registerUser(formData))
       .then((res) => {
         setLoading(false);
-        if (res?.meta?.requestStatus === "fulfilled") {
+        if (res?.payload?.status === 200) {
           toast.success("Signup successful!");
           navigate("/"); // Redirect to homepage
         } else {

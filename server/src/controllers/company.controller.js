@@ -8,13 +8,13 @@ const registerCompany = asyncErrorHandler(async (req, res, next) => {
   const { companyName } = req.body;
 
   // Check if the user is a Recruiter
-  // if (req.user.role !== "recruiter") {
-  //   const error = new ErrorHandler(
-  //     "Only Recruiters are allowed to register a company. Please update your account role to Recruiter to proceed.",
-  //     403
-  //   ); // 403: Forbidden
-  //   return error.sendError(res);
-  // }
+  if (req.user.role !== "recruiter") {
+    const error = new ErrorHandler(
+      "Only Recruiters are allowed to register a company. Please update your account role to Recruiter to proceed.",
+      403
+    ); // 403: Forbidden
+    return error.sendError(res);
+  }
 
   if (!companyName) {
     const error = new ErrorHandler("Company name is required", 400);
@@ -39,6 +39,7 @@ const registerCompany = asyncErrorHandler(async (req, res, next) => {
     message: "Company registered successfully.",
     company,
     success: true,
+    status:200
   });
 });
 
@@ -55,6 +56,7 @@ const getCompany = asyncErrorHandler(async (req, res, next) => {
   return res.status(200).json({
     companies,
     success: true,
+    status:200
   });
 });
 
@@ -71,6 +73,7 @@ const getCompanyById = asyncErrorHandler(async (req, res, next) => {
   return res.status(200).json({
     company,
     success: true,
+    status:200
   });
 });
 
@@ -116,6 +119,7 @@ const updateCompany = asyncErrorHandler(async (req, res, next) => {
     message: "Company information updated successfully.",
     company,
     success: true,
+    status:200
   });
 });
 

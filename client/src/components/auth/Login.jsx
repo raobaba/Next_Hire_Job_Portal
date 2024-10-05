@@ -54,6 +54,7 @@ const Login = () => {
     dispatch(loginUser(formData))
       .then((res) => {
         setLoading(false);
+        console.log(res?.payload?.status);
         if (res?.payload?.status === 200) {
           toast.success("Login successful!");
           navigate("/"); // Redirect on success
