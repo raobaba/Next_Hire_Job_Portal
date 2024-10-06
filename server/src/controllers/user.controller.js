@@ -95,35 +95,24 @@ const logoutUser = asyncErrorHandler(async (req, res, next) => {
 
 const updateProfile = asyncErrorHandler(async (req, res, next) => {
   const { fullname, email, phoneNumber, bio, skills } = req.body;
-  console.log(req.body);
   const userId = req.user.id;
-
-  // Find the user by their ID
   let user = await User.findById(userId);
 
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
   }
-
-  // Update basic user information
   if (fullname) user.fullname = fullname;
   if (email) user.email = email;
   if (phoneNumber) user.phoneNumber = phoneNumber;
   if (bio) user.profile.bio = bio;
-
-  // Update skills (convert comma-separated string to array)
   if (skills) {
     user.profile.skills = skills.split(",").map((skill) => skill.trim());
   }
 
-  // Check if an avatar file is uploaded
   if (req.files && req.files.avatar && req.files.avatar.tempFilePath) {
-    // If user already has a profile photo, delete the old one from Cloudinary
     if (user.profile.profilePhoto && user.profile.profilePhoto.public_id) {
       await cloudinary.uploader.destroy(user.profile.profilePhoto.public_id);
     }
-
-    // Upload new profile photo to Cloudinary
     const result = await cloudinary.uploader.upload(
       req.files.avatar.tempFilePath,
       {
@@ -132,20 +121,34 @@ const updateProfile = asyncErrorHandler(async (req, res, next) => {
         crop: "scale",
       }
     );
-
-    // Update user's profile photo information
     user.profile.profilePhoto = {
       public_id: result.public_id,
       url: result.secure_url,
     };
   }
 
-  // Save the updated user data
+  if (req.files && req.files.resume && req.files.resume.tempFilePath) {
+    if (user.profile.resume && user.profile.resume.public_id) {
+      await cloudinary.uploader.destroy(user.profile.resume.public_id);
+    }
+    const resumeUpload = await cloudinary.uploader.upload(
+      req.files.resume.tempFilePath,
+      {
+        folder: "resumes",
+      }
+    );
+    user.profile.resume = {
+      public_id: resumeUpload.public_id,
+      url: resumeUpload.secure_url,
+      resumeOriginalName: req.files.resume.name,
+    };
+  }
+
   await user.save();
 
   res.status(200).json({
     success: true,
-    status:200,
+    status: 200,
     message: "Profile updated successfully",
     data: {
       user,
@@ -165,7 +168,7 @@ const getUserSearchHistory = asyncErrorHandler(async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    status:200,
+    status: 200,
     searchHistory: user.searchHistory,
   });
 });
@@ -182,7 +185,7 @@ const clearUserSearchHistory = asyncErrorHandler(async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    status:200,
+    status: 200,
     message: "Search history cleared successfully.",
   });
 });

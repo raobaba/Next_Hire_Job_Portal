@@ -21,6 +21,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -60,6 +61,7 @@ const Login = () => {
           navigate("/"); // Redirect on success
         } else {
           console.log(res);
+          setErrorMessage(res?.payload?.message);
           toast.error(res?.payload?.message || "Something went wrong");
         }
       })
@@ -223,12 +225,14 @@ const Login = () => {
               </Link>
             </span>
             <div className="mt-2">
-              <span className="font-semibold text-sm">
-                Forgot your password?{" "}
-                <Link to="/forgot-password" className="text-blue-600">
-                  Reset here
-                </Link>
-              </span>
+              {errorMessage === "Incorrect Password" && (
+                <span className="font-semibold text-sm">
+                  Forgot your password?{" "}
+                  <Link to="/forgot-password" className="text-blue-600">
+                    Reset here
+                  </Link>
+                </span>
+              )}
             </div>
           </div>
         </form>

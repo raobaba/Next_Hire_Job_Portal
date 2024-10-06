@@ -9,11 +9,14 @@ import {
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Loader2 } from "lucide-react";
-
-import { toast } from "sonner";
+import { X } from "lucide-react";
+import Loader from "./shared/Loader";
+import { useDispatch } from "react-redux";
+import { updateUserProfile } from "@/redux/slices/user.slice";
+import { toast } from "react-toastify";
 
 const UpdateProfileDialog = ({ open, setOpen, user }) => {
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState({
     fullname: user?.fullname || "",
@@ -21,20 +24,25 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     phoneNumber: user?.phoneNumber || "",
     bio: user?.profile?.bio || "",
     skills: user?.profile?.skills?.join(", ") || "",
-    file: null, // Initialize file as null for file upload
+    file: null,
   });
 
+  // Handle form field change events
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
 
+  // Handle file input change
   const fileChangeHandler = (e) => {
     const file = e.target.files?.[0];
     setInput({ ...input, file });
   };
 
-  const submitHandler = async (e) => {
+  // Handle form submission to update profile
+  const submitHandler = (e) => {
     e.preventDefault();
+    setLoading(true); // Set loading to true at the start
+
     const formData = new FormData();
     formData.append("fullname", input.fullname);
     formData.append("email", input.email);
@@ -43,24 +51,51 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     formData.append(
       "skills",
       input.skills.split(", ").map((skill) => skill.trim())
-    ); // Convert skills back to array
+    );
+
     if (input.file) {
-      formData.append("file", input.file);
+      formData.append("resume", input.file);
     }
 
+    // Dispatch the action
+    dispatch(updateUserProfile(formData))
+      .then((res) => {
+        // If the profile update is successful
+        if (res?.payload?.status === 200) {
+          console.log(res.payload.data);
+          toast.success("Profile updated successfully!");
+          setOpen(false); // Close the dialog
+        }
+      })
+      .catch((error) => {
+        // Handle error case
+        toast.error("Failed to update profile. Please try again.");
+      })
+      .finally(() => {
+        setLoading(false); // Always set loading to false when done
+      });
   };
 
   return (
     <Dialog open={open}>
+      {loading && <Loader />}
       <DialogContent
         className="sm:max-w-[425px]"
         onInteractOutside={() => setOpen(false)}
       >
         <DialogHeader>
           <DialogTitle>Update Profile</DialogTitle>
+          <Button
+            variant="ghost"
+            className="absolute top-2 right-2"
+            onClick={() => setOpen(false)}
+          >
+            <X className="w-5 h-5" /> {/* Cross icon */}
+          </Button>
         </DialogHeader>
         <form onSubmit={submitHandler}>
           <div className="grid gap-4 py-4">
+            {/* Fullname input */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="fullname" className="text-right">
                 Name
@@ -74,6 +109,8 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 className="col-span-3"
               />
             </div>
+
+            {/* Email input */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="email" className="text-right">
                 Email
@@ -87,6 +124,8 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 className="col-span-3"
               />
             </div>
+
+            {/* Phone number input */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="phoneNumber" className="text-right">
                 Number
@@ -99,6 +138,8 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 className="col-span-3"
               />
             </div>
+
+            {/* Bio input */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="bio" className="text-right">
                 Bio
@@ -111,6 +152,8 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 className="col-span-3"
               />
             </div>
+
+            {/* Skills input */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="skills" className="text-right">
                 Skills
@@ -123,6 +166,8 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 className="col-span-3"
               />
             </div>
+
+            {/* Resume file input */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="file" className="text-right">
                 Resume
@@ -131,16 +176,17 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 id="file"
                 name="file"
                 type="file"
-                accept="application/pdf"
+                accept="image/png"
                 onChange={fileChangeHandler}
                 className="col-span-3"
               />
             </div>
           </div>
+
+          {/* Submit button with loading state */}
           <DialogFooter>
             {loading ? (
               <Button className="w-full my-4" disabled>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Please wait
               </Button>
             ) : (

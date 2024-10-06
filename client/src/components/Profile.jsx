@@ -6,27 +6,14 @@ import { Contact, Mail, Pen } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import AppliedJobTable from "./AppliedJobTable";
+import { useSelector } from "react-redux";
 import UpdateProfileDialog from "./UpdateProfileDialog";
 import ReactHelmet from "./shared/ReactHelmet";
 
-// Sample user data for demonstration purposes
-const sampleUser = {
-  fullname: "John Doe",
-  email: "john.doe@example.com",
-  phoneNumber: "+1234567890",
-  profile: {
-    bio: "A passionate software developer.",
-    skills: ["HTML", "CSS", "JavaScript", "React"],
-    resume: "https://example.com/resume.pdf",
-    resumeOriginalName: "John_Doe_Resume.pdf",
-  },
-};
-
-const isResume = true;
-
 const Profile = () => {
   const [open, setOpen] = useState(false);
-  const user = sampleUser; // Use sample user data
+  const user = useSelector((state) => state.user.user);
+  console.log(user);
 
   return (
     <div className="min-h-screen mt-20 bg-gray-50">
@@ -42,7 +29,7 @@ const Profile = () => {
           <div className="flex items-center gap-4 mb-4 sm:mb-0">
             <Avatar className="h-24 w-24">
               <AvatarImage
-                src="https://www.shutterstock.com/image-vector/circle-line-simple-design-logo-600nw-2174926871.jpg"
+                src={user?.profile?.profilePhoto?.url}
                 alt="profile"
               />
             </Avatar>
@@ -83,14 +70,14 @@ const Profile = () => {
         </div>
         <div className="grid w-full max-w-sm items-center gap-1.5">
           <Label className="text-md font-bold">Resume</Label>
-          {isResume ? (
+          {user?.profile?.resume ? (
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href={user.profile.resume}
+              href={user?.profile?.resume?.url}
               className="text-blue-500 hover:underline cursor-pointer"
             >
-              {user.profile.resumeOriginalName}
+              {user?.profile?.resume?.resumeOriginalName}
             </a>
           ) : (
             <span className="text-gray-500">NA</span>
@@ -99,7 +86,6 @@ const Profile = () => {
       </div>
       <div className="max-w-4xl mx-auto bg-white rounded-2xl my-5 p-6 sm:p-8">
         <h1 className="font-bold text-lg my-5">Applied Jobs</h1>
-        {/* Applied Job Table */}
         <AppliedJobTable />
       </div>
       <UpdateProfileDialog open={open} setOpen={setOpen} />

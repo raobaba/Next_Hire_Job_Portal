@@ -33,5 +33,5 @@ export const clearUserSearchHistoryApi = async () => {
 // Update user profile API
 export const updateUserProfileApi = async (formData) => {
   const url = `api/v1/user/profile/update`;
-  return await fetchFromApiServer("POST", url, formData);
+  return await fetchFromApiServer("MULTIPART", url, formData);
 };

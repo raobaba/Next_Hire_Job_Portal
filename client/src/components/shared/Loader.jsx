@@ -3,7 +3,7 @@ import LoaderLogo from "@/assets/NexthireLogo.png"; // Ensure the image path is 
 
 const Loader = () => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 custom-z-index">
       <div className="relative flex items-center justify-center">
         <img
           src={LoaderLogo}

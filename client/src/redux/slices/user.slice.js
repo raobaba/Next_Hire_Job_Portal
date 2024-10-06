@@ -82,8 +82,8 @@ export const updateUserProfile = createAsyncThunk(
   "profile/update",
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await updateUserProfileApi(formData);
-      return response.data.user;
+      const response = await updateUserProfileApi(formData); // API call
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data || "Failed to update profile"
@@ -204,7 +204,28 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+      //   {
+      //     "profile": {
+      //         "profilePhoto": {
+      //             "public_id": "y94pqm7zbobscgiqrtpm",
+      //             "url": "https://res.cloudinary.com/dcav4norh/image/upload/v1728172535/y94pqm7zbobscgiqrtpm.png"
+      //         },
+      //         "skills": [
+      //             "React.js",
+      //             "Node.js",
+      //             "Javascript",
+      //             "Typescript"
+      //         ],
+      //         "bio": "software developer "
+      //     },
+      //     "_id": "6701d1f667abad2026815331",
+      //     "fullname": "Rajan Kumar",
+      //     "email": "raorajan9576@gmail.com",
+      //     "phoneNumber": 7061344366,
+      //     "role": "student",
+      //     "jobRecommendations": [],
+      //     "searchHistory": [],
+      // }
       // Update user profile
       .addCase(updateUserProfile.pending, (state) => {
         state.loading = true;
@@ -212,8 +233,25 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
-        state.message = "Profile updated successfully";
+        console.log(action.payload.data.user);
+        if (action.payload.data.user.fullname) {
+          state.user.fullname = action.payload.data.user.fullname;
+        }
+        if (action.payload.data.user.email) {
+          state.user.email = action.payload.data.user.email;
+        }
+        if (action.payload.data.user.phoneNumber) {
+          state.user.phoneNumber = action.payload.data.user.phoneNumber;
+        }
+        if (action.payload.data.user.profile.bio) {
+          state.user.profile.bio = action.payload.data.user.profile.bio;
+        }
+        if (action.payload.data.user.profile.skills) {
+          state.user.profile.skills = action.payload.data.user.profile.skills;
+        }
+        if (action.payload.data.user.profile.resume) {
+          state.user.profile.resume = action.payload.data.user.profile.resume;
+        }
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;

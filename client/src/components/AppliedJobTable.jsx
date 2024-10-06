@@ -48,7 +48,7 @@ const sampleAppliedJobs = [
 ];
 
 const AppliedJobTable = () => {
-  const allAppliedJobs = sampleAppliedJobs; // Use sample data
+  const allAppliedJobs = sampleAppliedJobs;
 
   return (
     <div className="overflow-x-auto">
