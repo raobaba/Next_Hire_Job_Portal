@@ -56,23 +56,19 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     if (input.file) {
       formData.append("resume", input.file);
     }
-
-    // Dispatch the action
     dispatch(updateUserProfile(formData))
       .then((res) => {
-        // If the profile update is successful
         if (res?.payload?.status === 200) {
           console.log(res.payload.data);
           toast.success("Profile updated successfully!");
-          setOpen(false); // Close the dialog
+          setOpen(false); 
         }
       })
       .catch((error) => {
-        // Handle error case
         toast.error("Failed to update profile. Please try again.");
       })
       .finally(() => {
-        setLoading(false); // Always set loading to false when done
+        setLoading(false);
       });
   };
 

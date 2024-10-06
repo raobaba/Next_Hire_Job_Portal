@@ -8,7 +8,14 @@ const applyJob = asyncErrorHandler(async (req, res) => {
   try {
     const userId = req.user.id;
     const jobId = req.params.jobId;
-
+    // Check if the user is a Student
+    if (req.user.role !== "student") {
+      const error = new ErrorHandler(
+        "Only students are allowed to apply. Please update your account role to Student to proceed.",
+        403
+      ); // 403: Forbidden
+      return error.sendError(res);
+    }
     if (!jobId) {
       return new ErrorHandler("Job ID is required", 400).sendError(res);
     }

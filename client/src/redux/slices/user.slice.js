@@ -204,28 +204,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      //   {
-      //     "profile": {
-      //         "profilePhoto": {
-      //             "public_id": "y94pqm7zbobscgiqrtpm",
-      //             "url": "https://res.cloudinary.com/dcav4norh/image/upload/v1728172535/y94pqm7zbobscgiqrtpm.png"
-      //         },
-      //         "skills": [
-      //             "React.js",
-      //             "Node.js",
-      //             "Javascript",
-      //             "Typescript"
-      //         ],
-      //         "bio": "software developer "
-      //     },
-      //     "_id": "6701d1f667abad2026815331",
-      //     "fullname": "Rajan Kumar",
-      //     "email": "raorajan9576@gmail.com",
-      //     "phoneNumber": 7061344366,
-      //     "role": "student",
-      //     "jobRecommendations": [],
-      //     "searchHistory": [],
-      // }
       // Update user profile
       .addCase(updateUserProfile.pending, (state) => {
         state.loading = true;

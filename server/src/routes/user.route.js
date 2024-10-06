@@ -17,5 +17,5 @@ userRouter.route("/logout").get(logoutUser);
 userRouter.route("/profile/update").post(isAuthenticated, updateProfile);
 userRouter.get("/search-history", isAuthenticated, getUserSearchHistory);
 userRouter.delete("/search-history", isAuthenticated, clearUserSearchHistory);
-
+// Admin Routes
 module.exports = userRouter;

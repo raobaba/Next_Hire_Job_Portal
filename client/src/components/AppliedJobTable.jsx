@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -9,46 +9,26 @@ import {
   TableRow,
 } from "./ui/table";
 import { Badge } from "./ui/badge";
-
-// Sample applied jobs data for demonstration purposes
-const sampleAppliedJobs = [
-  {
-    _id: 1,
-    createdAt: "2024-09-18T09:00:00Z",
-    job: {
-      title: "Frontend Developer",
-      company: {
-        name: "TechCorp",
-      },
-    },
-    status: "accepted",
-  },
-  {
-    _id: 2,
-    createdAt: "2024-09-17T10:30:00Z",
-    job: {
-      title: "Backend Developer",
-      company: {
-        name: "InnovateX",
-      },
-    },
-    status: "pending",
-  },
-  {
-    _id: 3,
-    createdAt: "2024-09-16T11:00:00Z",
-    job: {
-      title: "Full Stack Developer",
-      company: {
-        name: "DevSolutions",
-      },
-    },
-    status: "rejected",
-  },
-];
+import { getAppliedJobs } from "@/redux/slices/application.slice";
+import { useSelector, useDispatch } from "react-redux";
 
 const AppliedJobTable = () => {
-  const allAppliedJobs = sampleAppliedJobs;
+  const dispatch = useDispatch();
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const application = useSelector((state) => state.application);
+  useEffect(() => {
+    if (!application?.applications?.length) {
+      dispatch(getAppliedJobs()).then((res) => {
+        if (res?.payload?.status === 200) {
+          console.log("response",res?.payload)
+          setAppliedJobs(res.payload.applications);
+        }
+      });
+    } else {
+      setAppliedJobs(application.applications);
+    }
+  }, [dispatch]);
+  console.log(appliedJobs);
 
   return (
     <div className="overflow-x-auto">
@@ -63,23 +43,23 @@ const AppliedJobTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {allAppliedJobs.length <= 0 ? (
+          {appliedJobs.length <= 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="text-center">
                 You haven't applied to any jobs yet.
               </TableCell>
             </TableRow>
           ) : (
-            allAppliedJobs.map((appliedJob) => (
+            appliedJobs.map((appliedJob) => (
               <TableRow key={appliedJob._id}>
                 <TableCell className="whitespace-nowrap">
                   {appliedJob.createdAt.split("T")[0]}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {appliedJob.job.title}
+                  {appliedJob?.job.title}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {appliedJob.job.company.name}
+                  {appliedJob?.job.company.companyName}
                 </TableCell>
                 <TableCell className="text-right whitespace-nowrap">
                   <Badge

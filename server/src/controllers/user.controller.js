@@ -94,7 +94,8 @@ const logoutUser = asyncErrorHandler(async (req, res, next) => {
 });
 
 const updateProfile = asyncErrorHandler(async (req, res, next) => {
-  const { fullname, email, phoneNumber, bio, skills } = req.body;
+  const { fullname, email, phoneNumber, bio, skills, resume } = req.body;
+  console.log(req.body);
   const userId = req.user.id;
   let user = await User.findById(userId);
 
@@ -127,6 +128,7 @@ const updateProfile = asyncErrorHandler(async (req, res, next) => {
     };
   }
 
+  // Check if a resume file is uploaded
   if (req.files && req.files.resume && req.files.resume.tempFilePath) {
     if (user.profile.resume && user.profile.resume.public_id) {
       await cloudinary.uploader.destroy(user.profile.resume.public_id);

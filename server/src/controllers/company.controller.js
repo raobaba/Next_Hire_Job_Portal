@@ -39,7 +39,7 @@ const registerCompany = asyncErrorHandler(async (req, res, next) => {
     message: "Company registered successfully.",
     company,
     success: true,
-    status:200
+    status: 200,
   });
 });
 
@@ -56,7 +56,7 @@ const getCompany = asyncErrorHandler(async (req, res, next) => {
   return res.status(200).json({
     companies,
     success: true,
-    status:200
+    status: 200,
   });
 });
 
@@ -73,7 +73,7 @@ const getCompanyById = asyncErrorHandler(async (req, res, next) => {
   return res.status(200).json({
     company,
     success: true,
-    status:200
+    status: 200,
   });
 });
 
@@ -119,7 +119,7 @@ const updateCompany = asyncErrorHandler(async (req, res, next) => {
     message: "Company information updated successfully.",
     company,
     success: true,
-    status:200
+    status: 200,
   });
 });
 
