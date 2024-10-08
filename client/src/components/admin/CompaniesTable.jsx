@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -12,65 +12,34 @@ import { Avatar, AvatarImage } from "../ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Edit2, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-// Sample static company data for demonstration
-const staticCompaniesData = [
-  {
-    _id: 1,
-    logo: "https://via.placeholder.com/50",
-    name: "TechCorp",
-    createdAt: "2024-09-01T09:00:00Z",
-  },
-  {
-    _id: 2,
-    logo: "https://via.placeholder.com/50",
-    name: "InnovateX",
-    createdAt: "2024-09-02T10:30:00Z",
-  },
-  {
-    _id: 3,
-    logo: "https://via.placeholder.com/50",
-    name: "DevSolutions",
-    createdAt: "2024-09-03T11:00:00Z",
-  },
-  {
-    _id: 4,
-    logo: "https://via.placeholder.com/50",
-    name: "BuildIt",
-    createdAt: "2024-09-04T12:00:00Z",
-  },
-];
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { getCompanies } from "@/redux/slices/company.slice";
 
 const CompaniesTable = () => {
-  const [companies] = useState(staticCompaniesData); // Static data
-  const [searchCompanyByText, setSearchCompanyByText] = useState("");
-  const [filterCompany, setFilterCompany] = useState(companies);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const companies = useSelector((state) => state.company.companies);
 
   useEffect(() => {
-    const filteredCompany = companies.filter((company) => {
-      if (!searchCompanyByText) {
-        return true;
-      }
-      return company?.name
-        ?.toLowerCase()
-        .includes(searchCompanyByText.toLowerCase());
-    });
-    setFilterCompany(filteredCompany);
-  }, [companies, searchCompanyByText]);
+    if (!companies || companies.length === 0) {
+      dispatch(getCompanies()).then((res) => {
+        if (res?.payload?.status === 200) {
+          console.log(res?.payload);
+        } else {
+          toast.error("Failed to fetch companies.");
+        }
+      });
+    }
+  }, [dispatch, companies]);
 
   return (
     <div className="container mx-auto p-4">
-      <input
-        type="text"
-        placeholder="Filter by company name"
-        value={searchCompanyByText}
-        onChange={(e) => setSearchCompanyByText(e.target.value)}
-        className="w-full p-2 border rounded mb-4"
-      />
       <div className="overflow-x-auto">
         <Table className="min-w-full">
-          <TableCaption>A list of your recent registered companies</TableCaption>
+          <TableCaption>
+            A list of your recent registered companies
+          </TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Logo</TableHead>
@@ -80,35 +49,48 @@ const CompaniesTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filterCompany.map((company) => (
-              <TableRow key={company._id}>
-                <TableCell>
-                  <Avatar>
-                    <AvatarImage src={company.logo} />
-                  </Avatar>
-                </TableCell>
-                <TableCell>{company.name}</TableCell>
-                <TableCell>{company.createdAt.split("T")[0]}</TableCell>
-                <TableCell className="text-right cursor-pointer">
-                  <Popover>
-                    <PopoverTrigger>
-                      <MoreHorizontal />
-                    </PopoverTrigger>
-                    <PopoverContent className="w-32">
-                      <div
-                        onClick={() =>
-                          navigate(`/admin/companies/${company._id}`)
-                        }
-                        className="flex items-center gap-2 w-fit cursor-pointer"
-                      >
-                        <Edit2 className="w-4" />
-                        <span>Edit</span>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+            {companies && companies.length > 0 ? (
+              companies.map((company) => (
+                <TableRow key={company._id}>
+                  <TableCell>
+                    <Avatar>
+                      <AvatarImage src={company?.logo?.url} />
+                    </Avatar>
+                  </TableCell>
+                  <TableCell>{company.companyName}</TableCell>
+                  <TableCell>
+                    {/* Safely check for 'createdAt' before calling split */}
+                    {company.createdAt
+                      ? company.createdAt.split("T")[0]
+                      : "No date available"}
+                  </TableCell>
+                  <TableCell className="text-right cursor-pointer">
+                    <Popover>
+                      <PopoverTrigger>
+                        <MoreHorizontal />
+                      </PopoverTrigger>
+                      <PopoverContent className="w-32">
+                        <div
+                          onClick={() =>
+                            navigate(`/profile/admin/companies/${company._id}`)
+                          }
+                          className="flex items-center gap-2 w-fit cursor-pointer"
+                        >
+                          <Edit2 className="w-4" />
+                          <span>Edit</span>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="4" className="text-center">
+                  No companies found.
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>

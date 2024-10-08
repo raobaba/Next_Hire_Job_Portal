@@ -21,7 +21,9 @@ const getHeaderConfig = (requestType, options, Authorization) => {
   const token = getToken();
   const headers = {
     "Content-Type":
-      requestType === "MULTIPART" ? "multipart/form-data" : "application/json",
+      requestType === "MULTIPART" || requestType === "PUT"
+        ? "multipart/form-data"
+        : "application/json",
     Accept: "*/*",
     ...(token && { Authorization: Authorization || `Bearer ${token}` }),
   };

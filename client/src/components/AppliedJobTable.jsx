@@ -10,18 +10,22 @@ import {
 } from "./ui/table";
 import { Badge } from "./ui/badge";
 import { getAppliedJobs } from "@/redux/slices/application.slice";
+import Loader from "./shared/Loader";
 import { useSelector, useDispatch } from "react-redux";
 
 const AppliedJobTable = () => {
   const dispatch = useDispatch();
   const [appliedJobs, setAppliedJobs] = useState([]);
+  const [loading, setLoading] = useState(false);
   const application = useSelector((state) => state.application);
   useEffect(() => {
     if (!application?.applications?.length) {
+      setLoading(true);
       dispatch(getAppliedJobs()).then((res) => {
         if (res?.payload?.status === 200) {
-          console.log("response",res?.payload)
+          console.log("response", res?.payload);
           setAppliedJobs(res.payload.applications);
+          setLoading(false);
         }
       });
     } else {
@@ -34,6 +38,7 @@ const AppliedJobTable = () => {
     <div className="overflow-x-auto">
       <Table>
         <TableCaption>A list of your applied jobs</TableCaption>
+        {loading && <Loader />}
         <TableHeader>
           <TableRow>
             <TableHead>Date</TableHead>

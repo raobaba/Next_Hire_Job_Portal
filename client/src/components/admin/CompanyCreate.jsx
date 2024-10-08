@@ -4,40 +4,39 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import ReactHelmet from "../shared/ReactHelmet";
-
+import { useDispatch, useSelector } from "react-redux";
+import Loader from "../shared/Loader";
+import { registerCompany } from "@/redux/slices/company.slice";
 const CompanyCreate = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [companyName, setCompanyName] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const registerNewCompany = async () => {
-    try {
-      const res = await axios.post(
-        "https://your-api-endpoint.com/register",
-        { companyName },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-      if (res?.data?.success) {
-        toast.success(res.data.message);
-        const companyId = res?.data?.company?._id;
-        navigate(`/admin/companies/${companyId}`);
+    setLoading(true);
+    const companyData = {
+      companyName: companyName,
+    };
+    dispatch(registerCompany(companyData)).then((res) => {
+      if (res?.payload?.status === 200) {
+        console.log(res?.payload);
+        toast.success(res?.payload?.message);
+        setLoading(false);
+        navigate(`/profile/admin/companies/${res?.payload?.company._id}`);
+      } else {
+        toast.error(res?.payload?.message);
+        setLoading(false);
       }
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to create the company. Please try again.");
-    }
+    });
   };
 
   return (
     <div>
       <Navbar />
+      {loading && <Loader />}
       <ReactHelmet
         title="Create Company - Next_Hire"
         description="Register your company and post job openings to attract top talent. Provide essential information about your organization and start building your team with Next_Hire."
@@ -62,10 +61,7 @@ const CompanyCreate = () => {
           onChange={(e) => setCompanyName(e.target.value)}
         />
         <div className="flex items-center gap-2 my-10">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/admin/companies")}
-          >
+          <Button variant="outline" onClick={() => navigate("/profile")}>
             Cancel
           </Button>
           <Button onClick={registerNewCompany}>Continue</Button>

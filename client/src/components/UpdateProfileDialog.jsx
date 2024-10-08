@@ -23,7 +23,7 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     email: user?.email || "",
     phoneNumber: user?.phoneNumber || "",
     bio: user?.profile?.bio || "",
-    skills: user?.profile?.skills?.join(", ") || "",
+    skills: user?.profile?.skills ? user.profile.skills.join(", ") : "", // Safely handle skills
     file: null,
   });
 
@@ -48,20 +48,22 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     formData.append("email", input.email);
     formData.append("phoneNumber", input.phoneNumber);
     formData.append("bio", input.bio);
-    formData.append(
-      "skills",
-      input.skills.split(", ").map((skill) => skill.trim())
-    );
+
+    const skillsArray = input?.skills
+      ? input.skills.split(", ").map((skill) => skill.trim())
+      : [];
+    formData.append("skills", skillsArray);
 
     if (input.file) {
       formData.append("resume", input.file);
     }
+
     dispatch(updateUserProfile(formData))
       .then((res) => {
         if (res?.payload?.status === 200) {
           console.log(res.payload.data);
           toast.success("Profile updated successfully!");
-          setOpen(false); 
+          setOpen(false);
         }
       })
       .catch((error) => {
@@ -148,35 +150,38 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 className="col-span-3"
               />
             </div>
-
+            {user?.role === "student" && (
+              <>
+                {" "}
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="skills" className="text-right">
+                    Skills
+                  </Label>
+                  <Input
+                    id="skills"
+                    name="skills"
+                    value={input.skills}
+                    onChange={changeEventHandler}
+                    className="col-span-3"
+                  />
+                </div>
+                {/* Resume file input */}
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="file" className="text-right">
+                    Resume
+                  </Label>
+                  <Input
+                    id="file"
+                    name="file"
+                    type="file"
+                    accept="image/png"
+                    onChange={fileChangeHandler}
+                    className="col-span-3"
+                  />
+                </div>
+              </>
+            )}
             {/* Skills input */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="skills" className="text-right">
-                Skills
-              </Label>
-              <Input
-                id="skills"
-                name="skills"
-                value={input.skills}
-                onChange={changeEventHandler}
-                className="col-span-3"
-              />
-            </div>
-
-            {/* Resume file input */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="file" className="text-right">
-                Resume
-              </Label>
-              <Input
-                id="file"
-                name="file"
-                type="file"
-                accept="image/png"
-                onChange={fileChangeHandler}
-                className="col-span-3"
-              />
-            </div>
           </div>
 
           {/* Submit button with loading state */}

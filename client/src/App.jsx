@@ -50,7 +50,7 @@ const appRouter = createBrowserRouter([
     element: <Profile />,
   },
   {
-    path: "/admin/companies",
+    path: "/profile/admin/companies",
     element: (
       <ProtectedRoute>
         <Companies />
@@ -58,7 +58,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/companies/create",
+    path: "/profile/admin/companies/create",
     element: (
       <ProtectedRoute>
         <CompanyCreate />
@@ -66,7 +66,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/companies/:id",
+    path: "/profile/admin/companies/:id",
     element: (
       <ProtectedRoute>
         <CompanySetup />
@@ -74,7 +74,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/jobs",
+    path: "/profile/admin/jobs",
     element: (
       <ProtectedRoute>
         <AdminJobs />
@@ -82,7 +82,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/jobs/create",
+    path: "/profile/admin/jobs/create",
     element: (
       <ProtectedRoute>
         <PostJob />
@@ -90,7 +90,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/jobs/:id/applicants",
+    path: "/profile/admin/jobs/:id/applicants",
     element: (
       <ProtectedRoute>
         <Applicants />
@@ -103,7 +103,6 @@ const appRouter = createBrowserRouter([
 function App() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Flex column layout ensures full height */}
       <RouterProvider router={appRouter} />
     </div>
   );
