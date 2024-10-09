@@ -54,7 +54,6 @@ const PostJob = () => {
   useEffect(() => {
     dispatch(getCompanies()).then((res) => {
       if (res?.payload?.status === 200) {
-        console.log(res?.payload);
         setCompany(res?.payload);
       }
     });

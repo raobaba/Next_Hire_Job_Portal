@@ -12,28 +12,40 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Edit2, Eye, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
-
-const sampleJobs = [];
+import { useDispatch } from "react-redux";
+import { getAdminJobs } from "@/redux/slices/job.slice";
+import Loader from "../shared/Loader";
 
 const AdminJobsTable = ({ searchJobByText }) => {
-  const [filterJobs, setFilterJobs] = useState(sampleJobs);
+  const dispatch = useDispatch();
+  const [filterJobs, setFilterJobs] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const filteredJobs = sampleJobs.filter((job) => {
-      if (!searchJobByText) {
-        return true;
+    dispatch(getAdminJobs()).then((res) => {
+      if (res?.payload?.status === 200) {
+        const jobs = res?.payload?.jobs || [];
+        const filteredJobs = jobs.filter((job) => {
+          if (!searchJobByText) {
+            return true;
+          }
+          return (
+            job.title.toLowerCase().includes(searchJobByText.toLowerCase()) ||
+            (job.company &&
+              job.company.companyName
+                .toLowerCase()
+                .includes(searchJobByText.toLowerCase()))
+          );
+        });
+        setFilterJobs(filteredJobs);
       }
-      return (
-        job.title.toLowerCase().includes(searchJobByText.toLowerCase()) ||
-        job.company.name.toLowerCase().includes(searchJobByText.toLowerCase())
-      );
     });
-    setFilterJobs(filteredJobs);
-  }, [searchJobByText]);
+  }, [dispatch, searchJobByText]);
 
   return (
     <div className="max-w-6xl mx-auto p-4">
+      {loading && <Loader />}
       {filterJobs.length > 0 ? (
         <Table>
           <TableCaption>A list of your recently posted jobs</TableCaption>
@@ -48,10 +60,10 @@ const AdminJobsTable = ({ searchJobByText }) => {
           <TableBody>
             {filterJobs.map((job) => (
               <TableRow
-                key={job.id}
+                key={job._id}
                 className="hover:bg-gray-100 transition-all"
               >
-                <TableCell>{job.company.name}</TableCell>
+                <TableCell>{job.company?.companyName || "N/A"}</TableCell>
                 <TableCell>{job.title}</TableCell>
                 <TableCell>{job.createdAt.split("T")[0]}</TableCell>
                 <TableCell className="text-right cursor-pointer">
@@ -61,7 +73,9 @@ const AdminJobsTable = ({ searchJobByText }) => {
                     </PopoverTrigger>
                     <PopoverContent className="w-32">
                       <div
-                        onClick={() => navigate(`/admin/companies/${job.id}`)}
+                        onClick={() =>
+                          navigate(`/profile/admin/companies/${job._id}`)
+                        }
                         className="flex items-center gap-2 w-fit cursor-pointer"
                       >
                         <Edit2 className="w-4" />
@@ -69,7 +83,7 @@ const AdminJobsTable = ({ searchJobByText }) => {
                       </div>
                       <div
                         onClick={() =>
-                          navigate(`/admin/jobs/${job.id}/applicants`)
+                          navigate(`/profile/admin/jobs/${job._id}/applicants`)
                         }
                         className="flex items-center w-fit gap-2 cursor-pointer mt-2"
                       >

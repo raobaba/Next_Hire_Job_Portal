@@ -24,7 +24,7 @@ export const getAllJobs = createAsyncThunk(
   async (searchParams, { rejectWithValue }) => {
     try {
       const response = await getAllJobsApi(searchParams);
-      return response.data.jobs;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error?.response?.data || "Failed to fetch jobs");
     }
@@ -37,7 +37,7 @@ export const getAdminJobs = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getAdminJobsApi();
-      return response.data.jobs;
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data || "Failed to fetch admin jobs"
@@ -52,7 +52,7 @@ export const getJobById = createAsyncThunk(
   async (jobId, { rejectWithValue }) => {
     try {
       const response = await getJobByIdApi(jobId);
-      return response.data.job;
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data || "Failed to fetch job by ID"
@@ -123,7 +123,7 @@ const jobSlice = createSlice({
       })
       .addCase(getAdminJobs.fulfilled, (state, action) => {
         state.loading = false;
-        state.adminJobs = action.payload; // Set admin jobs data
+        state.adminJobs = action.payload;
       })
       .addCase(getAdminJobs.rejected, (state, action) => {
         state.loading = false;
