@@ -33,6 +33,10 @@ const CompaniesTable = () => {
     }
   }, [dispatch, companies]);
 
+  const handleJobDetails = () => {
+    navigate("/profile/admin/jobs");
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="overflow-x-auto">
@@ -51,20 +55,23 @@ const CompaniesTable = () => {
           <TableBody>
             {companies && companies.length > 0 ? (
               companies.map((company) => (
-                <TableRow key={company._id}>
-                  <TableCell>
+                <TableRow
+                  key={company._id}
+                  className="cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all duration-200 ease-in-out mb-4 rounded-lg"
+                  onClick={handleJobDetails}
+                >
+                  <TableCell className="p-4">
                     <Avatar>
                       <AvatarImage src={company?.logo?.url} />
                     </Avatar>
                   </TableCell>
-                  <TableCell>{company.companyName}</TableCell>
-                  <TableCell>
-                    {/* Safely check for 'createdAt' before calling split */}
+                  <TableCell className="p-4">{company.companyName}</TableCell>
+                  <TableCell className="p-4">
                     {company.createdAt
                       ? company.createdAt.split("T")[0]
                       : "No date available"}
                   </TableCell>
-                  <TableCell className="text-right cursor-pointer">
+                  <TableCell className="p-4 text-right cursor-pointer">
                     <Popover>
                       <PopoverTrigger>
                         <MoreHorizontal />
@@ -86,7 +93,7 @@ const CompaniesTable = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan="4" className="text-center">
+                <TableCell colSpan="4" className="text-center p-4">
                   No companies found.
                 </TableCell>
               </TableRow>

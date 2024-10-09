@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -11,18 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+
 import { Loader2 } from "lucide-react";
 import ReactHelmet from "../shared/ReactHelmet";
-
-const companyArray = [
-  { _id: "1", name: "Company A" },
-  { _id: "2", name: "Company B" },
-  { _id: "3", name: "Company C" },
-];
-
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { getCompanies } from "@/redux/slices/company.slice";
+import { postJob } from "@/redux/slices/job.slice";
+import Loader from "../shared/Loader";
 const PostJob = () => {
+  const dispatch = useDispatch();
+  const [company, setCompany] = useState([]);
   const [input, setInput] = useState({
     title: "",
     description: "",
@@ -42,27 +42,66 @@ const PostJob = () => {
   };
 
   const selectChangeHandler = (value) => {
-    const selectedCompany = companyArray.find(
-      (company) => company.name.toLowerCase() === value
+    const selectedCompany = company.companies.find(
+      (company) => company.companyName.toLowerCase() === value
     );
-    setInput({ ...input, companyId: selectedCompany._id });
+    setInput({
+      ...input,
+      companyId: selectedCompany._id,
+    });
   };
+
+  useEffect(() => {
+    dispatch(getCompanies()).then((res) => {
+      if (res?.payload?.status === 200) {
+        console.log(res?.payload);
+        setCompany(res?.payload);
+      }
+    });
+  }, [dispatch]);
+
+  console.log(company);
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
+    const formData = new FormData();
+    formData.append("title", input.title);
+    formData.append("description", input.description);
+    formData.append("requirements", input.requirements);
+    formData.append("salary", input.salary);
+    formData.append("location", input.location);
+    formData.append("jobType", input.jobType);
+    formData.append("experienceLevel", input.experience);
+    formData.append("position", input.position);
+    formData.append("companyId", input.companyId);
+    setLoading(true);
+    dispatch(postJob(formData))
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          toast.success(res?.payload?.message);
+          console.log("Data", res?.payload?.data);
+          setLoading(false);
+          navigate(-1);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error(res?.payload?.message);
+        setLoading(false);
+      });
   };
 
   return (
-    <div>
+    <div className=" m-auto flex items-center justify-center w-11/12">
       <Navbar />
+      {loading && <Loader />}
       <ReactHelmet
         title="Post a Job - Next_Hire"
         description="Easily post job openings to attract qualified candidates. Fill out the job details, including role, responsibilities, and requirements, to find the perfect fit for your team."
         canonicalUrl="http://mysite.com/post-job"
       />
 
-      <div className="flex items-center justify-center w-screen my-5 px-4 mt-20 md:px-0">
+      <div className="flex items-center justify-center w-11/12 my-5 px-4 mt-20 md:px-0">
         <form
           onSubmit={submitHandler}
           className="p-8 max-w-4xl border border-gray-200 shadow-lg rounded-md w-full"
@@ -75,7 +114,7 @@ const PostJob = () => {
                 name="title"
                 value={input.title}
                 onChange={changeEventHandler}
-                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                className="w-full max-w-md my-1"
                 required
               />
             </div>
@@ -86,7 +125,7 @@ const PostJob = () => {
                 name="description"
                 value={input.description}
                 onChange={changeEventHandler}
-                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                className="w-full max-w-md my-1"
                 required
               />
             </div>
@@ -97,7 +136,7 @@ const PostJob = () => {
                 name="requirements"
                 value={input.requirements}
                 onChange={changeEventHandler}
-                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                className="w-full max-w-md my-1"
               />
             </div>
             <div>
@@ -107,7 +146,7 @@ const PostJob = () => {
                 name="salary"
                 value={input.salary}
                 onChange={changeEventHandler}
-                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                className="w-full max-w-md my-1"
               />
             </div>
             <div>
@@ -117,7 +156,7 @@ const PostJob = () => {
                 name="location"
                 value={input.location}
                 onChange={changeEventHandler}
-                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                className="w-full max-w-md my-1"
               />
             </div>
             <div>
@@ -127,7 +166,7 @@ const PostJob = () => {
                 name="jobType"
                 value={input.jobType}
                 onChange={changeEventHandler}
-                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                className="w-full max-w-md my-1"
               />
             </div>
             <div>
@@ -137,7 +176,7 @@ const PostJob = () => {
                 name="experience"
                 value={input.experience}
                 onChange={changeEventHandler}
-                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                className="w-full max-w-md my-1"
               />
             </div>
             <div>
@@ -147,25 +186,25 @@ const PostJob = () => {
                 name="position"
                 value={input.position}
                 onChange={changeEventHandler}
-                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
+                className="w-full max-w-md my-1"
                 min="1"
               />
             </div>
-            {companyArray.length > 0 && (
+            {company?.companies?.length > 0 && (
               <div>
                 <Label>Select Company</Label>
                 <Select onValueChange={selectChangeHandler}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full max-w-md">
                     <SelectValue placeholder="Select a Company" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {companyArray.map((company) => (
+                      {company?.companies?.map((company) => (
                         <SelectItem
                           key={company._id}
-                          value={company.name.toLowerCase()}
+                          value={company.companyName.toLowerCase()}
                         >
-                          {company.name}
+                          {company.companyName}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -183,7 +222,7 @@ const PostJob = () => {
               Post New Job
             </Button>
           )}
-          {companyArray.length === 0 && (
+          {company?.companies?.length === 0 && (
             <p className="text-xs text-red-600 font-bold text-center my-3">
               *Please register a company first before posting a job
             </p>

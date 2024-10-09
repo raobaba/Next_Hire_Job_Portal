@@ -51,16 +51,24 @@ const AdminJobs = () => {
         canonicalUrl="http://mysite.com/admin-jobs"
       />
 
-      <div className="max-w-6xl mx-auto my-10 mt-20">
+      <div className="max-w-6xl mx-auto my-10 mt-20 px-4">
         <div className="flex items-center justify-between my-5">
-          <Input
-            className="w-fit"
-            placeholder="Filter by name, role"
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <Button onClick={() => navigate("/admin/jobs/create")}>
-            New Job
+          {/* Go Back Button on the left */}
+          <Button variant="outline" onClick={() => navigate(-1)}>
+            Go Back
           </Button>
+
+          <div className="flex items-center space-x-4">
+            <Input
+              className="w-full max-w-md"
+              placeholder="Filter by name, role"
+              onChange={(e) => setInput(e.target.value)}
+            />
+            {/* New Job Button on the right */}
+            <Button onClick={() => navigate("/profile/admin/jobs/create")}>
+              New Job
+            </Button>
+          </div>
         </div>
         <AdminJobsTable jobs={filteredJobs} />
       </div>
