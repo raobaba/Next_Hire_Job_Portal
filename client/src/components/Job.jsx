@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 
 const Job = ({ job }) => {
   const navigate = useNavigate();
-
   const daysAgoFunction = (mongodbTime) => {
     const createdAt = new Date(mongodbTime);
     const currentTime = new Date();
@@ -16,7 +15,7 @@ const Job = ({ job }) => {
   };
 
   return (
-    <div className="p-5 rounded-md shadow-lg bg-white border border-gray-200">
+    <div className="p-5 rounded-md shadow-lg bg-white border border-gray-200 flex flex-col h-full">
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">
           {daysAgoFunction(job?.createdAt) === 0
@@ -40,10 +39,13 @@ const Job = ({ job }) => {
         </div>
       </div>
 
-      <div>
-        <h1 className="font-bold text-lg my-2">{job?.title}</h1>
+      <div className="flex-grow">
+        <h1 className="font-bold text-lg my-2 overflow-hidden text-ellipsis whitespace-nowrap">
+          {job?.title}
+        </h1>
         <p className="text-sm text-gray-600">{job?.description}</p>
       </div>
+
       <div className="flex items-center gap-2 mt-4 flex-wrap">
         <Badge className={"text-blue-700 font-bold"} variant="ghost">
           {job?.position} Positions
@@ -52,9 +54,10 @@ const Job = ({ job }) => {
           {job?.jobType}
         </Badge>
         <Badge className={"text-[#7209b7] font-bold"} variant="ghost">
-          {job?.salary}LPA
+          {job?.salary} LPA
         </Badge>
       </div>
+
       <div className="flex items-center gap-4 mt-4 flex-wrap">
         <Button
           onClick={() => navigate(`/description/${job?._id}`)}
@@ -64,6 +67,18 @@ const Job = ({ job }) => {
         </Button>
         <Button className="bg-[#7209b7] text-white">Save For Later</Button>
       </div>
+    </div>
+  );
+};
+
+const JobList = ({ jobs }) => {
+  return (
+    <div className="flex flex-wrap gap-4">
+      {jobs.map((job) => (
+        <div className="flex-1 min-w-[300px] max-w-[400px]" key={job._id}>
+          <Job job={job} />
+        </div>
+      ))}
     </div>
   );
 };

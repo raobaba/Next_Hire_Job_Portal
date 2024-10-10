@@ -5,6 +5,10 @@ import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import ReactHelmet from "./shared/ReactHelmet";
 import { useNavigate } from "react-router-dom";
+import { getJobById } from "@/redux/slices/job.slice";
+import { useDispatch, useSelector } from "react-redux";
+import Loader from "./shared/Loader";
+
 const mockJobData = [
   {
     _id: "1",
@@ -68,7 +72,7 @@ const mockJobData = [
   },
   {
     _id: "6",
-    title: "Mobile Developer",
+    title: "Backend Developer",
     position: 2,
     jobType: "Full-time",
     salary: 11, // In LPA
@@ -80,7 +84,7 @@ const mockJobData = [
   },
   {
     _id: "7",
-    title: "Sales Executive",
+    title: "Frontend Developer",
     position: 5,
     jobType: "Full-time",
     salary: 7, // In LPA
@@ -92,7 +96,7 @@ const mockJobData = [
   },
   {
     _id: "8",
-    title: "Content Writer",
+    title: "Full Stack Developer",
     position: 3,
     jobType: "Part-time",
     salary: 5, // In LPA
@@ -105,6 +109,7 @@ const mockJobData = [
 ];
 
 const JobDescription = () => {
+  const dispatch = useDispatch();
   const params = useParams();
   const navigate = useNavigate();
   const jobId = params.id;
@@ -113,25 +118,29 @@ const JobDescription = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    dispatch(getJobById(jobId)).then((res) => {
+      if (res?.payload?.status === 200) {
+        const response = res?.payload?.job;
+        if (response) {
+          setSingleJob(response);
+          setIsApplied(
+            response.applications.some(
+              (application) => application.applicant === user?._id
+            )
+          );
+        }
+      }
+    });
+  }, [dispatch, jobId, user]);
+
+  useEffect(() => {
     const fetchUserData = () => {
-      const fetchedUser = { _id: "user-id-123" };
+      const fetchedUser = { _id: "user-id-123" }; // Replace with actual user fetching logic
       setUser(fetchedUser);
     };
 
     fetchUserData();
   }, []);
-
-  useEffect(() => {
-    const job = mockJobData.find((job) => job._id === jobId);
-    if (job) {
-      setSingleJob(job);
-      setIsApplied(
-        job.applications.some(
-          (application) => application.applicant === user?._id
-        )
-      );
-    }
-  }, [jobId, user?._id]);
 
   const applyJobHandler = () => {
     if (isApplied) return;
@@ -151,7 +160,7 @@ const JobDescription = () => {
     (job) => job.jobType === singleJob?.jobType && job._id !== singleJob?._id
   );
 
-  if (!singleJob) return <div>Loading...</div>;
+  if (!singleJob) return <Loader />;
 
   return (
     <div className="w-11/12 mx-auto md:p-8">
@@ -160,6 +169,13 @@ const JobDescription = () => {
         description="Discover detailed information about the job role, responsibilities, qualifications, and how to apply. Learn more to see if this is the right opportunity for you."
         canonicalUrl="http://mysite.com/job-details"
       />
+
+      <Button
+        onClick={() => navigate(-1)} // Go back to the previous page
+        className="mb-4 rounded-lg bg-gray-400 hover:bg-gray-500"
+      >
+        Go Back
+      </Button>
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Job Description Section */}
@@ -202,7 +218,7 @@ const JobDescription = () => {
             <JobDetail label="Description" value={singleJob.description} />
             <JobDetail
               label="Experience"
-              value={`${singleJob.experience} yrs`}
+              value={`${singleJob.experienceLevel} yrs`} // Adjusted to match your data
             />
             <JobDetail label="Salary" value={`${singleJob.salary} LPA`} />
             <JobDetail

@@ -5,27 +5,31 @@ import Job from "./Job";
 import { motion } from "framer-motion";
 import ReactHelmet from "./shared/ReactHelmet";
 import { getAllJobs } from "@/redux/slices/job.slice";
-import { useDispatch,useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import Loader from "./shared/Loader";
 
 const Jobs = () => {
   const dispatch = useDispatch();
-  const [allJobs,setAllJobs] = useState([]);
-  const [filterJobs, setFilterJobs] = useState(allJobs);
+  const [allJobs, setAllJobs] = useState([]);
+  const [filterJobs, setFilterJobs] = useState([]);
   const [searchedQuery, setSearchedQuery] = useState("");
   const [currentCategory, setCurrentCategory] = useState("all");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(()=>{
-     dispatch(getAllJobs()).then((res)=>{
-      if(res?.payload?.status === 200){
-        console.log("jobsData",res?.payload)
-        setAllJobs(res?.payload?.jobs)
+  useEffect(() => {
+    setLoading(true);
+    dispatch(getAllJobs()).then((res) => {
+      if (res?.payload?.status === 200) {
+        console.log("jobsData", res?.payload);
+        setAllJobs(res?.payload?.jobs);
+        setFilterJobs(res?.payload?.jobs); // Initialize filtered jobs as well
+        setLoading(false);
       }
-     })
-  },[dispatch])
+    });
+  }, [dispatch]);
 
-  const recommendedJobs = allJobs.filter((job) => job.position === 1); // Example filter for recommended jobs
-  const searchHistory = allJobs.filter((job) => job.salary > 15); // Example filter for trending jobs
+  const recommendedJobs = allJobs.filter((job) => job.position === 1);
+  const searchHistory = allJobs.filter((job) => job.salary > 15);
 
   useEffect(() => {
     let filteredJobs = allJobs;
@@ -42,19 +46,21 @@ const Jobs = () => {
     } else {
       if (currentCategory === "recommended") {
         filteredJobs = recommendedJobs;
-      } else if (currentCategory === "searchHistory") {
+      } else if (currentCategory === "trending") {
+        // Corrected to "trending"
         filteredJobs = searchHistory;
       } else {
-        filteredJobs = allJobs;
+        filteredJobs = allJobs; // Reset to all jobs when "all" is selected
       }
     }
 
     setFilterJobs(filteredJobs);
-  }, [searchedQuery, currentCategory]);
+  }, [searchedQuery, currentCategory, allJobs, recommendedJobs, searchHistory]);
 
   return (
     <div>
       <Navbar />
+      {loading && <Loader />}
       <ReactHelmet
         title="Job Openings - Next_Hire"
         description="Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire."
@@ -81,7 +87,10 @@ const Jobs = () => {
             {/* Stylish and Responsive Headings */}
             <div className="flex flex-col sm:flex-row items-center justify-between my-5 sm:space-x-4 space-y-3 sm:space-y-0">
               <h2
-                onClick={() => setCurrentCategory("all")}
+                onClick={() => {
+                  setCurrentCategory("all");
+                  setSearchedQuery(""); // Clear search when going back to all
+                }}
                 className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
                   currentCategory === "all" ? "text-blue-600" : "text-gray-800"
                 }`}
