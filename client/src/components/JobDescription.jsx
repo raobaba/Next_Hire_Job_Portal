@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import ReactHelmet from "./shared/ReactHelmet";
-
+import { useNavigate } from "react-router-dom";
 const mockJobData = [
   {
     _id: "1",
@@ -106,6 +106,7 @@ const mockJobData = [
 
 const JobDescription = () => {
   const params = useParams();
+  const navigate = useNavigate();
   const jobId = params.id;
   const [singleJob, setSingleJob] = useState(null);
   const [isApplied, setIsApplied] = useState(false);
@@ -145,92 +146,116 @@ const JobDescription = () => {
     toast.success("Application successful!");
   };
 
+  // Similar jobs based on job type
+  const similarJobs = mockJobData.filter(
+    (job) => job.jobType === singleJob?.jobType && job._id !== singleJob?._id
+  );
+
   if (!singleJob) return <div>Loading...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto my-10 p-4 md:p-8">
+    <div className="w-11/12 mx-auto md:p-8">
       <ReactHelmet
         title="Job Details - Next_Hire"
         description="Discover detailed information about the job role, responsibilities, qualifications, and how to apply. Learn more to see if this is the right opportunity for you."
         canonicalUrl="http://mysite.com/job-details"
       />
 
-      <div className="flex flex-col md:flex-row items-start justify-between">
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Job Description Section */}
         <div className="flex-1">
-          <h1 className="font-bold text-2xl md:text-3xl">{singleJob.title}</h1>
-          <div className="flex items-center gap-2 mt-4 flex-wrap">
-            <Badge className={"text-blue-700 font-bold"} variant="ghost">
-              {singleJob.position} Positions
-            </Badge>
-            <Badge className={"text-[#F83002] font-bold"} variant="ghost">
-              {singleJob.jobType}
-            </Badge>
-            <Badge className={"text-[#7209b7] font-bold"} variant="ghost">
-              {singleJob.salary} LPA
-            </Badge>
+          <div className="flex flex-col mb-6">
+            <h1 className="font-bold text-2xl md:text-3xl">
+              {singleJob.title}
+            </h1>
+            <div className="flex items-center gap-2 mt-4 flex-wrap">
+              <Badge className={"text-blue-700 font-bold"} variant="ghost">
+                {singleJob.position} Positions
+              </Badge>
+              <Badge className={"text-[#F83002] font-bold"} variant="ghost">
+                {singleJob.jobType}
+              </Badge>
+              <Badge className={"text-[#7209b7] font-bold"} variant="ghost">
+                {singleJob.salary} LPA
+              </Badge>
+            </div>
+          </div>
+
+          <Button
+            onClick={isApplied ? null : applyJobHandler}
+            disabled={isApplied}
+            className={`mt-4 rounded-lg ${
+              isApplied
+                ? "bg-gray-600 cursor-not-allowed"
+                : "bg-[#7209b7] hover:bg-[#5f32ad]"
+            }`}
+          >
+            {isApplied ? "Already Applied" : "Apply Now"}
+          </Button>
+
+          <h1 className="border-b-2 border-b-gray-300 font-medium py-4 mt-6">
+            Job Description
+          </h1>
+          <div className="my-4 space-y-2">
+            <JobDetail label="Role" value={singleJob.title} />
+            <JobDetail label="Location" value={singleJob.location} />
+            <JobDetail label="Description" value={singleJob.description} />
+            <JobDetail
+              label="Experience"
+              value={`${singleJob.experience} yrs`}
+            />
+            <JobDetail label="Salary" value={`${singleJob.salary} LPA`} />
+            <JobDetail
+              label="Total Applicants"
+              value={singleJob.applications.length}
+            />
+            <JobDetail
+              label="Posted Date"
+              value={singleJob.createdAt.split("T")[0]}
+            />
           </div>
         </div>
-        <Button
-          onClick={isApplied ? null : applyJobHandler}
-          disabled={isApplied}
-          className={`mt-4 md:mt-0 rounded-lg ${
-            isApplied
-              ? "bg-gray-600 cursor-not-allowed"
-              : "bg-[#7209b7] hover:bg-[#5f32ad]"
-          }`}
-        >
-          {isApplied ? "Already Applied" : "Apply Now"}
-        </Button>
-      </div>
-      <h1 className="border-b-2 border-b-gray-300 font-medium py-4 mt-6">
-        Job Description
-      </h1>
-      <div className="my-4">
-        <h1 className="font-bold my-1">
-          Role:{" "}
-          <span className="pl-4 font-normal text-gray-800">
-            {singleJob.title}
-          </span>
-        </h1>
-        <h1 className="font-bold my-1">
-          Location:{" "}
-          <span className="pl-4 font-normal text-gray-800">
-            {singleJob.location}
-          </span>
-        </h1>
-        <h1 className="font-bold my-1">
-          Description:{" "}
-          <span className="pl-4 font-normal text-gray-800">
-            {singleJob.description}
-          </span>
-        </h1>
-        <h1 className="font-bold my-1">
-          Experience:{" "}
-          <span className="pl-4 font-normal text-gray-800">
-            {singleJob.experience} yrs
-          </span>
-        </h1>
-        <h1 className="font-bold my-1">
-          Salary:{" "}
-          <span className="pl-4 font-normal text-gray-800">
-            {singleJob.salary} LPA
-          </span>
-        </h1>
-        <h1 className="font-bold my-1">
-          Total Applicants:{" "}
-          <span className="pl-4 font-normal text-gray-800">
-            {singleJob.applications.length}
-          </span>
-        </h1>
-        <h1 className="font-bold my-1">
-          Posted Date:{" "}
-          <span className="pl-4 font-normal text-gray-800">
-            {singleJob.createdAt.split("T")[0]}
-          </span>
-        </h1>
+
+        {/* Similar Jobs Section */}
+        <div className="w-full md:w-1/3 border rounded-md shadow-md p-4">
+          <h1 className="border-b-2 border-b-gray-300 font-medium py-2">
+            Similar Jobs
+          </h1>
+          <div className="max-h-[400px] overflow-y-auto mt-2 scrollbar-hidden">
+            {similarJobs.length > 0 ? (
+              <div className="space-y-4">
+                {similarJobs.map((job) => (
+                  <div
+                    key={job._id}
+                    className="p-4 border rounded-md flex flex-col"
+                  >
+                    <h2 className="font-bold text-lg">{job.title}</h2>
+                    <p className="text-gray-600">{job.location}</p>
+                    <p className="text-gray-800">{job.salary} LPA</p>
+                    <p className="text-gray-500">{job.jobType}</p>
+                    <Button
+                      onClick={() => navigate(`/job/${job._id}`)}
+                      className="mt-2 rounded-lg bg-[#7209b7] hover:bg-[#5f32ad]"
+                    >
+                      View Job
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No similar jobs found.</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
+
+const JobDetail = ({ label, value }) => (
+  <h1 className="font-bold my-1">
+    {label}: <span className="pl-4 font-normal text-gray-800">{value}</span>
+  </h1>
+);
 
 export default JobDescription;

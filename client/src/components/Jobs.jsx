@@ -4,168 +4,53 @@ import FilterCard from "./FilterCard";
 import Job from "./Job";
 import { motion } from "framer-motion";
 import ReactHelmet from "./shared/ReactHelmet";
+import { getAllJobs } from "@/redux/slices/job.slice";
+import { useDispatch,useSelector } from "react-redux";
 
-const allJobs = [
-  {
-    _id: 1,
-    title: "Frontend Developer",
-    description: "Build and optimize web applications using React.js.",
-    location: "Bangalore",
-    company: {
-      name: "TechCorp",
-      logo: "https://example.com/company1-logo.png",
-    },
-    createdAt: "2024-09-18T09:00:00Z",
-    position: 3,
-    jobType: "Full-Time",
-    salary: "12",
-  },
-  {
-    _id: 2,
-    title: "Backend Developer",
-    description: "Develop and maintain server-side APIs using Node.js.",
-    location: "Pune",
-    company: {
-      name: "InnovateX",
-      logo: "https://example.com/company2-logo.png",
-    },
-    createdAt: "2024-09-17T10:30:00Z",
-    position: 1,
-    jobType: "Full-Time",
-    salary: "18",
-  },
-  {
-    _id: 3,
-    title: "Data Scientist",
-    description: "Analyze complex data to provide actionable insights.",
-    location: "Hyderabad",
-    company: {
-      name: "DataWorks",
-      logo: "https://example.com/company3-logo.png",
-    },
-    createdAt: "2024-09-15T14:00:00Z",
-    position: 2,
-    jobType: "Full-Time",
-    salary: "22",
-  },
-  {
-    _id: 4,
-    title: "Android Developer",
-    description: "Build mobile applications for Android platforms.",
-    location: "Delhi",
-    company: {
-      name: "AppSoft",
-      logo: "https://example.com/company4-logo.png",
-    },
-    createdAt: "2024-09-19T12:00:00Z",
-    position: 4,
-    jobType: "Contract",
-    salary: "10",
-  },
-  {
-    _id: 5,
-    title: "DevOps Engineer",
-    description: "Manage infrastructure and automate deployment pipelines.",
-    location: "Mumbai",
-    company: {
-      name: "CloudGen",
-      logo: "https://example.com/company5-logo.png",
-    },
-    createdAt: "2024-09-16T08:00:00Z",
-    position: 2,
-    jobType: "Part-Time",
-    salary: "20",
-  },
-  {
-    _id: 6,
-    title: "UI/UX Designer",
-    description: "Design user-friendly interfaces and improve user experience.",
-    location: "Chennai",
-    company: {
-      name: "DesignPro",
-      logo: "https://example.com/company6-logo.png",
-    },
-    createdAt: "2024-09-13T11:45:00Z",
-    position: 1,
-    jobType: "Full-Time",
-    salary: "14",
-  },
-  {
-    _id: 7,
-    title: "Project Manager",
-    description: "Oversee project development and ensure timely delivery.",
-    location: "Kolkata",
-    company: {
-      name: "ProManage",
-      logo: "https://example.com/company7-logo.png",
-    },
-    createdAt: "2024-09-12T07:30:00Z",
-    position: 1,
-    jobType: "Full-Time",
-    salary: "25",
-  },
-  {
-    _id: 8,
-    title: "FullStack Developer",
-    description: "Work on both front-end and back-end features of web apps.",
-    location: "Bangalore",
-    company: {
-      name: "CodeCraft",
-      logo: "https://example.com/company8-logo.png",
-    },
-    createdAt: "2024-09-20T13:00:00Z",
-    position: 2,
-    jobType: "Full-Time",
-    salary: "16",
-  },
-  {
-    _id: 9,
-    title: "Machine Learning Engineer",
-    description: "Develop and optimize machine learning models.",
-    location: "Pune",
-    company: {
-      name: "AI Innovations",
-      logo: "https://example.com/company9-logo.png",
-    },
-    createdAt: "2024-09-18T15:00:00Z",
-    position: 3,
-    jobType: "Full-Time",
-    salary: "30",
-  },
-  {
-    _id: 10,
-    title: "QA Engineer",
-    description:
-      "Test software products and ensure they meet quality standards.",
-    location: "Gurgaon",
-    company: {
-      name: "TestTech",
-      logo: "https://example.com/company10-logo.png",
-    },
-    createdAt: "2024-09-14T09:30:00Z",
-    position: 2,
-    jobType: "Full-Time",
-    salary: "12",
-  },
-];
+
 const Jobs = () => {
+  const dispatch = useDispatch();
+  const [allJobs,setAllJobs] = useState([]);
   const [filterJobs, setFilterJobs] = useState(allJobs);
   const [searchedQuery, setSearchedQuery] = useState("");
+  const [currentCategory, setCurrentCategory] = useState("all");
+
+  useEffect(()=>{
+     dispatch(getAllJobs()).then((res)=>{
+      if(res?.payload?.status === 200){
+        console.log("jobsData",res?.payload)
+        setAllJobs(res?.payload?.jobs)
+      }
+     })
+  },[dispatch])
+
+  const recommendedJobs = allJobs.filter((job) => job.position === 1); // Example filter for recommended jobs
+  const searchHistory = allJobs.filter((job) => job.salary > 15); // Example filter for trending jobs
 
   useEffect(() => {
+    let filteredJobs = allJobs;
+
     if (searchedQuery) {
-      const filteredJobs = allJobs.filter((job) => {
+      filteredJobs = allJobs.filter((job) => {
         return (
           job.title.toLowerCase().includes(searchedQuery.toLowerCase()) ||
           job.description.toLowerCase().includes(searchedQuery.toLowerCase()) ||
           job.location.toLowerCase().includes(searchedQuery.toLowerCase())
         );
       });
-      setFilterJobs(filteredJobs);
+      setCurrentCategory("search");
     } else {
-      setFilterJobs(allJobs);
+      if (currentCategory === "recommended") {
+        filteredJobs = recommendedJobs;
+      } else if (currentCategory === "searchHistory") {
+        filteredJobs = searchHistory;
+      } else {
+        filteredJobs = allJobs;
+      }
     }
-  }, [searchedQuery]);
+
+    setFilterJobs(filteredJobs);
+  }, [searchedQuery, currentCategory]);
 
   return (
     <div>
@@ -182,6 +67,54 @@ const Jobs = () => {
             <FilterCard setSearchedQuery={setSearchedQuery} />
           </div>
           <div className="flex-1 h-[80vh] overflow-y-auto pb-5">
+            {/* Search Field Above Headings */}
+            <div className="my-5">
+              <input
+                type="text"
+                value={searchedQuery}
+                onChange={(e) => setSearchedQuery(e.target.value)}
+                placeholder="Search for jobs..."
+                className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            {/* Stylish and Responsive Headings */}
+            <div className="flex flex-col sm:flex-row items-center justify-between my-5 sm:space-x-4 space-y-3 sm:space-y-0">
+              <h2
+                onClick={() => setCurrentCategory("all")}
+                className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                  currentCategory === "all" ? "text-blue-600" : "text-gray-800"
+                }`}
+              >
+                All Jobs ({allJobs.length})
+              </h2>
+              <h2
+                onClick={() => setCurrentCategory("recommended")}
+                className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                  currentCategory === "recommended"
+                    ? "text-blue-600"
+                    : "text-gray-800"
+                }`}
+              >
+                Recommended ({recommendedJobs.length})
+              </h2>
+              <h2
+                onClick={() => setCurrentCategory("trending")}
+                className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                  currentCategory === "trending"
+                    ? "text-blue-600"
+                    : "text-gray-800"
+                }`}
+              >
+                Based On Search ({searchHistory.length})
+              </h2>
+              {searchedQuery && (
+                <h2 className="text-sm md:text-lg lg:text-xl font-bold text-red-500">
+                  Based on Search Results ({filterJobs.length})
+                </h2>
+              )}
+            </div>
+
             {filterJobs.length <= 0 ? (
               <span>Job not found</span>
             ) : (

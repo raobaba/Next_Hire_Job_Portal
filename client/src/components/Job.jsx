@@ -31,11 +31,11 @@ const Job = ({ job }) => {
       <div className="flex items-center gap-2 my-2">
         <Button className="p-2" variant="outline" size="icon">
           <Avatar>
-            <AvatarImage src={job?.company?.logo} />
+            <AvatarImage src={job?.company?.logo?.url} />
           </Avatar>
         </Button>
         <div>
-          <h1 className="font-medium text-lg">{job?.company?.name}</h1>
+          <h1 className="font-medium text-lg">{job?.company?.companyName}</h1>
           <p className="text-sm text-gray-500">{job?.location}</p>
         </div>
       </div>
