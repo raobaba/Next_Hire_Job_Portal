@@ -86,6 +86,7 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
   }
 
   const jobs = await Job.find(query)
+    .populate("applications")
     .populate("company")
     .sort({ createdAt: -1 });
 

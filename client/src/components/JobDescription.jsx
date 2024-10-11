@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { useParams } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import ReactHelmet from "./shared/ReactHelmet";
 import { useNavigate } from "react-router-dom";
 import { getJobById } from "@/redux/slices/job.slice";
+import { applyJob } from "@/redux/slices/application.slice";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "./shared/Loader";
 
@@ -115,44 +116,46 @@ const JobDescription = () => {
   const jobId = params.id;
   const [singleJob, setSingleJob] = useState(null);
   const [isApplied, setIsApplied] = useState(false);
-  const [user, setUser] = useState(null);
+  const user = useSelector((state) => state.user.user);
 
   useEffect(() => {
     dispatch(getJobById(jobId)).then((res) => {
       if (res?.payload?.status === 200) {
         const response = res?.payload?.job;
+        console.log(res?.payload?.job?.applications);
         if (response) {
           setSingleJob(response);
-          setIsApplied(
-            response.applications.some(
-              (application) => application.applicant === user?._id
-            )
+          const findApplications = res?.payload?.job?.applications;
+          const alreadyApplied = findApplications?.some(
+            (application) => application.applicant === user._id
           );
+          setIsApplied(alreadyApplied);
         }
       }
     });
   }, [dispatch, jobId, user]);
 
-  useEffect(() => {
-    const fetchUserData = () => {
-      const fetchedUser = { _id: "user-id-123" }; // Replace with actual user fetching logic
-      setUser(fetchedUser);
-    };
+  console.log(isApplied);
 
-    fetchUserData();
-  }, []);
+  useEffect(() => {}, []);
 
   const applyJobHandler = () => {
-    if (isApplied) return;
-
-    const updatedSingleJob = {
-      ...singleJob,
-      applications: [...singleJob.applications, { applicant: user?._id }],
-    };
-
-    setSingleJob(updatedSingleJob);
-    setIsApplied(true);
-    toast.success("Application successful!");
+    dispatch(applyJob(jobId))
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          console.log(res?.payload);
+          toast.success(res?.payload?.message);
+          setIsApplied(true);
+        } else {
+          toast.info(res?.payload?.message);
+        }
+      })
+      .catch((error) => {
+        console.log("Error:", error);
+        toast.error(
+          error?.response?.data?.message || "Failed to apply for job."
+        );
+      });
   };
 
   // Similar jobs based on job type
@@ -171,7 +174,7 @@ const JobDescription = () => {
       />
 
       <Button
-        onClick={() => navigate(-1)} // Go back to the previous page
+        onClick={() => navigate(-1)}
         className="mb-4 rounded-lg bg-gray-400 hover:bg-gray-500"
       >
         Go Back
@@ -200,13 +203,13 @@ const JobDescription = () => {
           <Button
             onClick={isApplied ? null : applyJobHandler}
             disabled={isApplied}
-            className={`mt-4 rounded-lg ${
+            className={`rounded-lg ${
               isApplied
                 ? "bg-gray-600 cursor-not-allowed"
                 : "bg-[#7209b7] hover:bg-[#5f32ad]"
             }`}
           >
-            {isApplied ? "Already Applied" : "Apply Now"}
+            {isApplied ? "Applied" : "Apply Now"}
           </Button>
 
           <h1 className="border-b-2 border-b-gray-300 font-medium py-4 mt-6">

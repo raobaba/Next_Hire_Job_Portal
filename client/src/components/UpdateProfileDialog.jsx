@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,13 +19,27 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState({
-    fullname: user?.fullname || "",
-    email: user?.email || "",
-    phoneNumber: user?.phoneNumber || "",
-    bio: user?.profile?.bio || "",
-    skills: user?.profile?.skills ? user.profile.skills.join(", ") : "", // Safely handle skills
+    fullname: "",
+    email: "",
+    phoneNumber: "",
+    bio: "",
+    skills: "",
     file: null,
   });
+
+  // useEffect to update state when the user prop changes
+  useEffect(() => {
+    if (user) {
+      setInput({
+        fullname: user.fullname || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber ? String(user.phoneNumber) : "", // Convert phone number to string
+        bio: user.profile?.bio || "",
+        skills: user.profile?.skills ? user.profile.skills.join(", ") : "",
+        file: null,
+      });
+    }
+  }, [user]); // Only runs when user prop changes
 
   // Handle form field change events
   const changeEventHandler = (e) => {
@@ -49,7 +63,7 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     formData.append("phoneNumber", input.phoneNumber);
     formData.append("bio", input.bio);
 
-    const skillsArray = input?.skills
+    const skillsArray = input.skills
       ? input.skills.split(", ").map((skill) => skill.trim())
       : [];
     formData.append("skills", skillsArray);
@@ -61,7 +75,6 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     dispatch(updateUserProfile(formData))
       .then((res) => {
         if (res?.payload?.status === 200) {
-          console.log(res.payload.data);
           toast.success("Profile updated successfully!");
           setOpen(false);
         }
@@ -150,9 +163,10 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 className="col-span-3"
               />
             </div>
+
+            {/* Conditional rendering for student role */}
             {user?.role === "student" && (
               <>
-                {" "}
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="skills" className="text-right">
                     Skills
@@ -165,6 +179,7 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                     className="col-span-3"
                   />
                 </div>
+
                 {/* Resume file input */}
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="file" className="text-right">
@@ -181,7 +196,6 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 </div>
               </>
             )}
-            {/* Skills input */}
           </div>
 
           {/* Submit button with loading state */}

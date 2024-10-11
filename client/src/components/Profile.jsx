@@ -14,8 +14,7 @@ import ReactHelmet from "./shared/ReactHelmet";
 const Profile = () => {
   const [open, setOpen] = useState(false);
   const user = useSelector((state) => state.user.user);
-  console.log("user", user);
-
+  console.log("user",user)
   return (
     <div className="min-h-screen mt-20 bg-gray-50">
       <Navbar />
@@ -95,12 +94,9 @@ const Profile = () => {
           <AppliedJobTable />
         </div>
       )}
-      {user?.role === "recruiter" && (
-         <Companies />
-        
-      )}
+      {user?.role === "recruiter" && <Companies />}
 
-      <UpdateProfileDialog open={open} setOpen={setOpen} />
+      <UpdateProfileDialog open={open} setOpen={setOpen} user={user} />
     </div>
   );
 };

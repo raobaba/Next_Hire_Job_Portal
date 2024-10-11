@@ -4,15 +4,24 @@ import { Bookmark } from "lucide-react";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Job = ({ job }) => {
   const navigate = useNavigate();
+
   const daysAgoFunction = (mongodbTime) => {
     const createdAt = new Date(mongodbTime);
     const currentTime = new Date();
     const timeDifference = currentTime - createdAt;
     return Math.floor(timeDifference / (1000 * 24 * 60 * 60));
   };
+
+  const user = useSelector((state) => state.user.user);
+
+  // Check if user has applied for the job
+  const hasApplied = job?.applications?.some(
+    (application) => application.applicant === user._id
+  );
 
   return (
     <div className="p-5 rounded-md shadow-lg bg-white border border-gray-200 flex flex-col h-full">
@@ -58,27 +67,20 @@ const Job = ({ job }) => {
         </Badge>
       </div>
 
-      <div className="flex items-center gap-4 mt-4 flex-wrap">
+      <div className="flex justify-between gap-4 mt-4 flex-wrap">
         <Button
           onClick={() => navigate(`/description/${job?._id}`)}
           variant="outline"
         >
           Details
         </Button>
-        <Button className="bg-[#7209b7] text-white">Save For Later</Button>
+        <Button
+          className="bg-[#7209b7] text-white"
+          disabled={hasApplied} // Disable if user has applied
+        >
+          {hasApplied ? "Applied" : "Apply Now"}
+        </Button>
       </div>
-    </div>
-  );
-};
-
-const JobList = ({ jobs }) => {
-  return (
-    <div className="flex flex-wrap gap-4">
-      {jobs.map((job) => (
-        <div className="flex-1 min-w-[300px] max-w-[400px]" key={job._id}>
-          <Job job={job} />
-        </div>
-      ))}
     </div>
   );
 };
