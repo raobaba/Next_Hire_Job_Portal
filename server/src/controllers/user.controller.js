@@ -56,7 +56,7 @@ const loginUser = asyncErrorHandler(async (req, res, next) => {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
-    const error = new ErrorHandler("Invalid Email", 401);
+    const error = new ErrorHandler("User does not exist. Please sign up.", 404);
     return error.sendError(res);
   }
 

@@ -1,13 +1,20 @@
-import React from "react";
+import React, { useState } from "react"; // Import useState
 import { Button } from "./ui/button";
 import { Bookmark } from "lucide-react";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { applyJob } from "@/redux/slices/application.slice"; // Import applyJob action
+import { toast } from "react-toastify"; // Import toast for notifications
 
 const Job = ({ job }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
+  const [hasApplied, setHasApplied] = useState(
+    job?.applications?.some((application) => application.applicant === user._id)
+  );
 
   const daysAgoFunction = (mongodbTime) => {
     const createdAt = new Date(mongodbTime);
@@ -16,12 +23,26 @@ const Job = ({ job }) => {
     return Math.floor(timeDifference / (1000 * 24 * 60 * 60));
   };
 
-  const user = useSelector((state) => state.user.user);
-
-  // Check if user has applied for the job
-  const hasApplied = job?.applications?.some(
-    (application) => application.applicant === user._id
-  );
+  const applyJobHandler = () => {
+    // Update hasApplied state immediately
+    setHasApplied(true);
+    
+    dispatch(applyJob(job._id)) // Dispatch applyJob action with job ID
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          toast.success(res?.payload?.message);
+        } else {
+          toast.info(res?.payload?.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error applying for job:", error);
+        toast.error(
+          error?.response?.data?.message || "Failed to apply for job."
+        );
+        setHasApplied(false); // Revert the state if the application fails
+      });
+  };
 
   return (
     <div className="p-5 rounded-md shadow-lg bg-white border border-gray-200 flex flex-col h-full">
@@ -75,7 +96,8 @@ const Job = ({ job }) => {
           Details
         </Button>
         <Button
-          className="bg-[#7209b7] text-white"
+          onClick={hasApplied ? null : applyJobHandler} // Apply directly if not applied
+          className={`bg-[#7209b7] text-white ${hasApplied ? "cursor-not-allowed" : ""}`}
           disabled={hasApplied} // Disable if user has applied
         >
           {hasApplied ? "Applied" : "Apply Now"}

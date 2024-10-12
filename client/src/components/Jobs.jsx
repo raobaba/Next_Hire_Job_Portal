@@ -15,17 +15,30 @@ const Jobs = () => {
   const [searchedQuery, setSearchedQuery] = useState("");
   const [currentCategory, setCurrentCategory] = useState("all");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // Error state
 
   useEffect(() => {
-    setLoading(true);
-    dispatch(getAllJobs()).then((res) => {
-      if (res?.payload?.status === 200) {
-        console.log("jobsData", res?.payload);
-        setAllJobs(res?.payload?.jobs);
-        setFilterJobs(res?.payload?.jobs); // Initialize filtered jobs as well
+    const fetchJobs = async () => {
+      setLoading(true);
+      setError(null); // Reset error state before fetching
+      try {
+        const res = await dispatch(getAllJobs());
+        if (res?.payload?.status === 200) {
+          console.log("jobsData", res?.payload);
+          setAllJobs(res?.payload?.jobs);
+          setFilterJobs(res?.payload?.jobs); // Initialize filtered jobs as well
+        } else {
+          setError("Failed to load jobs."); // Handle unexpected response status
+        }
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+        setError("An error occurred while fetching jobs.");
+      } finally {
         setLoading(false);
       }
-    });
+    };
+
+    fetchJobs();
   }, [dispatch]);
 
   const recommendedJobs = allJobs.filter((job) => job.position === 1);
@@ -47,7 +60,6 @@ const Jobs = () => {
       if (currentCategory === "recommended") {
         filteredJobs = recommendedJobs;
       } else if (currentCategory === "trending") {
-        // Corrected to "trending"
         filteredJobs = searchHistory;
       } else {
         filteredJobs = allJobs; // Reset to all jobs when "all" is selected
@@ -61,6 +73,9 @@ const Jobs = () => {
     <div>
       <Navbar />
       {loading && <Loader />}
+      {error && (
+        <div className="text-red-500 text-center my-4">{error}</div> // Display error message
+      )}
       <ReactHelmet
         title="Job Openings - Next_Hire"
         description="Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire."

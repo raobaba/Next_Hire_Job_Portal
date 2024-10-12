@@ -39,6 +39,14 @@ const postJob = asyncErrorHandler(async (req, res) => {
     const error = new ErrorHandler("Company not found", 404);
     return error.sendError(res);
   }
+
+  if (company.userId.toString() !== userId) {
+    const error = new ErrorHandler(
+      "You do not have permission to post jobs for this company.",
+      403
+    );
+    return error.sendError(res);
+  }
   const companyName = company.companyName;
 
   const job = await Job.create({

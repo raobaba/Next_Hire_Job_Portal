@@ -175,7 +175,7 @@ const JobDescription = () => {
 
       <Button
         onClick={() => navigate(-1)}
-        className="mb-4 rounded-lg bg-gray-400 hover:bg-gray-500"
+        className="mb-2 rounded-lg bg-gray-400 hover:bg-gray-500"
       >
         Go Back
       </Button>
@@ -183,11 +183,11 @@ const JobDescription = () => {
       <div className="flex flex-col md:flex-row gap-6">
         {/* Job Description Section */}
         <div className="flex-1">
-          <div className="flex flex-col mb-6">
+          <div className="flex flex-col mb-2">
             <h1 className="font-bold text-2xl md:text-3xl">
               {singleJob.title}
             </h1>
-            <div className="flex items-center gap-2 mt-4 flex-wrap">
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
               <Badge className={"text-blue-700 font-bold"} variant="ghost">
                 {singleJob.position} Positions
               </Badge>
@@ -236,11 +236,11 @@ const JobDescription = () => {
         </div>
 
         {/* Similar Jobs Section */}
-        <div className="w-full md:w-1/3 border rounded-md shadow-md p-4">
+        <div className="w-full md:w-1/3 border border-black rounded-md shadow-md p-4">
           <h1 className="border-b-2 border-b-gray-300 font-medium py-2">
             Similar Jobs
           </h1>
-          <div className="max-h-[400px] overflow-y-auto mt-2 scrollbar-hidden">
+          <div className="max-h-[400px] overflow-y-auto mt-1 scrollbar-hidden">
             {similarJobs.length > 0 ? (
               <div className="space-y-4">
                 {similarJobs.map((job) => (

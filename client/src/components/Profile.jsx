@@ -14,7 +14,8 @@ import ReactHelmet from "./shared/ReactHelmet";
 const Profile = () => {
   const [open, setOpen] = useState(false);
   const user = useSelector((state) => state.user.user);
-  console.log("user",user)
+  console.log("user", user);
+
   return (
     <div className="min-h-screen mt-20 bg-gray-50">
       <Navbar />
@@ -56,6 +57,8 @@ const Profile = () => {
             <span className="text-gray-800">{user.phoneNumber}</span>
           </div>
         </div>
+
+        {/* Conditional Rendering for Skills and Resume */}
         {user.role === "student" && (
           <>
             <div className="my-5">
@@ -88,9 +91,11 @@ const Profile = () => {
           </>
         )}
       </div>
+
+      {/* Conditional Rendering for Applied Jobs and Companies */}
       {user?.role === "student" && (
         <div className="max-w-4xl mx-auto bg-white rounded-2xl my-5 p-6 sm:p-8">
-          <h1 className="font-bold text-lg my-5">Applied Jobs</h1>
+          <h1 className="font-bold text-lg text-center my-5">Applied Jobs</h1>
           <AppliedJobTable />
         </div>
       )}
