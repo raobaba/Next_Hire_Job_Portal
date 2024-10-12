@@ -3,13 +3,29 @@ import Navbar from "../shared/Navbar";
 import ApplicantsTable from "./ApplicantsTable";
 import { useParams } from "react-router-dom";
 import ReactHelmet from "../shared/ReactHelmet";
+import { getApplicants } from "@/redux/slices/application.slice";
+import { useDispatch } from "react-redux";
+import Loader from "../shared/Loader";
 
 const Applicants = () => {
-  const params = useParams();
+  const { id } = useParams();
+  const dispatch = useDispatch();
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
+  useEffect(() => {
+    dispatch(getApplicants(id))
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          setApplicants(res.payload.applicants || []);
+          setLoading(false);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, [dispatch, id]);
 
   return (
     <div>
@@ -24,7 +40,7 @@ const Applicants = () => {
         <h1 className="font-bold text-xl my-5">
           Applicants {loading ? "..." : applicants.length}
         </h1>
-        <ApplicantsTable applicants={applicants} loading={loading} />
+        {loading ? <Loader /> : <ApplicantsTable applicants={applicants} />}
       </div>
     </div>
   );

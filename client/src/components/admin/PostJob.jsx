@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCompanies } from "@/redux/slices/company.slice";
 import { postJob } from "@/redux/slices/job.slice";
 import Loader from "../shared/Loader";
+
 const PostJob = () => {
   const dispatch = useDispatch();
   const [company, setCompany] = useState([]);
@@ -42,12 +43,12 @@ const PostJob = () => {
   };
 
   const selectChangeHandler = (value) => {
-    const selectedCompany = company.companies.find(
-      (company) => company.companyName.toLowerCase() === value
+    const selectedCompany = company?.companies?.find(
+      (company) => company.companyName === value // Remove lowercase comparison
     );
     setInput({
       ...input,
-      companyId: selectedCompany._id,
+      companyId: selectedCompany?._id, // Use optional chaining for safety
     });
   };
 
@@ -59,41 +60,35 @@ const PostJob = () => {
     });
   }, [dispatch]);
 
-  console.log(company);
-
   const submitHandler = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("title", input.title);
-    formData.append("description", input.description);
-    formData.append("requirements", input.requirements);
-    formData.append("salary", input.salary);
-    formData.append("location", input.location);
-    formData.append("jobType", input.jobType);
-    formData.append("experienceLevel", input.experience);
-    formData.append("position", input.position);
-    formData.append("companyId", input.companyId);
     setLoading(true);
+
+    const formData = {
+      ...input,
+    };
+
     dispatch(postJob(formData))
       .then((res) => {
         if (res?.payload?.status === 200) {
           toast.success(res?.payload?.message);
-          console.log("Data", res?.payload?.data);
           setLoading(false);
           navigate(-1);
+        } else {
+          toast.error("An error occurred while posting the job.");
+          setLoading(false);
         }
       })
       .catch((error) => {
-        console.log(error);
-        toast.error(res?.payload?.message);
+        console.error(error);
+        toast.error("An unexpected error occurred."); // Avoid accessing res inside catch
         setLoading(false);
       });
   };
 
   return (
-    <div className=" m-auto flex items-center justify-center w-11/12">
+    <div className="m-auto flex items-center justify-center w-11/12">
       <Navbar />
-      {loading && <Loader />}
       <ReactHelmet
         title="Post a Job - Next_Hire"
         description="Easily post job openings to attract qualified candidates. Fill out the job details, including role, responsibilities, and requirements, to find the perfect fit for your team."
@@ -201,7 +196,7 @@ const PostJob = () => {
                       {company?.companies?.map((company) => (
                         <SelectItem
                           key={company._id}
-                          value={company.companyName.toLowerCase()}
+                          value={company.companyName} // Do not lowercase here
                         >
                           {company.companyName}
                         </SelectItem>

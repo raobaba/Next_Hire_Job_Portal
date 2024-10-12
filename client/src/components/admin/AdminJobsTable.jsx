@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Table,
   TableBody,
@@ -12,41 +12,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Edit2, Eye, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
-import { useDispatch } from "react-redux";
-import { getAdminJobs } from "@/redux/slices/job.slice";
-import Loader from "../shared/Loader";
 
-const AdminJobsTable = ({ searchJobByText }) => {
-  const dispatch = useDispatch();
-  const [filterJobs, setFilterJobs] = useState([]);
-  const [loading, setLoading] = useState(false);
+const AdminJobsTable = ({ jobs }) => {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    dispatch(getAdminJobs()).then((res) => {
-      if (res?.payload?.status === 200) {
-        const jobs = res?.payload?.jobs || [];
-        const filteredJobs = jobs.filter((job) => {
-          if (!searchJobByText) {
-            return true;
-          }
-          return (
-            job.title.toLowerCase().includes(searchJobByText.toLowerCase()) ||
-            (job.company &&
-              job.company.companyName
-                .toLowerCase()
-                .includes(searchJobByText.toLowerCase()))
-          );
-        });
-        setFilterJobs(filteredJobs);
-      }
-    });
-  }, [dispatch, searchJobByText]);
 
   return (
     <div className="max-w-6xl mx-auto p-4">
-      {loading && <Loader />}
-      {filterJobs.length > 0 ? (
+      {jobs.length > 0 ? (
         <Table>
           <TableCaption>A list of your recently posted jobs</TableCaption>
           <TableHeader>
@@ -58,7 +30,7 @@ const AdminJobsTable = ({ searchJobByText }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filterJobs.map((job) => (
+            {jobs.map((job) => (
               <TableRow
                 key={job._id}
                 className="hover:bg-gray-100 transition-all"

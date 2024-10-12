@@ -42,7 +42,7 @@ export const getApplicants = createAsyncThunk(
   async (jobId, { rejectWithValue }) => {
     try {
       const response = await getApplicantsApi(jobId);
-      return response.data.applicants;
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data || "Failed to fetch applicants"

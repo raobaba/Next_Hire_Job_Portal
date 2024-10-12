@@ -5,46 +5,50 @@ import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 import AdminJobsTable from "./AdminJobsTable";
 import ReactHelmet from "../shared/ReactHelmet";
-
-const sampleJobs = [
-  {
-    id: 1,
-    title: "Software Engineer",
-    company: "Company A",
-    location: "Remote",
-  },
-  {
-    id: 2,
-    title: "Product Manager",
-    company: "Company B",
-    location: "On-site",
-  },
-  { id: 3, title: "Data Scientist", company: "Company C", location: "Hybrid" },
-  // Add more sample jobs as needed
-];
+import Loader from "../shared/Loader";
+import { useDispatch } from "react-redux";
+import { getAdminJobs } from "@/redux/slices/job.slice";
 
 const AdminJobs = () => {
   const [input, setInput] = useState("");
-  const [filteredJobs, setFilteredJobs] = useState(sampleJobs);
+  const [jobs, setJobs] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
+    // Fetch jobs when component mounts
+    dispatch(getAdminJobs()).then((res) => {
+      if (res?.payload?.status === 200) {
+        setJobs(res?.payload?.jobs || []);
+        setFilteredJobs(res?.payload?.jobs || []);
+      }
+      setLoading(false);
+    });
+  }, [dispatch]);
+
+  useEffect(() => {
+    // Filter jobs based on input
     if (input) {
       setFilteredJobs(
-        sampleJobs.filter(
+        jobs.filter(
           (job) =>
             job.title.toLowerCase().includes(input.toLowerCase()) ||
-            job.company.toLowerCase().includes(input.toLowerCase())
+            job.company?.companyName
+              .toLowerCase()
+              .includes(input.toLowerCase())
         )
       );
     } else {
-      setFilteredJobs(sampleJobs);
+      setFilteredJobs(jobs);
     }
-  }, [input]);
+  }, [input, jobs]);
 
   return (
     <div>
       <Navbar />
+      {loading && <Loader />}
       <ReactHelmet
         title="Admin Jobs - Next_Hire"
         description="Browse a variety of administrative job opportunities across different sectors. Find roles that match your skills in organization, communication, and management."
@@ -53,7 +57,6 @@ const AdminJobs = () => {
 
       <div className="max-w-6xl mx-auto my-10 mt-20 px-4">
         <div className="flex items-center justify-between my-5">
-          {/* Go Back Button on the left */}
           <Button variant="outline" onClick={() => navigate(-1)}>
             Go Back
           </Button>
@@ -62,9 +65,9 @@ const AdminJobs = () => {
             <Input
               className="w-full max-w-md"
               placeholder="Filter by name, role"
+              value={input}
               onChange={(e) => setInput(e.target.value)}
             />
-            {/* New Job Button on the right */}
             <Button onClick={() => navigate("/profile/admin/jobs/create")}>
               New Job
             </Button>

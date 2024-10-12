@@ -8,17 +8,23 @@ import ReactHelmet from "../shared/ReactHelmet";
 import { getCompanies } from "@/redux/slices/company.slice";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
+import Loader from "../shared/Loader";
 
 const Companies = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [input, setInput] = useState("");
   const [companies, setCompanies] = useState([]);
+  const [isloading, setIsLoading] = useState(false);
   useEffect(() => {
+    setIsLoading(true);
     dispatch(getCompanies()).then((res) => {
       if (res?.payload?.status === 200) {
         console.log(res?.payload);
+        setIsLoading(false);
         setCompanies(res?.payload);
+      } else {
+        setIsLoading(false);
       }
     });
   }, [dispatch]);
@@ -28,6 +34,7 @@ const Companies = () => {
   return (
     <div>
       <Navbar />
+      {isloading && <Loader />}
       <ReactHelmet
         title="Companies - Next_Hire"
         description="Explore a list of companies hiring in your area. Learn about company cultures, available positions, and how to apply. Find your next workplace with Next_Hire."
