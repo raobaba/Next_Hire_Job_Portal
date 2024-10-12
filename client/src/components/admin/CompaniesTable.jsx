@@ -1,20 +1,9 @@
 import React, { useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import { Avatar, AvatarImage } from "../ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Edit2, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { getCompanies } from "@/redux/slices/company.slice";
+import { Avatar, AvatarImage } from "../ui/avatar";
+import { toast } from "react-toastify";
 
 const CompaniesTable = () => {
   const dispatch = useDispatch();
@@ -33,74 +22,80 @@ const CompaniesTable = () => {
     }
   }, [dispatch, companies]);
 
-  const handleJobDetails = () => {
-    navigate("/profile/admin/jobs");
-  };
-
   return (
     <div className="container mx-auto p-4">
-      <div className="overflow-x-auto">
-        <Table className="min-w-full">
-          <TableCaption>
-            A list of your recent registered companies
-          </TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Logo</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {companies && companies.length > 0 ? (
-              companies.map((company) => (
-                <TableRow
-                  key={company._id}
-                  className="cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all duration-200 ease-in-out mb-4 rounded-lg"
-                  onClick={handleJobDetails}
+      {companies && companies.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {companies.map((company) => (
+            <div
+              key={company._id}
+              className="bg-white rounded-lg shadow-lg p-6 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ease-in-out flex flex-col justify-between h-80 w-full"
+              style={{ minHeight: "320px", maxWidth: "100%" }}
+            >
+              {/* Company Logo */}
+              <div className="flex justify-center mb-4">
+                <Avatar className="w-20 h-20">
+                  <AvatarImage src={company?.logo?.url} />
+                </Avatar>
+              </div>
+
+              {/* Company Name */}
+              <h2 className="text-lg font-bold text-center mb-2">
+                {company.companyName}
+              </h2>
+
+              {/* Company Description */}
+              <p className="text-gray-600 text-sm text-center mb-4 overflow-hidden overflow-ellipsis">
+                {company.description.length > 80
+                  ? `${company.description.slice(0, 80)}...`
+                  : company.description}
+              </p>
+
+              {/* Location */}
+              <div className="text-center text-gray-500 text-sm mb-2">
+                <span className="font-semibold">Location: </span>
+                {company.location}
+              </div>
+
+              {/* Website */}
+              <div className="text-center">
+                <a
+                  href={company.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800"
                 >
-                  <TableCell className="p-4">
-                    <Avatar>
-                      <AvatarImage src={company?.logo?.url} />
-                    </Avatar>
-                  </TableCell>
-                  <TableCell className="p-4">{company.companyName}</TableCell>
-                  <TableCell className="p-4">
-                    {company.createdAt
-                      ? company.createdAt.split("T")[0]
-                      : "No date available"}
-                  </TableCell>
-                  <TableCell className="p-4 text-right cursor-pointer">
-                    <Popover>
-                      <PopoverTrigger>
-                        <MoreHorizontal />
-                      </PopoverTrigger>
-                      <PopoverContent className="w-32">
-                        <div
-                          onClick={() =>
-                            navigate(`/profile/admin/companies/${company._id}`)
-                          }
-                          className="flex items-center gap-2 w-fit cursor-pointer"
-                        >
-                          <Edit2 className="w-4" />
-                          <span>Edit</span>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan="4" className="text-center p-4">
-                  No companies found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                  Visit Website
+                </a>
+              </div>
+
+              {/* Action: Go to Company Details */}
+              <div className="mt-4 flex justify-between">
+                <button
+                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-300"
+                  onClick={() =>
+                    navigate(`/profile/admin/companies/${company._id}`)
+                  }
+                >
+                  View Jobs
+                </button>
+                <button
+                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-300"
+                  onClick={() =>
+                    navigate(`/profile/admin/companies/${company._id}`)
+                  }
+                >
+                  Updated
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center p-6">
+          <p>No companies found.</p>
+        </div>
+      )}
     </div>
   );
 };

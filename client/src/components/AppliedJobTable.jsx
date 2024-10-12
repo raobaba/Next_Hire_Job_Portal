@@ -1,18 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
-import { Badge } from "./ui/badge";
 import { getAppliedJobs } from "@/redux/slices/application.slice";
 import Loader from "./shared/Loader";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "./ui/badge";
 
 const AppliedJobTable = () => {
   const dispatch = useDispatch();
@@ -26,19 +17,17 @@ const AppliedJobTable = () => {
   useEffect(() => {
     const fetchAppliedJobs = () => {
       setLoading(true);
-      setError(null); // Reset error state before fetching
+      setError(null);
 
       dispatch(getAppliedJobs())
         .then((res) => {
           if (res?.payload?.status === 200) {
-            console.log("response", res?.payload);
             setAppliedJobs(res.payload.applications);
           } else {
             setError("Failed to load applied jobs.");
           }
         })
         .catch((error) => {
-          console.error("Error fetching applied jobs:", error);
           setError("An error occurred while fetching your applied jobs.");
         })
         .finally(() => {
@@ -46,20 +35,19 @@ const AppliedJobTable = () => {
         });
     };
 
-    // Only fetch jobs if application doesn't have jobs loaded yet
     if (!application?.applications?.length) {
       fetchAppliedJobs();
     } else {
-      setAppliedJobs(application.applications); // Use the already loaded jobs
+      setAppliedJobs(application.applications);
     }
-  }, [dispatch]); // Use length in dependency
+  }, [dispatch, application]);
 
-  const handleRowClick = (jobId) => {
+  const handleCardClick = (jobId) => {
     navigate(`/description/${jobId}`);
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div className="container mx-auto p-4">
       {loading && <Loader />}
       {appliedJobs.length === 0 ? (
         <div className="text-center py-4">
@@ -69,51 +57,71 @@ const AppliedJobTable = () => {
           </h2>
         </div>
       ) : (
-        <Table>
-          <TableCaption>A list of your applied jobs</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Job Role</TableHead>
-              <TableHead>Company</TableHead>
-              <TableHead className="text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {appliedJobs.map((appliedJob) => (
-              <TableRow
-                key={appliedJob?._id}
-                onClick={() => handleRowClick(appliedJob?.job?._id)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                <TableCell className="whitespace-nowrap">
-                  {appliedJob?.createdAt?.split("T")[0]}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {appliedJob?.job?.title}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {appliedJob?.job?.company?.companyName}
-                </TableCell>
-                <TableCell className="text-right whitespace-nowrap">
-                  <Badge
-                    className={`${
-                      appliedJob?.status === "rejected"
-                        ? "bg-red-400"
-                        : appliedJob?.status === "pending"
-                        ? "bg-gray-400"
-                        : "bg-green-400"
-                    }`}
-                  >
-                    {appliedJob?.status?.toUpperCase()}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {appliedJobs.map((appliedJob) => (
+            <div
+              key={appliedJob?._id}
+              className="bg-white rounded-lg shadow-lg p-4 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ease-in-out flex flex-col justify-between h-80 w-full" // Increased height to h-80
+              onClick={() => handleCardClick(appliedJob?.job?._id)}
+            >
+              {/* Company Logo */}
+              <div className="flex justify-center mb-3">
+                <img
+                  src={appliedJob?.job?.company?.logo?.url}
+                  alt={appliedJob?.job?.company?.companyName}
+                  className="w-16 h-16 object-cover rounded-full"
+                />
+              </div>
+
+              {/* Job Title and Company */}
+              <h3 className="text-md font-bold text-center mb-2">
+                {appliedJob?.job?.title}
+              </h3>
+              <p className="text-gray-600 text-xs text-center mb-2">
+                {appliedJob?.job?.company?.companyName} -{" "}
+                {appliedJob?.job?.location}
+              </p>
+
+              {/* Job Description */}
+              <p className="text-gray-500 text-xs mb-2">
+                {appliedJob?.job?.description.slice(0, 60)}...
+              </p>
+
+              {/* Additional Info: Salary, Experience, and Requirements */}
+              <div className="text-gray-700 text-xs mb-2 flex-grow">
+                <p>
+                  <strong>Salary:</strong> $
+                  {appliedJob?.job?.salary.toLocaleString()}
+                </p>
+                <p>
+                  <strong>Experience:</strong>{" "}
+                  {appliedJob?.job?.experienceLevel} years
+                </p>
+                <p>
+                  <strong>Key Skills:</strong>{" "}
+                  {appliedJob?.job?.requirements.slice(0, 3).join(", ")}...
+                </p>
+              </div>
+
+              {/* Status Badge */}
+              <div className="text-center">
+                <Badge
+                  className={`${
+                    appliedJob?.status === "rejected"
+                      ? "bg-red-400"
+                      : appliedJob?.status === "pending"
+                      ? "bg-gray-400"
+                      : "bg-green-400"
+                  }`}
+                >
+                  {appliedJob?.status?.toUpperCase()}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
-      {error && <div className="text-red-500">{error}</div>}
+      {error && <div className="text-red-500 mt-4">{error}</div>}
     </div>
   );
 };
