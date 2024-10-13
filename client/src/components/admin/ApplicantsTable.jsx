@@ -1,16 +1,42 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // To enable navigation
-
-const shortlistingStatus = [
-  { label: "Accepted", color: "bg-green-500" },
-  { label: "Rejected", color: "bg-red-500" },
-];
+import { updateApplicationStatus } from "@/redux/slices/application.slice"; // Importing the action
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 const ApplicantsTable = ({ applicants }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate(); // Hook to navigate back
 
-  const statusHandler = async (status, id) => {
-    // Handle accept/reject logic here
+  // State to track accepted/rejected applicants
+  const [applicantActions, setApplicantActions] = useState({});
+
+  useEffect(() => {
+    // Initialize actions for applicants based on their current status
+    const initialActions = {};
+    applicants.forEach((item) => {
+      initialActions[item._id] =
+        item.status.charAt(0).toUpperCase() + item.status.slice(1); // Capitalize status
+    });
+    setApplicantActions(initialActions);
+  }, [applicants]);
+
+  const statusHandler = (action, id) => {
+    const status = action === "accept" ? "Accepted" : "Rejected";
+    dispatch(updateApplicationStatus({ applicationId: id, status })).then(
+      (res) => {
+        if (res?.payload?.status === 200) {
+          // Update local state to reflect the new action taken
+          setApplicantActions((prevActions) => ({
+            ...prevActions,
+            [id]: status, // Set action taken for the specific applicant
+          }));
+          toast.success(`Application ${status} successfully!`);
+        } else {
+          toast.error(`Failed to update application status!`);
+        }
+      }
+    );
   };
 
   return (
@@ -18,7 +44,7 @@ const ApplicantsTable = ({ applicants }) => {
       {/* Go Back Button */}
       <div className="mb-4">
         <button
-          onClick={() => navigate(-1)} // Navigate back to the previous page
+          onClick={() => navigate(-1)}
           className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
         >
           Go Back
@@ -44,12 +70,10 @@ const ApplicantsTable = ({ applicants }) => {
                 <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
               )}
               <div className="truncate">
-                {/* Added truncate class to ensure text doesn't overflow */}
                 <h2 className="font-bold text-lg">
                   {item.applicant?.fullname}
                 </h2>
                 <p className="text-gray-600 overflow-hidden text-ellipsis whitespace-nowrap">
-                  {/* Ensured email is properly styled */}
                   {item.applicant?.email}
                 </p>
               </div>
@@ -57,8 +81,6 @@ const ApplicantsTable = ({ applicants }) => {
 
             {/* Applicant Details */}
             <div className="flex-grow mb-2">
-              {" "}
-              {/* Added flex-grow */}
               <div>
                 <strong>Contact:</strong> {item.applicant?.phoneNumber || "N/A"}
               </div>
@@ -92,17 +114,34 @@ const ApplicantsTable = ({ applicants }) => {
 
             {/* Action Buttons */}
             <div className="mt-auto flex justify-between space-x-3 mt-4">
-              {" "}
-              {/* mt-auto added */}
-              {shortlistingStatus.map((status) => (
-                <button
-                  key={status.label}
-                  onClick={() => statusHandler(status.label, item._id)}
-                  className={`text-white px-4 py-2 rounded ${status.color}`}
-                >
-                  {status.label}
-                </button>
-              ))}
+              {/* Render buttons based on applicant actions */}
+              <button
+                onClick={() => statusHandler("accept", item._id)}
+                className={`text-white px-4 py-2 rounded ${
+                  applicantActions[item._id] === "Accepted"
+                    ? "bg-green-500"
+                    : "bg-blue-500"
+                }`}
+                disabled={applicantActions[item._id] === "Rejected"} // Disable if rejected
+              >
+                {applicantActions[item._id] === "Accepted"
+                  ? "Accepted"
+                  : "Accept"}
+              </button>
+
+              <button
+                onClick={() => statusHandler("reject", item._id)}
+                className={`text-white px-4 py-2 rounded ${
+                  applicantActions[item._id] === "Rejected"
+                    ? "bg-red-500"
+                    : "bg-blue-500"
+                }`}
+                disabled={applicantActions[item._id] === "Accepted"} // Disable if accepted
+              >
+                {applicantActions[item._id] === "Rejected"
+                  ? "Rejected"
+                  : "Reject"}
+              </button>
             </div>
           </div>
         ))}

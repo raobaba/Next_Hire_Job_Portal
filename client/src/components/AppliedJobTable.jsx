@@ -40,7 +40,7 @@ const AppliedJobTable = () => {
     } else {
       setAppliedJobs(application.applications);
     }
-  }, [dispatch, application]);
+  }, [dispatch]);
 
   const handleCardClick = (jobId) => {
     navigate(`/description/${jobId}`);
@@ -61,8 +61,7 @@ const AppliedJobTable = () => {
           {appliedJobs.map((appliedJob) => (
             <div
               key={appliedJob?._id}
-              className="bg-white rounded-lg shadow-lg p-4 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ease-in-out flex flex-col justify-between h-80 w-full" // Increased height to h-80
-              onClick={() => handleCardClick(appliedJob?.job?._id)}
+              className="bg-white rounded-lg shadow-lg p-4 hover:shadow-2xl flex flex-col justify-between h-80 w-full" // Increased height to h-80
             >
               {/* Company Logo */}
               <div className="flex justify-center mb-3">
@@ -104,9 +103,15 @@ const AppliedJobTable = () => {
               </div>
 
               {/* Status Badge */}
-              <div className="text-center">
+              <div className="flex justify-between text-center">
+                <button
+                  className="bg-blue-500 text-white rounded-xl px-4 py-2" // Changed rounded-3xl to rounded-xl
+                  onClick={() => handleCardClick(appliedJob?.job?._id)}
+                >
+                  Job Details
+                </button>
                 <Badge
-                  className={`${
+                  className={`rounded-xl ${
                     appliedJob?.status === "rejected"
                       ? "bg-red-400"
                       : appliedJob?.status === "pending"
