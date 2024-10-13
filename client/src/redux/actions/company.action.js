@@ -18,6 +18,11 @@ export const getCompanyByIdApi = async (companyId) => {
   return await fetchFromApiServer("GET", url);
 };
 
+export const getJobsByCompanyApi = async(companyId)=>{
+  const url = `api/v1/company/getJob/${companyId}`;
+  return await fetchFromApiServer('GET',url);
+}
+
 // Update company API
 export const updateCompanyApi = async (companyId, formData) => {
   const url = `api/v1/company/update/${companyId}`;

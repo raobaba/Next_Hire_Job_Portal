@@ -74,7 +74,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/profile/admin/jobs",
+    path: "/profile/admin/jobs/:id",
     element: (
       <ProtectedRoute>
         <AdminJobs />

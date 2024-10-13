@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../shared/Navbar";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AdminJobsTable from "./AdminJobsTable";
 import ReactHelmet from "../shared/ReactHelmet";
 import Loader from "../shared/Loader";
 import { useDispatch } from "react-redux";
-import { getAdminJobs } from "@/redux/slices/job.slice";
+import { getJobsByCompany } from "@/redux/slices/company.slice";
 
 const AdminJobs = () => {
+  const { id } = useParams();
   const [input, setInput] = useState("");
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
@@ -18,15 +19,15 @@ const AdminJobs = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Fetch jobs when component mounts
-    dispatch(getAdminJobs()).then((res) => {
+    // Fetch jobs by company when component mounts
+    dispatch(getJobsByCompany(id)).then((res) => {
       if (res?.payload?.status === 200) {
         setJobs(res?.payload?.jobs || []);
         setFilteredJobs(res?.payload?.jobs || []);
       }
       setLoading(false);
     });
-  }, [dispatch]);
+  }, [dispatch, id]);
 
   useEffect(() => {
     // Filter jobs based on input
@@ -35,9 +36,7 @@ const AdminJobs = () => {
         jobs.filter(
           (job) =>
             job.title.toLowerCase().includes(input.toLowerCase()) ||
-            job.company?.companyName
-              .toLowerCase()
-              .includes(input.toLowerCase())
+            job.company?.companyName.toLowerCase().includes(input.toLowerCase())
         )
       );
     } else {

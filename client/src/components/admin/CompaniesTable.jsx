@@ -73,9 +73,7 @@ const CompaniesTable = () => {
               <div className="mt-4 flex justify-between">
                 <button
                   className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-300"
-                  onClick={() =>
-                    navigate(`/profile/admin/companies/${company._id}`)
-                  }
+                  onClick={() => navigate(`/profile/admin/jobs/${company._id}`)}
                 >
                   View Jobs
                 </button>

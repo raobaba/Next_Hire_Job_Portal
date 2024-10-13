@@ -1,4 +1,5 @@
 const Company = require("../models/company.model");
+const Job = require("../models/job.model");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const cloudinary = require("cloudinary");
 const ErrorHandler = require("../utils/errorHandler");
@@ -64,7 +65,6 @@ const getCompany = asyncErrorHandler(async (req, res, next) => {
 const getCompanyById = asyncErrorHandler(async (req, res, next) => {
   const companyId = req.params.id;
   const company = await Company.findById(companyId);
-
   if (!company) {
     const error = new ErrorHandler("Company not found", 404);
     return error.sendError(res);
@@ -72,6 +72,32 @@ const getCompanyById = asyncErrorHandler(async (req, res, next) => {
 
   return res.status(200).json({
     company,
+    success: true,
+    status: 200,
+  });
+});
+
+// Get Jobs by Company ID
+const getJobsByCompanyId = asyncErrorHandler(async (req, res, next) => {
+  const companyId = req.params.id; // Get the company ID from the request parameters
+  const company = await Company.findById(companyId);
+
+  if (!company) {
+    const error = new ErrorHandler("Company not found", 404);
+    return error.sendError(res);
+  }
+  const jobs = await Job.find({ company: companyId })
+    .populate("applications")
+    .populate("company")
+    .sort({ createdAt: -1 });
+
+  if (!jobs.length) {
+    const error = new ErrorHandler("No jobs found for this company", 404);
+    return error.sendError(res);
+  }
+
+  return res.status(200).json({
+    jobs,
     success: true,
     status: 200,
   });
@@ -123,4 +149,10 @@ const updateCompany = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-module.exports = { registerCompany, getCompany, getCompanyById, updateCompany };
+module.exports = {
+  registerCompany,
+  getCompany,
+  getCompanyById,
+  getJobsByCompanyId,
+  updateCompany,
+};

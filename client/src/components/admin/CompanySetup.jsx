@@ -16,7 +16,6 @@ const CompanySetup = () => {
   const params = useParams();
   const navigate = useNavigate();
 
-  // Separate state variables for each field
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [website, setWebsite] = useState("");
@@ -27,16 +26,17 @@ const CompanySetup = () => {
 
   const fetchCompanyData = () => {
     if (params.id && !isBackNavigation) {
-      setLoading(true); // Start loader before fetching data
+      setLoading(true); 
       dispatch(getCompanyById(params.id))
         .then((res) => {
           const company = res?.payload.company;
+          console.log(company);
           if (company) {
             setName(company.companyName || "");
             setDescription(company.description || "");
             setWebsite(company.website || "");
             setLocation(company.location || "");
-            setLogo(null); // Don't pre-populate file input with logo
+            setLogo(null); 
           } else {
             toast.error("Failed to fetch company data.");
           }
@@ -73,10 +73,10 @@ const CompanySetup = () => {
     formData.append("location", location);
 
     if (logo) {
-      formData.append("logo", logo); // Ensure the logo is appended
+      formData.append("logo", logo); 
     }
 
-    setLoading(true); // Start loader before the async operation
+    setLoading(true); 
     dispatch(updateCompany({ companyId: params.id, companyData: formData }))
       .then((res) => {
         if (res?.payload?.status === 200) {
