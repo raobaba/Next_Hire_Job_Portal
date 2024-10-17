@@ -29,7 +29,7 @@ const getHeaderConfig = (requestType, options, Authorization) => {
   };
   return {
     headers,
-    params: { ...options },
+    params: options.params,
     timeout: 60 * 10 * 1000,
   };
 };

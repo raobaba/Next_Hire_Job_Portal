@@ -9,7 +9,7 @@ export const postJobApi = async (data) => {
 // Get all jobs API
 export const getAllJobsApi = async (params) => {
   const url = "api/v1/job/get";
-  return await fetchFromApiServer("GET", url, null, { params });
+  return await fetchFromApiServer("GET", url, {}, { params }); // Ensure params is directly passed
 };
 
 // Get admin jobs API

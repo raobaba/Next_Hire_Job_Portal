@@ -26,7 +26,7 @@ const Job = ({ job }) => {
   const applyJobHandler = () => {
     // Update hasApplied state immediately
     setHasApplied(true);
-
+    
     dispatch(applyJob(job._id)) // Dispatch applyJob action with job ID
       .then((res) => {
         if (res?.payload?.status === 200) {
@@ -84,7 +84,7 @@ const Job = ({ job }) => {
           {job?.jobType}
         </Badge>
         <Badge className={"text-[#7209b7] font-bold"} variant="ghost">
-          ₹ {job?.salary} /month
+          {job?.salary} LPA
         </Badge>
       </div>
 
@@ -97,9 +97,7 @@ const Job = ({ job }) => {
         </Button>
         <Button
           onClick={hasApplied ? null : applyJobHandler} // Apply directly if not applied
-          className={`bg-[#7209b7] text-white ${
-            hasApplied ? "cursor-not-allowed" : ""
-          }`}
+          className={`bg-[#7209b7] text-white ${hasApplied ? "cursor-not-allowed" : ""}`}
           disabled={hasApplied} // Disable if user has applied
         >
           {hasApplied ? "Applied" : "Apply Now"}

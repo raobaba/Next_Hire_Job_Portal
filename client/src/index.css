@@ -78,3 +78,7 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+.smaller-placeholder::placeholder {
+  font-size: 8px; /* Adjust this value as needed */
+  color: #999; /* Optional: Change the color of the placeholder text */
+}

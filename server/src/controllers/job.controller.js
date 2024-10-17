@@ -177,12 +177,12 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
 
   // Fetch jobs with filters, pagination, and sorting
   const jobs = await Job.find(query)
-  .populate({
-    path: 'company'
-  })
-  .populate({
-    path: 'applications', // Assuming 'applications' is the field that holds the application references
-  })
+    .populate({
+      path: "company",
+    })
+    .populate({
+      path: "applications", // Assuming 'applications' is the field that holds the application references
+    })
     .skip(skip) // Skip for pagination
     .limit(limitNumber) // Limit for pagination
     .sort(sortOptions);

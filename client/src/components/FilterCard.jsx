@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import React, { useEffect, useState } from "react";
 import { Label } from "./ui/label";
+import { FiPlus, FiMinus, FiX } from "react-icons/fi"; // Import icons
 
 const filterData = [
   {
@@ -17,60 +17,118 @@ const filterData = [
   },
 ];
 
-const FilterCard = ({ setSearchedQuery }) => {
-  const [selectedValue, setSelectedValue] = useState("");
-  const [expandedFilters, setExpandedFilters] = useState(
-    filterData.map(() => false) // Initialize collapse for each filter group
-  );
+const FilterCard = ({ setFilterJobs, setSearchParams }) => {
+  const [selectedFilters, setSelectedFilters] = useState([]); // Track selected filters
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const toggleExpand = (index) => {
-    const newExpandedFilters = [...expandedFilters];
-    newExpandedFilters[index] = !newExpandedFilters[index]; // Toggle the expansion state
-    setExpandedFilters(newExpandedFilters);
+    setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
   };
 
   const changeHandler = (value) => {
-    setSelectedValue(value);
+    // Check if the filter is already selected
+    if (selectedFilters.includes(value)) {
+      // If selected, remove it
+      setSelectedFilters((prev) => prev.filter((filter) => filter !== value));
+    } else {
+      // If not selected, add it
+      setSelectedFilters((prev) => [...prev, value]);
+    }
   };
 
+  const removeFilter = (filter) => {
+    setSelectedFilters((prev) => prev.filter((f) => f !== filter)); // Remove selected filter from state
+  };
+
+  // Update search parameters and filtered jobs based on selected filters and search term
   useEffect(() => {
-    setSearchedQuery(selectedValue);
-  }, [selectedValue, setSearchedQuery]);
+    // Prepare the dynamic search parameters
+    const dynamicSearchParams = {
+      title: searchTerm,
+      location: selectedFilters.filter((filter) =>
+        filterData[0].array.includes(filter)
+      ), // Example of how to use filters
+      industry: selectedFilters.filter((filter) =>
+        filterData[1].array.includes(filter)
+      ),
+      salary: selectedFilters.filter((filter) =>
+        filterData[2].array.includes(filter)
+      ),
+    };
+
+    // Set search parameters in parent component
+    setSearchParams(dynamicSearchParams);
+
+    // Here, you can implement additional filtering logic if necessary
+    // setFilterJobs(filteredJobs);
+  }, [searchTerm, selectedFilters, setSearchParams]);
 
   return (
-    <div className="w-full bg-white p-4 rounded-md shadow-md">
+    <div className="w-full bg-white px-4 py-2 rounded-md shadow-md">
       <h1 className="font-bold text-lg">Filter Jobs</h1>
       <hr className="mt-1" />
-      <RadioGroup value={selectedValue} onValueChange={changeHandler}>
-        {filterData.map((data, index) => {
-          const isExpanded = expandedFilters[index];
-          const visibleItems = isExpanded ? data.array.length : 2; // Initially show 2 items, show all when expanded
-          return (
-            <div key={index} className="my-3">
+
+      {/* Search Field */}
+      <input
+        type="text"
+        placeholder="Search Jobs by Designation, Company etc..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full p-2 mb-1 border rounded-md focus:outline-none placeholder:text-sm"
+      />
+
+      {/* Selected Filters */}
+      <div className="flex flex-wrap gap-1 mb-1">
+        {selectedFilters.map((filter, index) => (
+          <div
+            key={index}
+            className="flex items-center bg-blue-500 text-white rounded-full px-1 h-[20px]"
+          >
+            <span style={{ fontSize: "10px" }}>{filter}</span>
+            <button
+              className="ml-2 text-white"
+              onClick={() => removeFilter(filter)}
+            >
+              <FiX size={10} />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {filterData.map((data, index) => {
+        const isExpanded = expandedIndex === index;
+        return (
+          <div key={index} className="my-1">
+            <div className="flex justify-between items-center">
               <h1 className="font-bold text-lg">{data.filterType}</h1>
-              <div className="flex flex-col sm:grid sm:grid-cols- md:flex md:flex-col gap-2">
-                {data.array.slice(0, visibleItems).map((item, idx) => {
+              <button
+                onClick={() => toggleExpand(index)}
+                className="text-blue-500 hover:text-blue-700 focus:outline-none"
+              >
+                {isExpanded ? <FiMinus size={20} /> : <FiPlus size={20} />}
+              </button>
+            </div>
+            <div className="flex flex-col gap-1">
+              {isExpanded &&
+                data.array.map((item, idx) => {
                   const itemId = `id${index}-${idx}`;
                   return (
                     <div className="flex items-center space-x-2" key={itemId}>
-                      <RadioGroupItem value={item} id={itemId} />
+                      <input
+                        type="checkbox"
+                        id={itemId}
+                        checked={selectedFilters.includes(item)} // Check if the item is in selectedFilters
+                        onChange={() => changeHandler(item)} // Call changeHandler on change
+                      />
                       <Label htmlFor={itemId}>{item}</Label>
                     </div>
                   );
                 })}
-              </div>
-
-              {/* Toggle Button */}
-              <button
-                onClick={() => toggleExpand(index)}
-                className="mt-2 text-blue-500 hover:text-blue-700 focus:outline-none text-sm"
-              >
-                {isExpanded ? "Show Less" : "Show More"}
-              </button>
             </div>
-          );
-        })}
-      </RadioGroup>
+          </div>
+        );
+      })}
     </div>
   );
 };
