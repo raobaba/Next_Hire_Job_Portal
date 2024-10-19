@@ -37,7 +37,7 @@ const Jobs = () => {
 
   const lastJobRef = useCallback(
     (node) => {
-      if (loading || !hasMore) return; // Prevent loading if already loading or no more data
+      if (loading || !hasMore) return;
       if (observer.current) observer.current.disconnect();
 
       observer.current = new IntersectionObserver((entries) => {
@@ -55,7 +55,7 @@ const Jobs = () => {
   );
 
   useEffect(() => {
-    if (!hasMore) return; // If there are no more jobs to load, exit early
+    if (!hasMore) return;
 
     setLoading(true);
     setError(null);
@@ -70,13 +70,11 @@ const Jobs = () => {
       .then((res) => {
         if (res?.payload?.status === 200) {
           const newJobs = res?.payload?.jobs;
-          console.log("newJobs", res?.payload);
           setAllJobs((prevJobs) => [...prevJobs, ...newJobs]);
           setFilterJobs((prevJobs) => [...prevJobs, ...newJobs]);
 
-          // Update hasMore based on totalPages and currentPage
           const { currentPage, totalPages } = res.payload;
-          setHasMore(currentPage < totalPages); // Set hasMore to false if currentPage equals totalPages
+          setHasMore(currentPage < totalPages);
         } else {
           setError("Failed to load jobs.");
         }
@@ -88,7 +86,7 @@ const Jobs = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [dispatch, searchParams, hasMore]); // Add hasMore to dependency array
+  }, [dispatch, searchParams, hasMore]);
 
   const recommendedJobs = allJobs.filter((job) => job.position === 1);
   const searchHistory = allJobs.filter((job) => job.salary > 15);
@@ -107,37 +105,32 @@ const Jobs = () => {
     setFilterJobs(filteredJobs);
   }, [currentCategory, allJobs, recommendedJobs, searchHistory]);
 
-  // Effect to filter based on searchParams
   useEffect(() => {
     const filterJobsBasedOnSearch = () => {
       let filteredJobs = allJobs;
 
-      // Apply title filtering
       if (searchParams.title) {
         filteredJobs = filteredJobs.filter((job) =>
           job.title.toLowerCase().includes(searchParams.title.toLowerCase())
         );
       }
 
-      // Apply location filtering
       if (searchParams.location.length > 0) {
         filteredJobs = filteredJobs.filter((job) =>
           searchParams.location.includes(job.location)
         );
       }
 
-      // Apply job type filtering
       if (searchParams.jobType.length > 0) {
         filteredJobs = filteredJobs.filter((job) =>
           searchParams.jobType.includes(job.jobType)
         );
       }
 
-      // Apply salary filtering
       if (searchParams.salary) {
-        const [min, max] = searchParams.salary.split('-').map(Number);
+        const [min, max] = searchParams.salary.split("-").map(Number);
         filteredJobs = filteredJobs.filter((job) => {
-          const salary = job.salary; // Assume job.salary is numeric
+          const salary = job.salary;
           return (min ? salary >= min : true) && (max ? salary <= max : true);
         });
       }
@@ -157,7 +150,6 @@ const Jobs = () => {
         description="Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire."
         canonicalUrl="http://mysite.com/job"
       />
-
       <div className="max-w-7xl mt-20 mx-auto px-4">
         <div className="flex flex-col md:flex-row gap-5">
           <div className="w-full md:w-1/4 lg:w-1/5">
@@ -201,7 +193,7 @@ const Jobs = () => {
               {filterJobs.length > 0 ? (
                 filterJobs.map((job, index) => (
                   <motion.div
-                    ref={filterJobs.length === index + 1 ? lastJobRef : null}
+                    ref={lastJobRef}
                     initial={{ opacity: 0, x: 100 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -100 }}

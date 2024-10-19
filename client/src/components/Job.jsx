@@ -1,12 +1,12 @@
-import React, { useState } from "react"; // Import useState
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Bookmark } from "lucide-react";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { applyJob } from "@/redux/slices/application.slice"; // Import applyJob action
-import { toast } from "react-toastify"; // Import toast for notifications
+import { applyJob } from "@/redux/slices/application.slice";
+import { toast } from "react-toastify";
 
 const Job = ({ job }) => {
   const navigate = useNavigate();
@@ -24,10 +24,8 @@ const Job = ({ job }) => {
   };
 
   const applyJobHandler = () => {
-    // Update hasApplied state immediately
     setHasApplied(true);
-
-    dispatch(applyJob(job._id)) // Dispatch applyJob action with job ID
+    dispatch(applyJob(job._id))
       .then((res) => {
         if (res?.payload?.status === 200) {
           toast.success(res?.payload?.message);
@@ -40,7 +38,7 @@ const Job = ({ job }) => {
         toast.error(
           error?.response?.data?.message || "Failed to apply for job."
         );
-        setHasApplied(false); // Revert the state if the application fails
+        setHasApplied(false);
       });
   };
 
@@ -96,11 +94,11 @@ const Job = ({ job }) => {
           Details
         </Button>
         <Button
-          onClick={hasApplied ? null : applyJobHandler} // Apply directly if not applied
+          onClick={hasApplied ? null : applyJobHandler}
           className={`bg-[#7209b7] text-white ${
             hasApplied ? "cursor-not-allowed" : ""
           }`}
-          disabled={hasApplied} // Disable if user has applied
+          disabled={hasApplied}
         >
           {hasApplied ? "Applied" : "Apply Now"}
         </Button>

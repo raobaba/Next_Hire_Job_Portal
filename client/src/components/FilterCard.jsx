@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react"; // Import useState and useEffect
-import { Label } from "./ui/label";
+import React, { useState, useEffect } from "react";
 import { FiPlus, FiMinus, FiX } from "react-icons/fi";
 
 const filterData = [
@@ -22,114 +21,110 @@ const FilterCard = ({ setFilterJobs, setSearchParams }) => {
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Function to toggle expansion for filter sections
   const toggleExpand = (index) => {
     setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
   };
 
-  // Handle checkbox changes
-  const changeHandler = (value) => {
-    if (selectedFilters.includes(value)) {
-      setSelectedFilters((prev) => prev.filter((filter) => filter !== value));
+  const handleFilterSelection = (filterType, filterValue) => {
+    const filterKey = filterType.toLowerCase();
+    const isSelected = selectedFilters.some(
+      (filter) => filter.type === filterKey && filter.value === filterValue
+    );
+
+    if (isSelected) {
+      setSelectedFilters((prev) =>
+        prev.filter(
+          (filter) =>
+            !(filter.type === filterKey && filter.value === filterValue)
+        )
+      );
     } else {
-      setSelectedFilters((prev) => [...prev, value]);
+      setSelectedFilters((prev) => [
+        ...prev,
+        { type: filterKey, value: filterValue },
+      ]);
     }
   };
 
-  // Remove selected filters (chips)
-  const removeFilter = (filter) => {
-    setSelectedFilters((prev) => prev.filter((f) => f !== filter));
-  };
+  // Debounced effect for searchTerm
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const dynamicSearchParams = { title: searchTerm };
+      setSearchParams((prevParams) => ({
+        ...prevParams,
+        ...dynamicSearchParams,
+      }));
+    }, 300); // Debounce delay
 
-  // Update searchParams when search term or selected filters change
-useEffect(() => {
-    const dynamicSearchParams = {
-      title: searchTerm, // Set title to search term
-      location: selectedFilters.filter((filter) =>
-        filterData[0].array.includes(filter)
-      ),
-      jobType: selectedFilters.filter((filter) =>
-        filterData[1].array.includes(filter)
-      ),
-      salary: selectedFilters.filter((filter) =>
-        filterData[2].array.includes(filter)
-      ).join(", "), // Join selected salary options as a comma-separated string
-    };
-
-    setSearchParams((prevParams) => ({
-      ...prevParams,
-      ...dynamicSearchParams,
-    }));
-}, [searchTerm, selectedFilters, setSearchParams]);
-
+    return () => clearTimeout(timeoutId); // Cleanup on component unmount or when searchTerm changes
+  }, [searchTerm, setSearchParams]);
 
   return (
-    <div className="w-full bg-white px-4 py-2 rounded-md shadow-md">
-      <h1 className="font-bold text-lg">Filter Jobs</h1>
-      <hr className="mt-1" />
-      {/* Search input for job search by title, designation, etc. */}
-      <input
-        type="text"
-        placeholder="Search Jobs by Designation, Company etc..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full p-2 mb-1 border rounded-md focus:outline-none placeholder:text-sm"
-      />
-
-      {/* Display selected filters as chips */}
-      <div className="flex flex-wrap gap-1 mb-1">
-        {selectedFilters.map((filter, index) => (
-          <div
-            key={index}
-            className="flex items-center bg-blue-500 text-white rounded-full px-1 h-[20px]"
-          >
-            <span style={{ fontSize: "10px" }}>{filter}</span>
-            <button
-              className="ml-2 text-white"
-              onClick={() => removeFilter(filter)}
+    <div className="border rounded-lg p-4">
+      <h2 className="font-bold mb-2">Filters</h2>
+      <div className="space-y-4">
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border rounded w-full p-2"
+          />
+        </div>
+        {selectedFilters.length > 0 && (
+          <div className="mt-2">
+            <h4 className="font-semibold">Selected Filters:</h4>
+            <div className="flex flex-wrap">
+              {selectedFilters.map((filter, index) => (
+                <div
+                  key={index}
+                  className="flex items-center bg-blue-100 text-blue-600 rounded-md px-1 py-1"
+                >
+                  <span className="text-[10px]">{filter.value}</span>
+                  <FiX
+                    className="ml-1 text-[12px] cursor-pointer"
+                    onClick={() =>
+                      handleFilterSelection(filter.type, filter.value)
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {filterData.map((filter, index) => (
+          <div key={filter.filterType}>
+            <div
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleExpand(index)}
             >
-              <FiX size={10} />
-            </button>
+              <h3 className="font-semibold">{filter.filterType}</h3>
+              {expandedIndex === index ? <FiMinus /> : <FiPlus />}
+            </div>
+            {expandedIndex === index && (
+              <div className="mt-1 space-y-1">
+                {filter.array.map((item) => (
+                  <div key={item} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={item}
+                      checked={selectedFilters.some(
+                        (filter) => filter.value === item
+                      )}
+                      onChange={() =>
+                        handleFilterSelection(filter.filterType, item)
+                      }
+                      className="mr-1"
+                    />
+                    <label htmlFor={item}>{item}</label>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
-
-      {/* Filter sections */}
-      {filterData.map((data, index) => {
-        const isExpanded = expandedIndex === index;
-        return (
-          <div key={index} className="my-1">
-            <div className="flex justify-between items-center">
-              <h1 className="font-bold text-lg">{data.filterType}</h1>
-              <button
-                onClick={() => toggleExpand(index)}
-                className="text-blue-500 hover:text-blue-700 focus:outline-none"
-              >
-                {isExpanded ? <FiMinus size={20} /> : <FiPlus size={20} />}
-              </button>
-            </div>
-
-            {/* Filter options (checkboxes) */}
-            <div className="flex flex-col gap-1">
-              {isExpanded &&
-                data.array.map((item, idx) => {
-                  const itemId = `id${index}-${idx}`;
-                  return (
-                    <div className="flex items-center space-x-2" key={itemId}>
-                      <input
-                        type="checkbox"
-                        id={itemId}
-                        checked={selectedFilters.includes(item)}
-                        onChange={() => changeHandler(item)}
-                      />
-                      <Label htmlFor={itemId}>{item}</Label>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 };
