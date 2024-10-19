@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Navbar from "./shared/Navbar";
 import FilterCard from "./FilterCard";
 import Job from "./Job";
@@ -19,9 +19,6 @@ const Jobs = () => {
 
   const [searchParams, setSearchParams] = useState({
     title: "",
-    description: "",
-    companyName: "",
-    requirements: "",
     salaryMin: "",
     salaryMax: "",
     experienceLevel: "",
@@ -33,36 +30,20 @@ const Jobs = () => {
     limit: 10,
   });
 
-  const observer = useRef();
+  const observerRef = useRef(null);
+  const currentPageRef = useRef(1);
+  const totalPagesRef = useRef(null);
+  const lastScrollTopRef = useRef(0); // To track the last scroll position
 
-  const lastJobRef = useCallback(
-    (node) => {
-      if (loading || !hasMore) return;
-      if (observer.current) observer.current.disconnect();
-
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setSearchParams((prevParams) => ({
-            ...prevParams,
-            page: prevParams.page ? prevParams.page + 1 : 2,
-          }));
-        }
-      });
-
-      if (node) observer.current.observe(node);
-    },
-    [loading, hasMore]
-  );
-
-  useEffect(() => {
-    if (!hasMore) return;
+  const fetchJobs = () => {
+    if (!hasMore || loading) return;
 
     setLoading(true);
     setError(null);
 
     const sanitizedParams = {
       ...searchParams,
-      page: searchParams.page || 1,
+      page: currentPageRef.current,
       limit: searchParams.limit || 10,
     };
 
@@ -70,11 +51,28 @@ const Jobs = () => {
       .then((res) => {
         if (res?.payload?.status === 200) {
           const newJobs = res?.payload?.jobs;
-          setAllJobs((prevJobs) => [...prevJobs, ...newJobs]);
-          setFilterJobs((prevJobs) => [...prevJobs, ...newJobs]);
+
+          // Update allJobs and filterJobs
+          if (currentPageRef.current === 1) {
+            setAllJobs(newJobs); // Clear previous jobs on new search
+            setFilterJobs(newJobs); // Set filterJobs initially
+          } else {
+            const uniqueJobs = [
+              ...new Set([...allJobs, ...newJobs].map((job) => job._id)),
+            ].map((id) =>
+              [...allJobs, ...newJobs].find((job) => job._id === id)
+            );
+
+            setAllJobs(uniqueJobs);
+            setFilterJobs(uniqueJobs); // Update filterJobs as well
+          }
 
           const { currentPage, totalPages } = res.payload;
+          totalPagesRef.current = totalPages;
           setHasMore(currentPage < totalPages);
+          if (sanitizedParams.page === currentPageRef.current) {
+            currentPageRef.current += 1;
+          }
         } else {
           setError("Failed to load jobs.");
         }
@@ -86,60 +84,46 @@ const Jobs = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [dispatch, searchParams, hasMore]);
+  };
 
-  const recommendedJobs = allJobs.filter((job) => job.position === 1);
-  const searchHistory = allJobs.filter((job) => job.salary > 15);
+  const handleScroll = () => {
+    if (observerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = observerRef.current;
+      const lastScrollTop = lastScrollTopRef.current;
 
-  useEffect(() => {
-    let filteredJobs = allJobs;
+      // Only trigger if scrolling down
+      if (scrollTop > lastScrollTop) {
+        if (
+          scrollTop + clientHeight >= scrollHeight - 50 &&
+          hasMore &&
+          !loading &&
+          currentPageRef.current <= totalPagesRef.current
+        ) {
+          fetchJobs();
+        }
+      }
 
-    if (currentCategory === "recommended") {
-      filteredJobs = recommendedJobs;
-    } else if (currentCategory === "trending") {
-      filteredJobs = searchHistory;
-    } else {
-      filteredJobs = allJobs;
+      // Update the last scroll position
+      lastScrollTopRef.current = scrollTop;
     }
-
-    setFilterJobs(filteredJobs);
-  }, [currentCategory, allJobs, recommendedJobs, searchHistory]);
+  };
 
   useEffect(() => {
-    const filterJobsBasedOnSearch = () => {
-      let filteredJobs = allJobs;
+    currentPageRef.current = 1;
+    setHasMore(true);
+    fetchJobs();
+  }, [searchParams]);
 
-      if (searchParams.title) {
-        filteredJobs = filteredJobs.filter((job) =>
-          job.title.toLowerCase().includes(searchParams.title.toLowerCase())
-        );
+  useEffect(() => {
+    if (observerRef.current) {
+      observerRef.current.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.removeEventListener("scroll", handleScroll);
       }
-
-      if (searchParams.location.length > 0) {
-        filteredJobs = filteredJobs.filter((job) =>
-          searchParams.location.includes(job.location)
-        );
-      }
-
-      if (searchParams.jobType.length > 0) {
-        filteredJobs = filteredJobs.filter((job) =>
-          searchParams.jobType.includes(job.jobType)
-        );
-      }
-
-      if (searchParams.salary) {
-        const [min, max] = searchParams.salary.split("-").map(Number);
-        filteredJobs = filteredJobs.filter((job) => {
-          const salary = job.salary;
-          return (min ? salary >= min : true) && (max ? salary <= max : true);
-        });
-      }
-
-      setFilterJobs(filteredJobs);
     };
-
-    filterJobsBasedOnSearch();
-  }, [searchParams, allJobs]);
+  }, [hasMore, loading]);
 
   return (
     <div>
@@ -158,7 +142,10 @@ const Jobs = () => {
               setSearchParams={setSearchParams}
             />
           </div>
-          <div className="flex-1 h-[85vh] overflow-y-auto pb-5">
+          <div
+            className="flex-1 h-[85vh] overflow-y-auto pb-5"
+            ref={observerRef}
+          >
             <div className="flex flex-col sm:flex-row items-center justify-between my-1 sm:space-x-4 space-y-3 sm:space-y-0">
               <h2
                 onClick={() => setCurrentCategory("all")}
@@ -176,7 +163,7 @@ const Jobs = () => {
                     : "text-gray-800"
                 }`}
               >
-                Recommended ({recommendedJobs.length})
+                Recommended (0)
               </h2>
               <h2
                 onClick={() => setCurrentCategory("trending")}
@@ -186,19 +173,18 @@ const Jobs = () => {
                     : "text-gray-800"
                 }`}
               >
-                Based On Search ({searchHistory.length})
+                Based On Search (0)
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {filterJobs.length > 0 ? (
-                filterJobs.map((job, index) => (
+                filterJobs.map((job) => (
                   <motion.div
-                    ref={lastJobRef}
+                    key={job._id}
                     initial={{ opacity: 0, x: 100 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -100 }}
                     transition={{ duration: 0.3 }}
-                    key={job._id}
                   >
                     <Job job={job} />
                   </motion.div>

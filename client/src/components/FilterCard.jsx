@@ -8,18 +8,27 @@ const filterData = [
   },
   {
     filterType: "Job Type",
-    array: ["Frontend Developer", "Backend Developer", "FullStack Developer"],
+    array: ["Full Time", "Part Time", "Freelancing"],
   },
   {
     filterType: "Salary",
-    array: ["0-40k", "42-1lakh", "1lakh to 5lakh"],
+    array: [
+      "1-2Lakh",
+      "2-3Lakh",
+      "3-4Lakh",
+      "4-5Lakh",
+      "5-6Lakh",
+      "6-7Lakh",
+      "More",
+    ],
   },
 ];
 
-const FilterCard = ({ setFilterJobs, setSearchParams }) => {
+const FilterCard = ({ setSearchParams }) => {
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
   const toggleExpand = (index) => {
     setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
@@ -27,37 +36,90 @@ const FilterCard = ({ setFilterJobs, setSearchParams }) => {
 
   const handleFilterSelection = (filterType, filterValue) => {
     const filterKey = filterType.toLowerCase();
-    const isSelected = selectedFilters.some(
-      (filter) => filter.type === filterKey && filter.value === filterValue
-    );
 
-    if (isSelected) {
-      setSelectedFilters((prev) =>
-        prev.filter(
-          (filter) =>
-            !(filter.type === filterKey && filter.value === filterValue)
-        )
+    // Ensure only one selection for Location, Job Type, or Salary
+    if (["location", "job type", "salary"].includes(filterKey)) {
+      const existingFilter = selectedFilters.find(
+        (filter) => filter.type === filterKey
       );
+
+      if (existingFilter) {
+        setSelectedFilters((prev) =>
+          prev.map((filter) =>
+            filter.type === filterKey
+              ? { ...filter, value: filterValue }
+              : filter
+          )
+        );
+      } else {
+        setSelectedFilters((prev) => [
+          ...prev,
+          { type: filterKey, value: filterValue },
+        ]);
+      }
     } else {
-      setSelectedFilters((prev) => [
-        ...prev,
-        { type: filterKey, value: filterValue },
-      ]);
+      // For other filter types, allow multiple selections
+      const isSelected = selectedFilters.some(
+        (filter) => filter.type === filterKey && filter.value === filterValue
+      );
+
+      if (isSelected) {
+        setSelectedFilters((prev) =>
+          prev.filter(
+            (filter) =>
+              !(filter.type === filterKey && filter.value === filterValue)
+          )
+        );
+      } else {
+        setSelectedFilters((prev) => [
+          ...prev,
+          { type: filterKey, value: filterValue },
+        ]);
+      }
     }
   };
 
-  // Debounced effect for searchTerm
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const dynamicSearchParams = { title: searchTerm };
-      setSearchParams((prevParams) => ({
-        ...prevParams,
-        ...dynamicSearchParams,
-      }));
-    }, 300); // Debounce delay
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 600);
 
-    return () => clearTimeout(timeoutId); // Cleanup on component unmount or when searchTerm changes
-  }, [searchTerm, setSearchParams]);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const updatedSearchParams = {
+      title: debouncedSearchTerm, // Use debounced search term
+      location: selectedFilters.find((f) => f.type === "location")?.value || "",
+      jobType: selectedFilters.find((f) => f.type === "job type")?.value || "",
+      salaryMin: selectedFilters.find(
+        (f) => f.type === "salary" && f.value.includes("Lakh")
+      )
+        ? selectedFilters
+            .find((f) => f.type === "salary")
+            .value.split("-")[0]
+            .replace("Lakh", "")
+            .trim()
+        : "",
+      salaryMax: selectedFilters.find(
+        (f) => f.type === "salary" && f.value.includes("Lakh")
+      )
+        ? selectedFilters
+            .find((f) => f.type === "salary")
+            .value.split("-")[1]
+            .replace("Lakh", "")
+            .trim()
+        : "",
+      page: 1,
+    };
+
+    setSearchParams((prevParams) => ({
+      ...prevParams,
+      ...updatedSearchParams,
+    }));
+  }, [selectedFilters, debouncedSearchTerm, setSearchParams]);
 
   return (
     <div className="border rounded-lg p-4">
@@ -66,20 +128,19 @@ const FilterCard = ({ setFilterJobs, setSearchParams }) => {
         <div className="mb-4">
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search by title, skills, company name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border rounded w-full p-2"
           />
         </div>
         {selectedFilters.length > 0 && (
-          <div className="mt-2">
-            <h4 className="font-semibold">Selected Filters:</h4>
+          <div className="">
             <div className="flex flex-wrap">
               {selectedFilters.map((filter, index) => (
                 <div
                   key={index}
-                  className="flex items-center bg-blue-100 text-blue-600 rounded-md px-1 py-1"
+                  className="flex items-center bg-blue-100 text-blue-600 rounded-md m-[3px] px-1 py-1"
                 >
                   <span className="text-[10px]">{filter.value}</span>
                   <FiX
