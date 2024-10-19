@@ -26,7 +26,7 @@ const CompanySetup = () => {
 
   const fetchCompanyData = () => {
     if (params.id && !isBackNavigation) {
-      setLoading(true); 
+      setLoading(true);
       dispatch(getCompanyById(params.id))
         .then((res) => {
           const company = res?.payload.company;
@@ -36,7 +36,7 @@ const CompanySetup = () => {
             setDescription(company.description || "");
             setWebsite(company.website || "");
             setLocation(company.location || "");
-            setLogo(null); 
+            setLogo(null);
           } else {
             toast.error("Failed to fetch company data.");
           }
@@ -73,10 +73,10 @@ const CompanySetup = () => {
     formData.append("location", location);
 
     if (logo) {
-      formData.append("logo", logo); 
+      formData.append("logo", logo);
     }
 
-    setLoading(true); 
+    setLoading(true);
     dispatch(updateCompany({ companyId: params.id, companyData: formData }))
       .then((res) => {
         if (res?.payload?.status === 200) {

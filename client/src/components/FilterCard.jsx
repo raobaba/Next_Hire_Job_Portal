@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react"; // Import useState and useEffect
 import { Label } from "./ui/label";
-import { FiPlus, FiMinus, FiX } from "react-icons/fi"; // Import icons
+import { FiPlus, FiMinus, FiX } from "react-icons/fi";
 
 const filterData = [
   {
@@ -8,7 +8,7 @@ const filterData = [
     array: ["Delhi", "Bangalore", "Hyderabad", "Pune", "Mumbai"],
   },
   {
-    filterType: "Industry",
+    filterType: "Job Type",
     array: ["Frontend Developer", "Backend Developer", "FullStack Developer"],
   },
   {
@@ -18,58 +18,56 @@ const filterData = [
 ];
 
 const FilterCard = ({ setFilterJobs, setSearchParams }) => {
-  const [selectedFilters, setSelectedFilters] = useState([]); // Track selected filters
+  const [selectedFilters, setSelectedFilters] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Function to toggle expansion for filter sections
   const toggleExpand = (index) => {
     setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
   };
 
+  // Handle checkbox changes
   const changeHandler = (value) => {
-    // Check if the filter is already selected
     if (selectedFilters.includes(value)) {
-      // If selected, remove it
       setSelectedFilters((prev) => prev.filter((filter) => filter !== value));
     } else {
-      // If not selected, add it
       setSelectedFilters((prev) => [...prev, value]);
     }
   };
 
+  // Remove selected filters (chips)
   const removeFilter = (filter) => {
-    setSelectedFilters((prev) => prev.filter((f) => f !== filter)); // Remove selected filter from state
+    setSelectedFilters((prev) => prev.filter((f) => f !== filter));
   };
 
-  // Update search parameters and filtered jobs based on selected filters and search term
-  useEffect(() => {
-    // Prepare the dynamic search parameters
+  // Update searchParams when search term or selected filters change
+useEffect(() => {
     const dynamicSearchParams = {
-      title: searchTerm,
+      title: searchTerm, // Set title to search term
       location: selectedFilters.filter((filter) =>
         filterData[0].array.includes(filter)
-      ), // Example of how to use filters
-      industry: selectedFilters.filter((filter) =>
+      ),
+      jobType: selectedFilters.filter((filter) =>
         filterData[1].array.includes(filter)
       ),
       salary: selectedFilters.filter((filter) =>
         filterData[2].array.includes(filter)
-      ),
+      ).join(", "), // Join selected salary options as a comma-separated string
     };
 
-    // Set search parameters in parent component
-    setSearchParams(dynamicSearchParams);
+    setSearchParams((prevParams) => ({
+      ...prevParams,
+      ...dynamicSearchParams,
+    }));
+}, [searchTerm, selectedFilters, setSearchParams]);
 
-    // Here, you can implement additional filtering logic if necessary
-    // setFilterJobs(filteredJobs);
-  }, [searchTerm, selectedFilters, setSearchParams]);
 
   return (
     <div className="w-full bg-white px-4 py-2 rounded-md shadow-md">
       <h1 className="font-bold text-lg">Filter Jobs</h1>
       <hr className="mt-1" />
-
-      {/* Search Field */}
+      {/* Search input for job search by title, designation, etc. */}
       <input
         type="text"
         placeholder="Search Jobs by Designation, Company etc..."
@@ -78,7 +76,7 @@ const FilterCard = ({ setFilterJobs, setSearchParams }) => {
         className="w-full p-2 mb-1 border rounded-md focus:outline-none placeholder:text-sm"
       />
 
-      {/* Selected Filters */}
+      {/* Display selected filters as chips */}
       <div className="flex flex-wrap gap-1 mb-1">
         {selectedFilters.map((filter, index) => (
           <div
@@ -96,6 +94,7 @@ const FilterCard = ({ setFilterJobs, setSearchParams }) => {
         ))}
       </div>
 
+      {/* Filter sections */}
       {filterData.map((data, index) => {
         const isExpanded = expandedIndex === index;
         return (
@@ -109,6 +108,8 @@ const FilterCard = ({ setFilterJobs, setSearchParams }) => {
                 {isExpanded ? <FiMinus size={20} /> : <FiPlus size={20} />}
               </button>
             </div>
+
+            {/* Filter options (checkboxes) */}
             <div className="flex flex-col gap-1">
               {isExpanded &&
                 data.array.map((item, idx) => {
@@ -118,8 +119,8 @@ const FilterCard = ({ setFilterJobs, setSearchParams }) => {
                       <input
                         type="checkbox"
                         id={itemId}
-                        checked={selectedFilters.includes(item)} // Check if the item is in selectedFilters
-                        onChange={() => changeHandler(item)} // Call changeHandler on change
+                        checked={selectedFilters.includes(item)}
+                        onChange={() => changeHandler(item)}
                       />
                       <Label htmlFor={itemId}>{item}</Label>
                     </div>

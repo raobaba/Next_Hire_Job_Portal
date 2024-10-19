@@ -30,7 +30,11 @@ const CompanyCreate = () => {
         toast.error(res?.payload?.message);
         setLoading(false);
       }
-    });
+    }).catch((error)=>{
+      console.log(error);
+      setLoading(false)
+    })
+    
   };
 
   return (

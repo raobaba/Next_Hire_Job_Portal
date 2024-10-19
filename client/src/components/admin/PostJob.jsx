@@ -53,11 +53,18 @@ const PostJob = () => {
   };
 
   useEffect(() => {
-    dispatch(getCompanies()).then((res) => {
-      if (res?.payload?.status === 200) {
-        setCompany(res?.payload);
-      }
-    });
+    setLoading(true);
+    dispatch(getCompanies())
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          setCompany(res?.payload);
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
   }, [dispatch]);
 
   const submitHandler = async (e) => {
@@ -67,7 +74,7 @@ const PostJob = () => {
     const formData = {
       ...input,
     };
-
+    setLoading(true);
     dispatch(postJob(formData))
       .then((res) => {
         if (res?.payload?.status === 200) {
@@ -89,6 +96,7 @@ const PostJob = () => {
   return (
     <div className="m-auto flex items-center justify-center w-11/12">
       <Navbar />
+      {loading && <Loader />}
       <ReactHelmet
         title="Post a Job - Next_Hire"
         description="Easily post job openings to attract qualified candidates. Fill out the job details, including role, responsibilities, and requirements, to find the perfect fit for your team."
