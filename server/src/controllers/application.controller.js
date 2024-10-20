@@ -12,7 +12,7 @@ const applyJob = asyncErrorHandler(async (req, res) => {
       const error = new ErrorHandler(
         "Only students are allowed to apply. Please update your account role to Student to proceed.",
         403
-      ); 
+      );
       return error.sendError(res);
     }
     if (!jobId) {

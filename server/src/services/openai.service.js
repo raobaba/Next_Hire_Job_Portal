@@ -14,14 +14,12 @@ async function processJobAndNotifyUsers(job, companyName) {
       experienceLevel,
     } = job;
 
-    // Find matching users based on job requirements
     const matchingUsers = await User.find({
       "profile.skills": { $in: requirements },
     });
 
     for (const user of matchingUsers) {
       if (user.role === "student") {
-        // Construct the email body with a fixed template and dynamic job details
         const emailContent = `Subject: ${title} Opportunity at ${companyName}
 
 Dear ${user.fullname},
@@ -55,7 +53,7 @@ The Hiring Team at ${companyName}`;
           from: "NextHire <noreply@nexthire.com>",
           to: user.email,
           subject: `${title} Opportunity at ${companyName}`,
-          text: emailContent, // Use the constructed content directly
+          text: emailContent,
           html: `
             <p>Dear ${user.fullname},</p>
             <p>We are excited to inform you of a great opportunity at <b>${companyName}</b>. As a registered candidate on NextHire, we thought you might be interested in the <b>${title}</b> position at ${companyName}, a rapidly growing tech company based in ${location}.</p>
@@ -89,7 +87,6 @@ The Hiring Team at ${companyName}`;
           `,
         };
 
-        // Send the email to the user
         await sendMail(emailBody);
         console.log(`Email sent to: ${user.email}`);
       } else {
@@ -103,10 +100,8 @@ The Hiring Team at ${companyName}`;
   }
 }
 
-// New function to check skills and notify users
 async function notifyUsersToCompleteProfile() {
   try {
-    // Find users whose skills field is empty
     const usersWithEmptySkills = await User.find({
       "profile.skills": { $exists: true, $eq: [] },
     });
@@ -138,8 +133,6 @@ The NextHire Team`;
         `,
       };
 
-      // Send the email to the user
-      // await sendMail(emailBody);
       console.log(`Email sent to: ${user.email}`);
     }
 
@@ -152,7 +145,6 @@ The NextHire Team`;
   }
 }
 
-// Schedule the profile completion notifications to run daily at midnight
 cron.schedule("0 0 * * *", () => {
   console.log(
     "Checking for users to notify about completing their profiles..."
@@ -199,7 +191,6 @@ The Hiring Team at ${companyName}
       html: emailContentHtml,
     };
 
-    // Send the email
     await sendMail(emailBody);
     console.log(`Application confirmation email sent to: ${user.email}`);
   } catch (error) {
@@ -207,5 +198,52 @@ The Hiring Team at ${companyName}
   }
 }
 
+async function notifyJobDeletion(jobTitle, companyName, applicants) {
+  try {
+    for (const applicant of applicants) {
+      const emailContentText = `
+Dear ${applicant.fullname},
 
-module.exports = { processJobAndNotifyUsers, notifyApplicationReceived };
+We regret to inform you that the job position for ${jobTitle} at ${companyName} has been deleted, and the hiring process for this position has been stopped. 
+
+We understand that this news may be disappointing, and we encourage you to explore other opportunities that may align with your skills and interests.
+
+Thank you for your understanding.
+
+Best regards,
+The Hiring Team at ${companyName}
+`;
+
+      const emailContentHtml = `
+<p>Dear ${applicant.fullname},</p>
+<p>We regret to inform you that the job position for <strong>${jobTitle}</strong> at <strong>${companyName}</strong> has been deleted, and the hiring process for this position has been stopped.</p>
+
+<p>We understand that this news may be disappointing, and we encourage you to explore other opportunities that may align with your skills and interests.</p>
+
+<p>Thank you for your understanding.</p>
+
+<p>Best regards,<br>The Hiring Team at ${companyName}</p>
+`;
+
+      const emailBody = {
+        from: "NextHire <noreply@nexthire.com>",
+        to: applicant.email,
+        subject: `Job Deletion Notification: ${jobTitle} at ${companyName}`,
+        text: emailContentText,
+        html: emailContentHtml,
+      };
+
+      await sendMail(emailBody);
+      console.log(`Notification email sent to: ${applicant.email}`);
+    }
+
+    console.log("All applicants notified about the job deletion.");
+  } catch (error) {
+    console.error("Error notifying applicants about job deletion:", error);
+  }
+}
+
+
+
+
+module.exports = { processJobAndNotifyUsers, notifyApplicationReceived, notifyJobDeletion };

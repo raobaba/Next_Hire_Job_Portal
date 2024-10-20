@@ -10,12 +10,13 @@ import {
   getSearchResult,
   clearSearchHistory,
 } from "@/redux/slices/user.slice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Loader from "./shared/Loader";
 import { toast } from "react-toastify";
 
 const Jobs = () => {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
   const [allJobs, setAllJobs] = useState([]);
   const [recommendedJobs, setRecommendedJobs] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
@@ -250,7 +251,7 @@ const Jobs = () => {
         setLoading(true);
         if (res?.payload?.status === 200) {
           setLoading(false);
-          handleCategoryChange("all")
+          handleCategoryChange("all");
           console.log("clearSearchHistory", res?.payload);
           toast.success(res?.payload?.message);
         } else {
@@ -300,42 +301,50 @@ const Jobs = () => {
                 >
                   All Jobs ({allJobs?.length})
                 </h2>
-                <h2
-                  onClick={() => handleCategoryChange("recommended")}
-                  className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
-                    currentCategory === "recommended"
-                      ? "text-blue-600"
-                      : "text-gray-800"
-                  }`}
-                >
-                  Recommended ({recommendedJobs?.length})
-                </h2>
-                <h2
-                  onClick={() => handleCategoryChange("searchedBased")}
-                  className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
-                    currentCategory === "searchedBased"
-                      ? "text-blue-600"
-                      : "text-gray-800"
-                  }`}
-                >
-                  Based On Search ({searchResult?.length})
-                </h2>
+                {user.role !== "recruiter" && (
+                  <>
+                    <h2
+                      onClick={() => handleCategoryChange("recommended")}
+                      className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                        currentCategory === "recommended"
+                          ? "text-blue-600"
+                          : "text-gray-800"
+                      }`}
+                    >
+                      Recommended ({recommendedJobs?.length})
+                    </h2>
+                    <h2
+                      onClick={() => handleCategoryChange("searchedBased")}
+                      className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                        currentCategory === "searchedBased"
+                          ? "text-blue-600"
+                          : "text-gray-800"
+                      }`}
+                    >
+                      Based On Search ({searchResult?.length})
+                    </h2>
+                  </>
+                )}
               </div>
             ) : (
-              <div className="flex justify-between items-center my-4 sm:space-x-4 space-y-3 sm:space-y-0">
-                <button
-                  onClick={() => handleCategoryChange("all")}
-                  className="px-4 py-2 text-sm md:text-lg font-semibold text-white bg-blue-600 rounded-lg shadow-md transition duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                >
-                  &larr; Back
-                </button>
-                <button
-                  onClick={() => handleClearSearchHistory()}
-                  className="px-4 py-2 text-sm md:text-lg font-semibold text-white bg-red-500 rounded-lg shadow-md transition duration-300 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50"
-                >
-                  Clear Search
-                </button>
-              </div>
+              <>
+                {user.role !== "recruiter" && (
+                  <div className="flex justify-between items-center my-4 sm:space-x-4 space-y-3 sm:space-y-0">
+                    <button
+                      onClick={() => handleCategoryChange("all")}
+                      className="px-4 py-2 text-sm md:text-lg font-semibold text-white bg-blue-600 rounded-lg shadow-md transition duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                    >
+                      &larr; Back
+                    </button>
+                    <button
+                      onClick={() => handleClearSearchHistory()}
+                      className="px-4 py-2 text-sm md:text-lg font-semibold text-white bg-red-500 rounded-lg shadow-md transition duration-300 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50"
+                    >
+                      Clear Search
+                    </button>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

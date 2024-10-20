@@ -3,8 +3,8 @@ const User = require("../models/user.model");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const ErrorHandler = require("../utils/errorHandler");
 const Company = require("../models/company.model");
-const { processJobAndNotifyUsers } = require("../services/openai.service");
-
+const Application = require('../models/application.model')
+const { processJobAndNotifyUsers, notifyJobDeletion } = require("../services/openai.service");
 const postJob = asyncErrorHandler(async (req, res) => {
   const {
     title,
@@ -211,25 +211,36 @@ const getAdminJobs = asyncErrorHandler(async (req, res) => {
 
 const deleteAdminJobs = asyncErrorHandler(async (req, res) => {
   const jobId = req.params.id;
-  const userId = req.user.id;
+  try {
+    const job = await Job.findById(jobId)
+      .populate("applications")
+      .populate("company");
 
-  const job = await Job.findById(jobId);
-  if (!job) {
-    const error = new ErrorHandler("Job not found", 404);
-    return error.sendError(res);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
+    }
+
+    const companyName = job.company.companyName;
+    const jobTitle = job.title;
+    const applicantIds = job.applications.map(application => application.applicant);
+    const applicants = await User.find({ _id: { $in: applicantIds } });
+
+    await Job.findByIdAndDelete(jobId);
+    await notifyJobDeletion(jobTitle, companyName, applicants);
+
+    return res.status(200).json({
+      status: 200,
+      success: true,
+      message: "Job deleted successfully and applicants notified.",
+    });
+  } catch (error) {
+    console.error("Error deleting job:", error);
+    return res.status(500).json({ message: "Internal server error." });
   }
+});
 
-  if (job.created_by.toString() !== userId) {
-    const error = new ErrorHandler("You do not have permission to delete this job", 403);
-    return error.sendError(res);
-  }
-  await job.deleteOne();
 
-  return res.status(200).json({
-    success: true,
-    status: 200,
-    message: "Job has been deleted successfully",
-  });
-})
+
+
 
 module.exports = { postJob, getAllJobs, getJobById, getAdminJobs, deleteAdminJobs };

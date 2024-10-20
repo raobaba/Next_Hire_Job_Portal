@@ -28,11 +28,11 @@ const jobSchema = new mongoose.Schema(
       required: true,
     },
     jobType: {
-      type: String, // Example: 'Full-time', 'Part-time', etc.
+      type: String, 
       required: true,
     },
     position: {
-      type: Number, // Number of positions available
+      type: Number, 
       required: true,
     },
     company: {
