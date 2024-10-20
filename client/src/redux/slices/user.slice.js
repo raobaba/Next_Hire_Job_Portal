@@ -6,7 +6,24 @@ import {
   getUserSearchHistoryApi,
   clearUserSearchHistoryApi,
   updateUserProfileApi,
+  fetchRecommendedJobs,
+  fetchSearchResult,
+  deleteSearchHistory,
 } from "../actions/user.action";
+
+
+// Initial state for user
+const initialState = {
+  user: null,
+  isAuthenticated: false,
+  searchHistory: [],
+  recommended: [],
+  searchResult: [],
+  loading: false,
+  error: null,
+  message: null,
+};
+
 
 // Thunk for user login
 export const loginUser = createAsyncThunk(
@@ -92,15 +109,50 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
-// Initial state for user
-const initialState = {
-  user: null,
-  isAuthenticated: false,
-  searchHistory: [],
-  loading: false,
-  error: null,
-  message: null,
-};
+export const getRecommendedJobs = createAsyncThunk(
+  'profile/recommend',
+  async (searchParams, { rejectWithValue }) => {
+    try {
+      const response = await fetchRecommendedJobs(searchParams);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to update profile"
+      );
+    }
+  }
+)
+
+export const getSearchResult = createAsyncThunk(
+  'profile/search',
+  async (searchParams, { rejectWithValue }) => {
+    try {
+      const response = await fetchSearchResult(searchParams);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to get Search Result"
+      )
+    }
+  }
+)
+
+export const clearSearchHistory = createAsyncThunk(
+  'profile/search',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await deleteSearchHistory();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to get Search Result"
+      )
+    }
+  }
+)
+
+
+
 
 const userSlice = createSlice({
   name: "user",
@@ -124,7 +176,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        // Store token in localStorage
         if (action?.payload?.token) {
           localStorage.setItem("token", action?.payload?.token);
           localStorage.setItem(
@@ -148,7 +199,6 @@ const userSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
 
-        // Store token in localStorage
         if (action.payload.token) {
           localStorage.setItem("token", action.payload.token);
           localStorage.setItem(
@@ -167,9 +217,9 @@ const userSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.loading = false;
         state.isAuthenticated = false;
-        state.user = null; // Set the user to null on successful logout
-        localStorage.removeItem("token"); // Clear the token from localStorage
-        localStorage.removeItem("profile"); // Clear the profile if stored
+        state.user = null;
+        localStorage.removeItem("token");
+        localStorage.removeItem("profile");
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.loading = false;
@@ -234,7 +284,34 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      // Fetch recommended jobs
+      .addCase(getRecommendedJobs.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getRecommendedJobs.fulfilled, (state, action) => {
+        state.loading = false;
+        state.recommended = action.payload;
+      })
+      .addCase(getRecommendedJobs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Fetch recommended jobs
+      .addCase(getSearchResult.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getSearchResult.fulfilled, (state, action) => {
+        state.loading = false;
+        state.searchResult = action.payload;
+      })
+      .addCase(getSearchResult.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      ;
   },
 });
 

@@ -1,6 +1,7 @@
 const Application = require("../models/application.model");
 const Job = require("../models/job.model");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
+const { notifyApplicationReceived } = require('../services/openai.service')
 const ErrorHandler = require("../utils/errorHandler");
 
 // Apply for a job
@@ -31,22 +32,19 @@ const applyJob = asyncErrorHandler(async (req, res) => {
       ).sendError(res);
     }
 
-    // Check if the job exists
-    const job = await Job.findById(jobId);
+    const job = await Job.findById(jobId).populate("company", "companyName");
     if (!job) {
       return new ErrorHandler("Job not found", 404).sendError(res);
     }
-
-    // Create a new application
+    console.log("job", job)
     const newApplication = await Application.create({
       job: jobId,
       applicant: userId,
     });
 
-    // Add the application to the job's applications array
     job.applications.push(newApplication._id);
     await job.save();
-
+    notifyApplicationReceived(req.user, job, job.company.companyName);
     return res.status(201).json({
       message: "Job applied successfully.",
       success: true,
@@ -62,7 +60,6 @@ const applyJob = asyncErrorHandler(async (req, res) => {
   }
 });
 
-// Get all jobs applied for by the user
 const getAppliedJobs = asyncErrorHandler(async (req, res) => {
   try {
     const userId = req.user.id;

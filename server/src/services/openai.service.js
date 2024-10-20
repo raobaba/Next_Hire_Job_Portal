@@ -6,7 +6,7 @@ async function processJobAndNotifyUsers(job, companyName) {
   try {
     const {
       title,
-      description, 
+      description,
       requirements,
       salary,
       location,
@@ -63,14 +63,14 @@ The Hiring Team at ${companyName}`;
             <p><b>Job Description:</b><br>${description}</p>
 
             <p>In this role, you will work with <b>${requirements.join(
-              ", "
-            )}</b> to develop and maintain web applications, collaborating with a talented team to deliver outstanding user experiences. You will contribute to building intuitive, responsive interfaces while ensuring the highest standards of quality and efficiency.</p>
+            ", "
+          )}</b> to develop and maintain web applications, collaborating with a talented team to deliver outstanding user experiences. You will contribute to building intuitive, responsive interfaces while ensuring the highest standards of quality and efficiency.</p>
 
             <p><b>Required Skills:</b></p>
             <ul>
               ${requirements
-                .map((skill) => `<li>Proficiency in ${skill}</li>`)
-                .join("")}
+              .map((skill) => `<li>Proficiency in ${skill}</li>`)
+              .join("")}
               <li>Over ${experienceLevel} years of experience as a ${jobType}</li>
               <li>Strong communication and problem-solving abilities</li>
             </ul>
@@ -160,4 +160,52 @@ cron.schedule("0 0 * * *", () => {
   notifyUsersToCompleteProfile();
 });
 
-module.exports = { processJobAndNotifyUsers };
+
+async function notifyApplicationReceived(user, job, companyName) {
+  try {
+    const emailContentText = `
+Dear ${user.fullname},
+
+Thank you for applying to the position of ${job.title} at ${companyName}. We have received your application, and it is currently under review.
+
+We value your interest in joining our team, and we will carefully evaluate your qualifications. Our hiring team will reach out to you if your skills and experience match the requirements of this role.
+
+In the meantime, feel free to explore other opportunities on our platform and update your profile to ensure we can suggest the most relevant job openings to you.
+
+Thank you again for your interest in ${companyName}. We wish you the best in the application process!
+
+Best regards,
+The Hiring Team at ${companyName}
+    `;
+
+    const emailContentHtml = `
+<p>Dear ${user.fullname},</p>
+<p>Thank you for applying to the position of <strong>${job.title}</strong> at <strong>${companyName}</strong>. We have received your application, and it is currently under review.</p>
+
+<p>We value your interest in joining our team, and we will carefully evaluate your qualifications. Our hiring team will reach out to you if your skills and experience match the requirements of this role.</p>
+
+<p>In the meantime, feel free to explore other opportunities on our platform and update your profile to ensure we can suggest the most relevant job openings to you.</p>
+
+<p>Thank you again for your interest in <strong>${companyName}</strong>. We wish you the best in the application process!</p>
+
+<p>Best regards,<br>The Hiring Team at ${companyName}</p>
+    `;
+
+    const emailBody = {
+      from: "NextHire <noreply@nexthire.com>",
+      to: user.email,
+      subject: `Application Received for ${job.title} at ${companyName}`,
+      text: emailContentText,
+      html: emailContentHtml,
+    };
+
+    // Send the email
+    await sendMail(emailBody);
+    console.log(`Application confirmation email sent to: ${user.email}`);
+  } catch (error) {
+    console.error("Error sending application confirmation email:", error);
+  }
+}
+
+
+module.exports = { processJobAndNotifyUsers, notifyApplicationReceived };

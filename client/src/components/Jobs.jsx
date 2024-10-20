@@ -5,18 +5,25 @@ import Job from "./Job";
 import { motion } from "framer-motion";
 import ReactHelmet from "./shared/ReactHelmet";
 import { getAllJobs } from "@/redux/slices/job.slice";
+import {
+  getRecommendedJobs,
+  getSearchResult,
+  clearSearchHistory,
+} from "@/redux/slices/user.slice";
 import { useDispatch } from "react-redux";
 import Loader from "./shared/Loader";
+import { toast } from "react-toastify";
 
 const Jobs = () => {
   const dispatch = useDispatch();
   const [allJobs, setAllJobs] = useState([]);
+  const [recommendedJobs, setRecommendedJobs] = useState([]);
+  const [searchResult, setSearchResult] = useState([]);
   const [filterJobs, setFilterJobs] = useState([]);
   const [currentCategory, setCurrentCategory] = useState("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
-
   const [searchParams, setSearchParams] = useState({
     title: "",
     salaryMin: "",
@@ -33,29 +40,24 @@ const Jobs = () => {
   const observerRef = useRef(null);
   const currentPageRef = useRef(1);
   const totalPagesRef = useRef(null);
-  const lastScrollTopRef = useRef(0); // To track the last scroll position
+  const lastScrollTopRef = useRef(0);
 
   const fetchJobs = () => {
     if (!hasMore || loading) return;
-
     setLoading(true);
     setError(null);
-
     const sanitizedParams = {
       ...searchParams,
       page: currentPageRef.current,
       limit: searchParams.limit || 10,
     };
-
     dispatch(getAllJobs(sanitizedParams))
       .then((res) => {
         if (res?.payload?.status === 200) {
           const newJobs = res?.payload?.jobs;
-
-          // Update allJobs and filterJobs
           if (currentPageRef.current === 1) {
-            setAllJobs(newJobs); // Clear previous jobs on new search
-            setFilterJobs(newJobs); // Set filterJobs initially
+            setAllJobs(newJobs);
+            setFilterJobs(newJobs);
           } else {
             const uniqueJobs = [
               ...new Set([...allJobs, ...newJobs].map((job) => job._id)),
@@ -64,7 +66,7 @@ const Jobs = () => {
             );
 
             setAllJobs(uniqueJobs);
-            setFilterJobs(uniqueJobs); // Update filterJobs as well
+            setFilterJobs(uniqueJobs);
           }
 
           const { currentPage, totalPages } = res.payload;
@@ -86,12 +88,106 @@ const Jobs = () => {
       });
   };
 
+  const fetchRecommendedJobs = () => {
+    if (!hasMore || loading) return;
+    setLoading(true);
+    setError(null);
+    const sanitizedParams = {
+      ...searchParams,
+      page: currentPageRef.current,
+      limit: searchParams.limit || 10,
+    };
+    dispatch(getRecommendedJobs(sanitizedParams))
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          const newJobs = res?.payload?.jobs;
+
+          if (currentPageRef.current === 1) {
+            setRecommendedJobs(newJobs);
+            setFilterJobs(newJobs);
+          } else {
+            const uniqueJobs = [
+              ...new Set(
+                [...recommendedJobs, ...newJobs].map((job) => job._id)
+              ),
+            ].map((id) =>
+              [...recommendedJobs, ...newJobs].find((job) => job._id === id)
+            );
+
+            setRecommendedJobs(uniqueJobs);
+            setFilterJobs(uniqueJobs);
+          }
+
+          const { currentPage, totalPages } = res.payload;
+          totalPagesRef.current = totalPages;
+          setHasMore(currentPage < totalPages);
+          if (sanitizedParams.page === currentPageRef.current) {
+            currentPageRef.current += 1;
+          }
+        } else {
+          setError("Failed to load recommended jobs.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching recommended jobs:", error);
+        setError("An error occurred while fetching recommended jobs.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const fetchSearchResult = () => {
+    if (!hasMore || loading) return;
+    setLoading(true);
+    setError(null);
+    const sanitizedParams = {
+      ...searchParams,
+      page: currentPageRef.current,
+      limit: searchParams.limit || 10,
+    };
+    dispatch(getSearchResult(sanitizedParams))
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          const newJobs = res?.payload?.jobs;
+
+          if (currentPageRef.current === 1) {
+            setSearchResult(newJobs);
+            setFilterJobs(newJobs);
+          } else {
+            const uniqueJobs = [
+              ...new Set([...searchResult, ...newJobs].map((job) => job._id)),
+            ].map((id) =>
+              [...searchResult, ...newJobs].find((job) => job._id === id)
+            );
+
+            setSearchResult(uniqueJobs);
+            setFilterJobs(uniqueJobs);
+          }
+
+          const { currentPage, totalPages } = res.payload;
+          totalPagesRef.current = totalPages;
+          setHasMore(currentPage < totalPages);
+          if (sanitizedParams.page === currentPageRef.current) {
+            currentPageRef.current += 1;
+          }
+        } else {
+          setError("Failed to load recommended jobs.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching recommended jobs:", error);
+        setError("An error occurred while fetching recommended jobs.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   const handleScroll = () => {
     if (observerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = observerRef.current;
       const lastScrollTop = lastScrollTopRef.current;
-
-      // Only trigger if scrolling down
       if (scrollTop > lastScrollTop) {
         if (
           scrollTop + clientHeight >= scrollHeight - 50 &&
@@ -99,11 +195,14 @@ const Jobs = () => {
           !loading &&
           currentPageRef.current <= totalPagesRef.current
         ) {
-          fetchJobs();
+          if (currentCategory === "recommended") {
+            fetchRecommendedJobs();
+          } else if (currentCategory === "trending") {
+          } else {
+            fetchJobs();
+          }
         }
       }
-
-      // Update the last scroll position
       lastScrollTopRef.current = scrollTop;
     }
   };
@@ -111,7 +210,13 @@ const Jobs = () => {
   useEffect(() => {
     currentPageRef.current = 1;
     setHasMore(true);
-    fetchJobs();
+    if (currentCategory === "recommended") {
+      fetchRecommendedJobs();
+    } else if (currentCategory === "searchedBased") {
+      fetchSearchResult();
+    } else {
+      fetchJobs();
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -125,6 +230,39 @@ const Jobs = () => {
     };
   }, [hasMore, loading]);
 
+  const handleCategoryChange = (category) => {
+    setCurrentCategory(category);
+    currentPageRef.current = 1;
+    setHasMore(true);
+
+    if (category === "recommended") {
+      fetchRecommendedJobs();
+    } else if (category === "searchedBased") {
+      fetchSearchResult();
+    } else {
+      fetchJobs();
+    }
+  };
+
+  const handleClearSearchHistory = () => {
+    dispatch(clearSearchHistory())
+      .then((res) => {
+        setLoading(true);
+        if (res?.payload?.status === 200) {
+          setLoading(false);
+          console.log("clearSearchHistory", res?.payload);
+          toast.success(res?.payload?.message);
+        } else {
+          toast.error("falied while deleting search history");
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error("falied while deleting search history");
+        setLoading(false);
+      });
+  };
   return (
     <div>
       <Navbar />
@@ -136,46 +274,69 @@ const Jobs = () => {
       />
       <div className="max-w-7xl mt-20 mx-auto px-4">
         <div className="flex flex-col md:flex-row gap-5">
-          <div className="w-full md:w-1/4 lg:w-1/5">
-            <FilterCard
-              setFilterJobs={setFilterJobs}
-              setSearchParams={setSearchParams}
-            />
-          </div>
+          {currentCategory !== "searchedBased" ? (
+            <div className="w-full md:w-1/4 lg:w-1/5">
+              <FilterCard
+                setFilterJobs={setFilterJobs}
+                setSearchParams={setSearchParams}
+              />
+            </div>
+          ) : null}
+
           <div
             className="flex-1 h-[85vh] overflow-y-auto pb-5"
             ref={observerRef}
           >
-            <div className="flex flex-col sm:flex-row items-center justify-between my-1 sm:space-x-4 space-y-3 sm:space-y-0">
-              <h2
-                onClick={() => setCurrentCategory("all")}
-                className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
-                  currentCategory === "all" ? "text-blue-600" : "text-gray-800"
-                }`}
-              >
-                All Jobs ({allJobs.length})
-              </h2>
-              <h2
-                onClick={() => setCurrentCategory("recommended")}
-                className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
-                  currentCategory === "recommended"
-                    ? "text-blue-600"
-                    : "text-gray-800"
-                }`}
-              >
-                Recommended (0)
-              </h2>
-              <h2
-                onClick={() => setCurrentCategory("trending")}
-                className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
-                  currentCategory === "trending"
-                    ? "text-blue-600"
-                    : "text-gray-800"
-                }`}
-              >
-                Based On Search (0)
-              </h2>
-            </div>
+            {currentCategory !== "searchedBased" ? (
+              <div className="flex flex-col sm:flex-row items-center justify-between my-1 sm:space-x-4 space-y-3 sm:space-y-0">
+                <h2
+                  onClick={() => handleCategoryChange("all")}
+                  className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                    currentCategory === "all"
+                      ? "text-blue-600"
+                      : "text-gray-800"
+                  }`}
+                >
+                  All Jobs ({allJobs.length})
+                </h2>
+                <h2
+                  onClick={() => handleCategoryChange("recommended")}
+                  className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                    currentCategory === "recommended"
+                      ? "text-blue-600"
+                      : "text-gray-800"
+                  }`}
+                >
+                  Recommended ({recommendedJobs.length})
+                </h2>
+                <h2
+                  onClick={() => handleCategoryChange("searchedBased")}
+                  className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                    currentCategory === "searchedBased"
+                      ? "text-blue-600"
+                      : "text-gray-800"
+                  }`}
+                >
+                  Based On Search ({searchResult.length})
+                </h2>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center my-4 sm:space-x-4 space-y-3 sm:space-y-0">
+                <button
+                  onClick={() => handleCategoryChange("all")}
+                  className="px-4 py-2 text-sm md:text-lg font-semibold text-white bg-blue-600 rounded-lg shadow-md transition duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                >
+                  &larr; Back
+                </button>
+                <button
+                  onClick={() => handleClearSearchHistory()}
+                  className="px-4 py-2 text-sm md:text-lg font-semibold text-white bg-red-500 rounded-lg shadow-md transition duration-300 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50"
+                >
+                  Clear Search
+                </button>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {filterJobs.length > 0 ? (
                 filterJobs.map((job) => (

@@ -37,12 +37,13 @@ const FilterCard = ({ setSearchParams }) => {
   const handleFilterSelection = (filterType, filterValue) => {
     const filterKey = filterType.toLowerCase();
 
-    // Ensure only one selection for Location, Job Type, or Salary
+    // Handle unique selections for Location, Job Type, and Salary
     if (["location", "job type", "salary"].includes(filterKey)) {
       const existingFilter = selectedFilters.find(
         (filter) => filter.type === filterKey
       );
 
+      // Update or add new filter
       if (existingFilter) {
         setSelectedFilters((prev) =>
           prev.map((filter) =>
@@ -58,7 +59,6 @@ const FilterCard = ({ setSearchParams }) => {
         ]);
       }
     } else {
-      // For other filter types, allow multiple selections
       const isSelected = selectedFilters.some(
         (filter) => filter.type === filterKey && filter.value === filterValue
       );
@@ -79,6 +79,19 @@ const FilterCard = ({ setSearchParams }) => {
     }
   };
 
+  // Remove a filter chip
+  const removeFilter = (filterType, filterValue) => {
+    setSelectedFilters((prev) =>
+      prev.filter(
+        (filter) =>
+          !(
+            filter.type === filterType.toLowerCase() &&
+            filter.value === filterValue
+          )
+      )
+    );
+  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -91,7 +104,7 @@ const FilterCard = ({ setSearchParams }) => {
 
   useEffect(() => {
     const updatedSearchParams = {
-      title: debouncedSearchTerm, // Use debounced search term
+      title: debouncedSearchTerm,
       location: selectedFilters.find((f) => f.type === "location")?.value || "",
       jobType: selectedFilters.find((f) => f.type === "job type")?.value || "",
       salaryMin: selectedFilters.find(
@@ -145,9 +158,7 @@ const FilterCard = ({ setSearchParams }) => {
                   <span className="text-[10px]">{filter.value}</span>
                   <FiX
                     className="ml-1 text-[12px] cursor-pointer"
-                    onClick={() =>
-                      handleFilterSelection(filter.type, filter.value)
-                    }
+                    onClick={() => removeFilter(filter.type, filter.value)}
                   />
                 </div>
               ))}

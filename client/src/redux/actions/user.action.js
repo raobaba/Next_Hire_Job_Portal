@@ -35,3 +35,18 @@ export const updateUserProfileApi = async (formData) => {
   const url = `api/v1/user/profile/update`;
   return await fetchFromApiServer("MULTIPART", url, formData);
 };
+
+export const fetchRecommendedJobs = async (params) => {
+  const url = `api/v1/user/recommended-jobs`;
+  return await fetchFromApiServer('GET', url, {}, { params })
+}
+
+export const fetchSearchResult = async (params)=>{
+  const url = `api/v1/user/search-result`;
+  return await fetchFromApiServer('GET',url,{},{params})
+}
+
+export const deleteSearchHistory = async()=>{
+  const url = `api/v1/user/search-history`;
+  return await fetchFromApiServer('DELETE',url)
+}
