@@ -2,9 +2,28 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Eye, Edit2 } from "lucide-react";
+import { MdDelete } from "react-icons/md";
+import { useDispatch } from "react-redux";
+import { deleteJob } from "@/redux/slices/job.slice"; // Import the deleteJob action
+import { toast } from "react-toastify"; // Optional: Import toast for notifications
 
-const AdminJobsTable = ({ jobs }) => {
+const AdminJobsTable = ({ jobs, onDeleteJob }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleDeleteJob = (jobId) => {
+    // Optional confirmation before deletion
+    if (window.confirm("Are you sure you want to delete this job?")) {
+      dispatch(deleteJob(jobId)).then((res) => {
+        if (res?.payload?.status === 200) {
+          toast.success("Job deleted successfully!"); // Optional notification
+          onDeleteJob(jobId); // Update the parent component's state
+        } else {
+          toast.error("Failed to delete job"); // Optional notification
+        }
+      });
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-4">
@@ -13,7 +32,7 @@ const AdminJobsTable = ({ jobs }) => {
           {jobs.map((job) => (
             <div
               key={job._id}
-              className="flex flex-col border border-gray-300 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow h-full" // Added flex and h-full
+              className="flex flex-col border border-gray-300 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow h-full"
             >
               <div className="flex items-center justify-between mb-2">
                 <img
@@ -32,8 +51,6 @@ const AdminJobsTable = ({ jobs }) => {
                 {job.company?.companyName || "Unknown Company"}
               </p>
               <p className="text-gray-500 text-sm mt-2 flex-grow">
-                {" "}
-                {/* Added flex-grow */}
                 {job.description.length > 100
                   ? job.description.substring(0, 100) + "..."
                   : job.description}
@@ -52,11 +69,9 @@ const AdminJobsTable = ({ jobs }) => {
               </div>
 
               <div className="mt-auto flex items-center justify-between mt-4">
-                {" "}
-                {/* Added mt-auto */}
                 <Button
-                  variant="outline" // Adjust the variant as needed
-                  className="bg-blue-500 hover:bg-blue-600 text-white border-blue-500" // Updated styles
+                  variant="outline"
+                  className="bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
                   onClick={() =>
                     navigate(`/profile/admin/jobs/${job._id}/applicants`)
                   }
@@ -64,13 +79,11 @@ const AdminJobsTable = ({ jobs }) => {
                   <Eye className="w-4 h-4 mr-1" /> View Applicants
                 </Button>
                 <Button
-                  variant="secondary" // Adjust the variant as needed
-                  className="bg-green-500 hover:bg-green-600 text-white border-green-500" // Updated styles
-                  onClick={() =>
-                    navigate(`/profile/admin/companies/${job._id}`)
-                  }
+                  variant="secondary"
+                  className="bg-green-500 hover:bg-green-600 text-white border-green-500"
+                  onClick={() => handleDeleteJob(job._id)} // Trigger the delete action
                 >
-                  <Edit2 className="w-4 h-4 mr-1" /> Edit
+                  <MdDelete className="w-4 h-4 mr-1" /> Delete
                 </Button>
               </div>
             </div>
@@ -82,7 +95,7 @@ const AdminJobsTable = ({ jobs }) => {
             No jobs available. Start by posting a new job!
           </h2>
           <Button
-            className="bg-blue-500 hover:bg-blue-600 text-white" // Updated styles
+            className="bg-blue-500 hover:bg-blue-600 text-white"
             onClick={() => navigate("/profile/admin/jobs/create")}
           >
             Post a New Job

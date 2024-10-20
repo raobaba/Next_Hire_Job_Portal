@@ -250,6 +250,7 @@ const Jobs = () => {
         setLoading(true);
         if (res?.payload?.status === 200) {
           setLoading(false);
+          handleCategoryChange("all")
           console.log("clearSearchHistory", res?.payload);
           toast.success(res?.payload?.message);
         } else {
@@ -297,7 +298,7 @@ const Jobs = () => {
                       : "text-gray-800"
                   }`}
                 >
-                  All Jobs ({allJobs.length})
+                  All Jobs ({allJobs?.length})
                 </h2>
                 <h2
                   onClick={() => handleCategoryChange("recommended")}
@@ -307,7 +308,7 @@ const Jobs = () => {
                       : "text-gray-800"
                   }`}
                 >
-                  Recommended ({recommendedJobs.length})
+                  Recommended ({recommendedJobs?.length})
                 </h2>
                 <h2
                   onClick={() => handleCategoryChange("searchedBased")}
@@ -317,7 +318,7 @@ const Jobs = () => {
                       : "text-gray-800"
                   }`}
                 >
-                  Based On Search ({searchResult.length})
+                  Based On Search ({searchResult?.length})
                 </h2>
               </div>
             ) : (
@@ -338,8 +339,8 @@ const Jobs = () => {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {filterJobs.length > 0 ? (
-                filterJobs.map((job) => (
+              {filterJobs?.length > 0 ? (
+                filterJobs?.map((job) => (
                   <motion.div
                     key={job._id}
                     initial={{ opacity: 0, x: 100 }}

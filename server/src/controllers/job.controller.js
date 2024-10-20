@@ -53,8 +53,8 @@ const postJob = asyncErrorHandler(async (req, res) => {
     title,
     description,
     requirements: Array.isArray(requirements)
-      ? requirements.map((req) => req.trim()) 
-      : requirements.split(",").map((req) => req.trim()), 
+      ? requirements.map((req) => req.trim())
+      : requirements.split(",").map((req) => req.trim()),
     salary: Number(salary),
     location,
     jobType,
@@ -77,7 +77,7 @@ const postJob = asyncErrorHandler(async (req, res) => {
 
 const getAllJobs = asyncErrorHandler(async (req, res) => {
   const {
-    title, 
+    title,
     salaryMin,
     salaryMax,
     experienceLevel,
@@ -104,18 +104,18 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
 
   if (keyword) {
     const companies = await Company.find({
-      companyName: { $regex: keyword, $options: "i" }, 
+      companyName: { $regex: keyword, $options: "i" },
     }).select("_id");
 
     query.$or = [
-      { title: { $regex: keyword, $options: "i" } }, 
+      { title: { $regex: keyword, $options: "i" } },
       { company: { $in: companies.map((company) => company._id) } },
       {
         requirements: {
           $in: keyword
-            .split(" ") 
+            .split(" ")
             .map((term) => new RegExp(term.trim(), "i")),
-        }, 
+        },
       },
     ];
   }
@@ -147,7 +147,7 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     const order = sortOrder === "asc" ? 1 : -1;
     sortOptions[sortBy] = order;
   } else {
-    sortOptions.createdAt = -1; 
+    sortOptions.createdAt = -1;
   }
 
   const jobs = await Job.find(query)
@@ -209,4 +209,27 @@ const getAdminJobs = asyncErrorHandler(async (req, res) => {
   });
 });
 
-module.exports = { postJob, getAllJobs, getJobById, getAdminJobs };
+const deleteAdminJobs = asyncErrorHandler(async (req, res) => {
+  const jobId = req.params.id;
+  const userId = req.user.id;
+
+  const job = await Job.findById(jobId);
+  if (!job) {
+    const error = new ErrorHandler("Job not found", 404);
+    return error.sendError(res);
+  }
+
+  if (job.created_by.toString() !== userId) {
+    const error = new ErrorHandler("You do not have permission to delete this job", 403);
+    return error.sendError(res);
+  }
+  await job.deleteOne();
+
+  return res.status(200).json({
+    success: true,
+    status: 200,
+    message: "Job has been deleted successfully",
+  });
+})
+
+module.exports = { postJob, getAllJobs, getJobById, getAdminJobs, deleteAdminJobs };

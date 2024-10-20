@@ -23,3 +23,9 @@ export const getJobByIdApi = async (jobId) => {
   const url = `api/v1/job/get/${jobId}`;
   return await fetchFromApiServer("GET", url);
 };
+
+
+export const removeJobApi = async (jobId) => {
+  const url = `api/v1/job/delete/${jobId}`;
+  return await fetchFromApiServer('DELETE', url)
+}

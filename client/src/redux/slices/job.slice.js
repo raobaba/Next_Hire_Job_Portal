@@ -4,6 +4,7 @@ import {
   getAllJobsApi,
   getAdminJobsApi,
   getJobByIdApi,
+  removeJobApi,
 } from "../actions/job.action";
 
 export const postJob = createAsyncThunk(
@@ -60,6 +61,22 @@ export const getJobById = createAsyncThunk(
     }
   }
 );
+
+// Thunk to delete job by ID
+export const deleteJob = createAsyncThunk(
+  "job/deleteJobById",
+  async (jobId, { rejectWithValue }) => {
+    try {
+      const response = await removeJobApi(jobId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to fetch job by ID"
+      );
+    }
+  }
+);
+
 
 // Initial state
 const initialState = {

@@ -4,17 +4,15 @@ const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const { notifyApplicationReceived } = require('../services/openai.service')
 const ErrorHandler = require("../utils/errorHandler");
 
-// Apply for a job
 const applyJob = asyncErrorHandler(async (req, res) => {
   try {
     const userId = req.user.id;
     const jobId = req.params.jobId;
-    // Check if the user is a Student
     if (req.user.role !== "student") {
       const error = new ErrorHandler(
         "Only students are allowed to apply. Please update your account role to Student to proceed.",
         403
-      ); // 403: Forbidden
+      ); 
       return error.sendError(res);
     }
     if (!jobId) {
@@ -93,7 +91,6 @@ const getAppliedJobs = asyncErrorHandler(async (req, res) => {
   }
 });
 
-// Get applicants for a specific job
 const getApplicants = asyncErrorHandler(async (req, res) => {
   try {
     const jobId = req.params.jobId;
@@ -125,7 +122,6 @@ const getApplicants = asyncErrorHandler(async (req, res) => {
   }
 });
 
-// Update the status of an application
 const updateStatus = asyncErrorHandler(async (req, res) => {
   try {
     const { status } = req.body;
@@ -140,7 +136,6 @@ const updateStatus = asyncErrorHandler(async (req, res) => {
       return new ErrorHandler("Application not found", 404).sendError(res);
     }
 
-    // Update the status
     application.status = status.toLowerCase();
     await application.save();
 

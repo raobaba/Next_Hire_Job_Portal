@@ -8,6 +8,7 @@ import ReactHelmet from "../shared/ReactHelmet";
 import Loader from "../shared/Loader";
 import { useDispatch } from "react-redux";
 import { getJobsByCompany } from "@/redux/slices/company.slice";
+import { deleteJob } from "@/redux/slices/job.slice";
 
 const AdminJobs = () => {
   const { id } = useParams();
@@ -44,6 +45,14 @@ const AdminJobs = () => {
     }
   }, [input, jobs]);
 
+  // Handle job deletion by updating the local jobs state
+  const handleJobDeletion = (deletedJobId) => {
+    setJobs((prevJobs) => prevJobs.filter((job) => job._id !== deletedJobId));
+    setFilteredJobs((prevFilteredJobs) =>
+      prevFilteredJobs.filter((job) => job._id !== deletedJobId)
+    );
+  };
+
   return (
     <div>
       <Navbar />
@@ -72,7 +81,7 @@ const AdminJobs = () => {
             </Button>
           </div>
         </div>
-        <AdminJobsTable jobs={filteredJobs} />
+        <AdminJobsTable jobs={filteredJobs} onDeleteJob={handleJobDeletion} />
       </div>
     </div>
   );
