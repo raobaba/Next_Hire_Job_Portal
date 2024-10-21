@@ -240,7 +240,51 @@ const deleteAdminJobs = asyncErrorHandler(async (req, res) => {
 });
 
 
+const getSimilarJobs = asyncErrorHandler(async (req, res) => {
+  const jobId = req.params.id;
+  const limit = parseInt(req.query.limit, 10) || 5;
 
+  try {
+    const job = await Job.findById(jobId);
 
+    if (!job) {
+      const error = new ErrorHandler("Job not found", 404);
+      return error.sendError(res);
+    }
 
-module.exports = { postJob, getAllJobs, getJobById, getAdminJobs, deleteAdminJobs };
+    const query = {
+      _id: { $ne: jobId },
+      $or: [
+        { title: { $regex: job.title, $options: "i" } },
+        { location: { $regex: job.location, $options: "i" } },
+        { jobType: job.jobType },
+        { experienceLevel: job.experienceLevel },
+      ],
+    };
+
+    const similarJobs = await Job.find(query)
+      .populate({
+        path: "company",
+        select: "companyName",
+      })
+      .limit(limit);
+
+    if (similarJobs.length === 0) {
+      const error = new ErrorHandler("No similar jobs found", 404);
+      return error.sendError(res);
+    }
+
+    return res.status(200).json({
+      success: true,
+      jobs: similarJobs,
+      totalJobs: similarJobs.length,
+      status: 200,
+    });
+  } catch (error) {
+    console.error("Error fetching similar jobs:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+module.exports = { postJob, getAllJobs, getJobById, getAdminJobs, deleteAdminJobs, getSimilarJobs };
+

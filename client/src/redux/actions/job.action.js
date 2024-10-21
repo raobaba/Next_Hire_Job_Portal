@@ -29,3 +29,8 @@ export const removeJobApi = async (jobId) => {
   const url = `api/v1/job/delete/${jobId}`;
   return await fetchFromApiServer('DELETE', url)
 }
+
+export const fetchSimilarJobApi = async (jobId) => {
+  const url = `api/v1/job/${jobId}/similar`;
+  return await fetchFromApiServer('GET', url)
+}

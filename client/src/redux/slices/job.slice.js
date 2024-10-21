@@ -5,6 +5,7 @@ import {
   getAdminJobsApi,
   getJobByIdApi,
   removeJobApi,
+  fetchSimilarJobApi,
 } from "../actions/job.action";
 
 export const postJob = createAsyncThunk(
@@ -77,11 +78,27 @@ export const deleteJob = createAsyncThunk(
   }
 );
 
+// Thunk to delete job by ID
+export const getSimilarJobs = createAsyncThunk(
+  "job/similar",
+  async (jobId, { rejectWithValue }) => {
+    try {
+      const response = await fetchSimilarJobApi(jobId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to fetch job by ID"
+      );
+    }
+  }
+);
+
 
 // Initial state
 const initialState = {
   jobs: [],
   adminJobs: [],
+  similarJobs: [],
   job: null,
   loading: false,
   error: null,
@@ -157,6 +174,19 @@ const jobSlice = createSlice({
         state.job = action.payload; // Set job data
       })
       .addCase(getJobById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Get similar jobs cases
+      .addCase(getSimilarJobs.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getSimilarJobs.fulfilled, (state, action) => {
+        state.loading = false;
+        state.similarJobs = action.payload.similarJobs; // Set similar jobs data
+      })
+      .addCase(getSimilarJobs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
