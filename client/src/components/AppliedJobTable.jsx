@@ -22,7 +22,10 @@ const AppliedJobTable = () => {
       dispatch(getAppliedJobs())
         .then((res) => {
           if (res?.payload?.status === 200) {
-            setAppliedJobs(res.payload.applications);
+            const validJobs = res.payload.applications.filter(
+              (job) => job?.job?._id // Filter out jobs where job ID is not available
+            );
+            setAppliedJobs(validJobs);
           } else {
             setError("Failed to load applied jobs.");
           }
@@ -38,9 +41,12 @@ const AppliedJobTable = () => {
     if (!application?.applications?.length) {
       fetchAppliedJobs();
     } else {
-      setAppliedJobs(application.applications);
+      const validJobs = application.applications.filter(
+        (job) => job?.job?._id // Filter out jobs where job ID is not available
+      );
+      setAppliedJobs(validJobs);
     }
-  }, [dispatch]);
+  }, [dispatch, application?.applications]);
 
   const handleCardClick = (jobId) => {
     navigate(`/description/${jobId}`);
@@ -61,7 +67,7 @@ const AppliedJobTable = () => {
           {appliedJobs.map((appliedJob) => (
             <div
               key={appliedJob?._id}
-              className="bg-white rounded-lg shadow-lg p-4 hover:shadow-2xl flex flex-col justify-between h-80 w-full" // Increased height to h-80
+              className="bg-white rounded-lg shadow-lg p-4 hover:shadow-2xl flex flex-col justify-between h-80 w-full"
             >
               {/* Company Logo */}
               <div className="flex justify-center mb-3">
@@ -105,7 +111,7 @@ const AppliedJobTable = () => {
               {/* Status Badge */}
               <div className="flex justify-between text-center">
                 <button
-                  className="bg-blue-500 text-white rounded-xl px-4 py-2" // Changed rounded-3xl to rounded-xl
+                  className="bg-blue-500 text-white rounded-xl px-4 py-2"
                   onClick={() => handleCardClick(appliedJob?.job?._id)}
                 >
                   Job Details

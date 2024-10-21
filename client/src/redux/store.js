@@ -15,6 +15,7 @@ import {
   REGISTER,
 } from "redux-persist";
 
+// Root reducer combining slices
 const rootReducer = combineReducers({
   user: userReducer,
   application: applicationReducer,
@@ -22,14 +23,34 @@ const rootReducer = combineReducers({
   job: jobReducer,
 });
 
+// Persist configuration
 const persistConfig = {
   key: "root",
   storage,
   whitelist: ["user", "application", "company", "job"],
 };
 
+// Create a persisted reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
+// Function to check and refresh state
+const checkAndRefreshState = () => {
+  const now = new Date().getTime();
+  const lastRefresh = localStorage.getItem("lastRefresh");
+
+  // Check if 1 hour (3600000 ms) has passed
+  if (lastRefresh && now - lastRefresh > 60 * 60 * 1000) {
+    localStorage.removeItem("persist:root"); // Clear persisted state
+    localStorage.setItem("lastRefresh", now); // Update last refresh timestamp
+  } else if (!lastRefresh) {
+    localStorage.setItem("lastRefresh", now); // Initialize on first run
+  }
+};
+
+// Call the check function
+checkAndRefreshState();
+
+// Configure the store
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -41,4 +62,5 @@ export const store = configureStore({
     }),
 });
 
+// Create a persistor
 export const persistor = persistStore(store);
