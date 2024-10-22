@@ -20,7 +20,6 @@ const AdminJobs = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Fetch jobs by company when component mounts
     dispatch(getJobsByCompany(id)).then((res) => {
       if (res?.payload?.status === 200) {
         setJobs(res?.payload?.jobs || []);
@@ -31,7 +30,6 @@ const AdminJobs = () => {
   }, [dispatch, id]);
 
   useEffect(() => {
-    // Filter jobs based on input
     if (input) {
       setFilteredJobs(
         jobs.filter(
@@ -45,7 +43,6 @@ const AdminJobs = () => {
     }
   }, [input, jobs]);
 
-  // Handle job deletion by updating the local jobs state
   const handleJobDeletion = (deletedJobId) => {
     setJobs((prevJobs) => prevJobs.filter((job) => job._id !== deletedJobId));
     setFilteredJobs((prevFilteredJobs) =>

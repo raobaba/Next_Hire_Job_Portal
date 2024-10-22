@@ -247,32 +247,53 @@ The Hiring Team at ${companyName}
 
 async function sendStatusUpdateEmail(applicant, jobTitle, status, companyName) {
   try {
-    const emailContentText = `
+    let emailContentText;
+    let emailContentHtml;
+
+    // Determine the email content based on the application status
+    if (status === 'accepted') {
+      emailContentText = `
 Hi ${applicant.fullname},
 
-We hope this message finds you well!
-
-We wanted to let you know that your application for the position of ${jobTitle} at ${companyName} has been ${status}. We appreciate your interest in joining our team and your patience throughout the process.
+We are excited to inform you that your application for the position of ${jobTitle} at ${companyName} has been accepted! Congratulations! We are looking forward to discussing the next steps with you.
 
 If you have any questions or need further information, feel free to reach out. We're here to help!
 
-Thank you once again for considering a career with us.
-
 Best wishes,
 The Hiring Team at ${companyName}
-    `;
+      `;
 
-    const emailContentHtml = `
+      emailContentHtml = `
 <p>Hi ${applicant.fullname},</p>
-<p>We hope this message finds you well!</p>
-<p>We wanted to let you know that your application for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong> has been updated to "<strong>${status}</strong>". We appreciate your interest in joining our team and your patience throughout the process.</p>
+<p>We are excited to inform you that your application for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong> has been accepted! Congratulations! We are looking forward to discussing the next steps with you.</p>
 
 <p>If you have any questions or need further information, feel free to reach out. We're here to help!</p>
 
-<p>Thank you once again for considering a career with us.</p>
+<p>Best wishes,<br>The Hiring Team at ${companyName}</p>
+      `;
+    } else if (status === 'rejected') {
+      emailContentText = `
+Hi ${applicant.fullname},
+
+Thank you for your interest in the position of ${jobTitle} at ${companyName}. We appreciate the time you took to apply and for your patience during the selection process. Unfortunately, we have decided to move forward with other candidates at this time.
+
+We encourage you to apply for future openings that match your skills and experience. Thank you once again for considering a career with us.
+
+Best wishes,
+The Hiring Team at ${companyName}
+      `;
+
+      emailContentHtml = `
+<p>Hi ${applicant.fullname},</p>
+<p>Thank you for your interest in the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>. We appreciate the time you took to apply and for your patience during the selection process. Unfortunately, we have decided to move forward with other candidates at this time.</p>
+
+<p>We encourage you to apply for future openings that match your skills and experience. Thank you once again for considering a career with us.</p>
 
 <p>Best wishes,<br>The Hiring Team at ${companyName}</p>
-    `;
+      `;
+    } else {
+      throw new Error("Invalid status");
+    }
 
     const emailBody = {
       from: "NextHire <noreply@nexthire.com>",

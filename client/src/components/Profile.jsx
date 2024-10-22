@@ -58,7 +58,6 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Conditional Rendering for Skills and Resume */}
         {user?.role === "student" && (
           <>
             <div className="my-5">
@@ -92,7 +91,6 @@ const Profile = () => {
         )}
       </div>
 
-      {/* Conditional Rendering for Applied Jobs and Companies */}
       {user?.role === "student" && (
         <div className="max-w-4xl mx-auto bg-white rounded-2xl my-5 p-6 sm:p-8">
           <h1 className="font-bold text-lg text-center my-5">Applied Jobs</h1>

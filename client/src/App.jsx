@@ -4,6 +4,7 @@ import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
 import Jobs from "./components/Jobs";
 import JobDescription from "./components/JobDescription";
+import CompanyDashboard from "./components/CompanyDashboard";
 import Notifications from "./components/Notifications";
 import Profile from "./components/Profile";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
@@ -32,6 +33,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/forgot-password",
     element: <ResetPassword />,
+  },
+  {
+    path: "/company-dashboard/:id",
+    element: <CompanyDashboard />,
   },
   {
     path: "/jobs",

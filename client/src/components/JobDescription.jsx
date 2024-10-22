@@ -63,8 +63,10 @@ const JobDescription = () => {
 
   // New function to handle navigation to company details
   const viewCompanyDetails = () => {
-    navigate(`/company/${singleJob.companyId}`); // Adjust the URL based on your routing setup
+    navigate(`/company-dashboard/${singleJob?.company}`); // Adjust the URL based on your routing setup
   };
+
+  console.log("singleJob", singleJob?.company);
 
   if (!singleJob) return <Loader />;
 
