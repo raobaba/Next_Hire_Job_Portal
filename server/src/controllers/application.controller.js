@@ -1,7 +1,8 @@
 const Application = require("../models/application.model");
 const Job = require("../models/job.model");
+const Company = require("../models/company.model")
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
-const { notifyApplicationReceived } = require('../services/openai.service')
+const { notifyApplicationReceived, sendStatusUpdateEmail } = require('../services/openai.service')
 const ErrorHandler = require("../utils/errorHandler");
 
 const applyJob = asyncErrorHandler(async (req, res) => {
@@ -34,7 +35,6 @@ const applyJob = asyncErrorHandler(async (req, res) => {
     if (!job) {
       return new ErrorHandler("Job not found", 404).sendError(res);
     }
-    console.log("job", job)
     const newApplication = await Application.create({
       job: jobId,
       applicant: userId,
@@ -126,18 +126,32 @@ const updateStatus = asyncErrorHandler(async (req, res) => {
   try {
     const { status } = req.body;
     const applicationId = req.params.applicationId;
-
     if (!status) {
       return new ErrorHandler("Status is required", 400).sendError(res);
     }
 
-    const application = await Application.findById(applicationId);
+    const application = await Application.findById(applicationId).populate('applicant'); // Populate to get applicant details
     if (!application) {
       return new ErrorHandler("Application not found", 404).sendError(res);
     }
 
+    const previousStatus = application.status;
     application.status = status.toLowerCase();
     await application.save();
+
+    const job = await Job.findById(application.job);
+    if (!job) {
+      return new ErrorHandler("Job not found", 404).sendError(res);
+    }
+
+    const company = await Company.findById(job.company)
+    if (!company) {
+      return new ErrorHandler("company not found", 404).sendError(res);
+    }
+    console.log("company", company)
+    const applicant = application.applicant;
+
+    await sendStatusUpdateEmail(applicant, job.title, application.status, company.companyName); // Call the function to send email
 
     return res.status(200).json({
       message: "Status updated successfully.",

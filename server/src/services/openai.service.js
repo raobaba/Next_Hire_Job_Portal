@@ -245,6 +245,51 @@ The Hiring Team at ${companyName}
 }
 
 
+async function sendStatusUpdateEmail(applicant, jobTitle, status, companyName) {
+  try {
+    const emailContentText = `
+Hi ${applicant.fullname},
+
+We hope this message finds you well!
+
+We wanted to let you know that your application for the position of ${jobTitle} at ${companyName} has been ${status}. We appreciate your interest in joining our team and your patience throughout the process.
+
+If you have any questions or need further information, feel free to reach out. We're here to help!
+
+Thank you once again for considering a career with us.
+
+Best wishes,
+The Hiring Team at ${companyName}
+    `;
+
+    const emailContentHtml = `
+<p>Hi ${applicant.fullname},</p>
+<p>We hope this message finds you well!</p>
+<p>We wanted to let you know that your application for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong> has been updated to "<strong>${status}</strong>". We appreciate your interest in joining our team and your patience throughout the process.</p>
+
+<p>If you have any questions or need further information, feel free to reach out. We're here to help!</p>
+
+<p>Thank you once again for considering a career with us.</p>
+
+<p>Best wishes,<br>The Hiring Team at ${companyName}</p>
+    `;
+
+    const emailBody = {
+      from: "NextHire <noreply@nexthire.com>",
+      to: applicant.email,
+      subject: `Application Status Update: ${jobTitle} at ${companyName}`,
+      text: emailContentText,
+      html: emailContentHtml,
+    };
+
+    await sendMail(emailBody);
+    console.log(`Status update email sent to: ${applicant.email}`);
+  } catch (error) {
+    console.error("Error sending application status update email:", error);
+  }
+}
 
 
-module.exports = { processJobAndNotifyUsers, notifyApplicationReceived, notifyJobDeletion };
+
+
+module.exports = { processJobAndNotifyUsers, notifyApplicationReceived, notifyJobDeletion, sendStatusUpdateEmail };
