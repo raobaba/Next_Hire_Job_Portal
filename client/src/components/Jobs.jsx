@@ -301,9 +301,9 @@ const Jobs = () => {
                       : "text-gray-800"
                   }`}
                 >
-                  All Jobs ({allJobs?.length})
+                  All Jobs ({allJobs?.length || 0})
                 </h2>
-                {user.role !== "recruiter" && (
+                {user?.role !== "recruiter" && (
                   <>
                     <h2
                       onClick={() => handleCategoryChange("recommended")}
@@ -313,7 +313,7 @@ const Jobs = () => {
                           : "text-gray-800"
                       }`}
                     >
-                      Recommended ({recommendedJobs?.length})
+                      Recommended ({recommendedJobs?.length || 0})
                     </h2>
                     <h2
                       onClick={() => handleCategoryChange("searchedBased")}
@@ -323,14 +323,14 @@ const Jobs = () => {
                           : "text-gray-800"
                       }`}
                     >
-                      Based On Search ({searchResult?.length})
+                      Based On Search ({searchResult?.length || 0})
                     </h2>
                   </>
                 )}
               </div>
             ) : (
               <>
-                {user.role !== "recruiter" && (
+                {user?.role !== "recruiter" && (
                   <div className="flex justify-between items-center my-4 sm:space-x-4 space-y-3 sm:space-y-0">
                     <button
                       onClick={() => handleCategoryChange("all")}

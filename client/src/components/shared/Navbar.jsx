@@ -107,7 +107,7 @@ const Navbar = () => {
                 <Link to="/jobs">Jobs</Link>
               </li>
               <li>
-                <Link to="/browse">Browse</Link>
+                <Link to="/notifications">Notifications</Link>
               </li>
             </ul>
             {token ? (
@@ -212,11 +212,11 @@ const Navbar = () => {
               </li>
               <li>
                 <Link
-                  to="/browse"
+                  to="/notifications"
                   onClick={toggleMenu}
                   className="text-gray-800 hover:text-[#F83002]"
                 >
-                  Browse
+                  Notifications
                 </Link>
               </li>
               <li>

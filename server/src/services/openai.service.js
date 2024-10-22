@@ -104,11 +104,11 @@ async function notifyUsersToCompleteProfile() {
   try {
     const usersWithEmptySkills = await User.find({
       "profile.skills": { $exists: true, $eq: [] },
+      role: "student",
     });
 
     for (const user of usersWithEmptySkills) {
-      // Construct the email body
-      const userProfileLink = `https://your-platform-url.com/profile/${user._id}`; // Replace with your actual profile URL
+      const userProfileLink = `http://localhost:5173/profile`; // Replace with your actual profile URL
       const emailContent = `Subject: Complete Your Profile for Better Job Suggestions
 
 Dear ${user.fullname},
@@ -132,7 +132,7 @@ The NextHire Team`;
           <p>Best regards,<br>The NextHire Team</p>
         `,
       };
-
+      await sendMail(emailBody);
       console.log(`Email sent to: ${user.email}`);
     }
 
@@ -144,6 +144,7 @@ The NextHire Team`;
     );
   }
 }
+
 
 cron.schedule("0 0 * * *", () => {
   console.log(

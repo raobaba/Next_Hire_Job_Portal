@@ -34,7 +34,7 @@ const allJobs = [
   },
 ];
 
-const Browse = () => {
+const Notifications = () => {
   return (
     <div>
       <Navbar />
@@ -58,4 +58,4 @@ const Browse = () => {
   );
 };
 
-export default Browse;
+export default Notifications;

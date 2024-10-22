@@ -65,8 +65,8 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="text-center mt-[100px]">
-      <div className="flex flex-col gap-5 my-10">
+    <div className="text-center mt-[80px]">
+      <div className="flex flex-col gap-5 my-5">
         <span className="mx-auto px-4 py-2 rounded-full bg-gray-100 text-[#F83002] font-medium">
           Your Gateway to Opportunities
         </span>

@@ -63,7 +63,7 @@ const AppliedJobTable = () => {
           </h2>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {appliedJobs.map((appliedJob) => (
             <div
               key={appliedJob?._id}
@@ -132,7 +132,6 @@ const AppliedJobTable = () => {
           ))}
         </div>
       )}
-      {error && <div className="text-red-500 mt-4">{error}</div>}
     </div>
   );
 };

@@ -61,6 +61,11 @@ const JobDescription = () => {
       });
   };
 
+  // New function to handle navigation to company details
+  const viewCompanyDetails = () => {
+    navigate(`/company/${singleJob.companyId}`); // Adjust the URL based on your routing setup
+  };
+
   if (!singleJob) return <Loader />;
 
   return (
@@ -98,17 +103,27 @@ const JobDescription = () => {
             </div>
           </div>
 
-          <Button
-            onClick={isApplied ? null : applyJobHandler}
-            disabled={isApplied}
-            className={`rounded-lg ${
-              isApplied
-                ? "bg-gray-600 cursor-not-allowed"
-                : "bg-[#7209b7] hover:bg-[#5f32ad]"
-            }`}
-          >
-            {isApplied ? "Applied" : "Apply Now"}
-          </Button>
+          <div className=" flex justify-between text-center align-baseline space-x-4">
+            <Button
+              onClick={isApplied ? null : applyJobHandler}
+              disabled={isApplied}
+              className={`rounded-lg ${
+                isApplied
+                  ? "bg-gray-600 cursor-not-allowed"
+                  : "bg-[#7209b7] hover:bg-[#5f32ad]"
+              }`}
+            >
+              {isApplied ? "Applied" : "Apply Now"}
+            </Button>
+
+            {/* New Button for Company Details */}
+            <Button
+              onClick={viewCompanyDetails}
+              className="rounded-lg bg-[#007BFF] hover:bg-[#0056b3]"
+            >
+              View Company Details
+            </Button>
+          </div>
 
           <h1 className="border-b-2 border-b-gray-300 font-medium py-4 mt-6">
             Job Description

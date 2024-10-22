@@ -35,8 +35,8 @@ const Profile = () => {
               />
             </Avatar>
             <div>
-              <h1 className="font-medium text-xl">{user.fullname}</h1>
-              <p className="text-gray-600">{user.profile.bio}</p>
+              <h1 className="font-medium text-xl">{user?.fullname}</h1>
+              <p className="text-gray-600">{user?.profile.bio}</p>
             </div>
           </div>
           <Button
@@ -50,22 +50,22 @@ const Profile = () => {
         <div className="my-5">
           <div className="flex items-center gap-3 my-2">
             <Mail className="text-gray-600" />
-            <span className="text-gray-800">{user.email}</span>
+            <span className="text-gray-800">{user?.email}</span>
           </div>
           <div className="flex items-center gap-3 my-2">
             <Contact className="text-gray-600" />
-            <span className="text-gray-800">{user.phoneNumber}</span>
+            <span className="text-gray-800">{user?.phoneNumber}</span>
           </div>
         </div>
 
         {/* Conditional Rendering for Skills and Resume */}
-        {user.role === "student" && (
+        {user?.role === "student" && (
           <>
             <div className="my-5">
               <h1 className="text-lg font-semibold">Skills</h1>
               <div className="flex flex-wrap items-center gap-1 mt-2">
-                {user.profile.skills.length !== 0 ? (
-                  user.profile.skills.map((item, index) => (
+                {user?.profile.skills?.length !== 0 ? (
+                  user?.profile.skills?.map((item, index) => (
                     <Badge key={index}>{item}</Badge>
                   ))
                 ) : (
