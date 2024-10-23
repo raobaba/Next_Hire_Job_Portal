@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { getAppliedJobs } from "@/redux/slices/application.slice";
-import Loader from "./shared/Loader";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "./ui/badge";
@@ -54,15 +53,52 @@ const AppliedJobTable = () => {
 
   return (
     <div className="container mx-auto p-4">
-      {loading && <Loader />}
-      {appliedJobs.length === 0 ? (
+      {loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow-lg p-4 animate-pulse flex flex-col justify-between h-80 w-full"
+            >
+              {/* Skeleton for Company Logo */}
+              <div className="flex justify-center mb-3">
+                <div className="w-16 h-16 bg-gray-300 rounded-full"></div>
+              </div>
+
+              {/* Skeleton for Job Title */}
+              <div className="h-4 bg-gray-300 rounded mb-2"></div>
+
+              {/* Skeleton for Job Company */}
+              <div className="h-4 bg-gray-300 rounded mb-2 w-3/4 mx-auto"></div>
+
+              {/* Skeleton for Job Description */}
+              <div className="h-3 bg-gray-300 rounded mb-2"></div>
+              <div className="h-3 bg-gray-300 rounded mb-2 w-5/6 mx-auto"></div>
+
+              {/* Skeleton for Salary, Experience, etc. */}
+              <div className="h-3 bg-gray-300 rounded mb-2"></div>
+              <div className="h-3 bg-gray-300 rounded mb-2 w-4/5 mx-auto"></div>
+
+              {/* Skeleton for Status Badge */}
+              <div className="flex justify-between">
+                <div className="w-24 h-8 bg-gray-300 rounded-lg"></div>
+                <div className="w-16 h-8 bg-gray-300 rounded-lg"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && appliedJobs.length === 0 && (
         <div className="text-center py-4">
           <h2 className="text-lg font-semibold">
             You haven't applied to any jobs yet. Start exploring and find your
             next opportunity!
           </h2>
         </div>
-      ) : (
+      )}
+
+      {!loading && appliedJobs.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {appliedJobs.map((appliedJob) => (
             <div

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
 import { useDispatch } from "react-redux";
 import { getCompanyById, getJobsByCompany } from "@/redux/slices/company.slice";
 import Navbar from "./shared/Navbar";
@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 const CompanyDashboard = () => {
   const { id } = useParams(); // Get company ID from the URL
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // Use useNavigate for back button
 
   const [company, setCompany] = useState(null);
   const [jobs, setJobs] = useState([]);
@@ -52,41 +53,54 @@ const CompanyDashboard = () => {
     <div className="min-h-screen mt-7 bg-gray-50">
       <Navbar />
       <div className="max-w-7xl mx-auto my-10 px-4 sm:px-6 lg:px-8">
-        {company ? (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="md:flex md:justify-between md:items-center">
-              <div className="flex items-center mb-4 md:mb-0">
-                {/* Company Logo */}
-                {company.logo?.url && (
-                  <img
-                    src={company.logo.url}
-                    alt={`${company.companyName} logo`}
-                    className="h-16 w-16 object-cover rounded-full mr-4"
-                  />
-                )}
-                {/* Company Name */}
-                <h1 className="text-2xl md:text-4xl font-bold">
-                  {company.companyName}
-                </h1>
-              </div>
+        {/* Go Back and Company Details Layout */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          {/* Go Back Button on the left */}
+          <Button
+            onClick={() => navigate(-1)}
+            variant="outline"
+            className="md:mr-8 mb-4 md:mb-0"
+          >
+            Go Back
+          </Button>
 
-              <div className="space-y-1 md:space-y-0 md:flex md:space-x-4">
-                <p className="text-sm md:text-base text-gray-600">
-                  Location: {company.location}
-                </p>
-                <p className="text-sm md:text-base text-gray-600">
-                  Website:{" "}
-                  <a href={company.website} className="text-blue-500">
-                    {company.website}
-                  </a>
-                </p>
+          {/* Company Details on the right */}
+          {company ? (
+            <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-auto">
+              <div className="md:flex md:justify-between md:items-center">
+                <div className="flex items-center mb-4 md:mb-0">
+                  {/* Company Logo */}
+                  {company.logo?.url && (
+                    <img
+                      src={company.logo.url}
+                      alt={`${company.companyName} logo`}
+                      className="h-16 w-16 object-cover rounded-full mr-4"
+                    />
+                  )}
+                  {/* Company Name */}
+                  <h1 className="text-2xl md:text-4xl font-bold">
+                    {company.companyName}
+                  </h1>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-sm md:text-base text-gray-600">
+                    Location: {company.location}
+                  </p>
+                  <p className="text-sm md:text-base text-gray-600">
+                    Website:{" "}
+                    <a href={company.website} className="text-blue-500">
+                      {company.website}
+                    </a>
+                  </p>
+                </div>
               </div>
+              <p className="mt-4 text-gray-700">{company.description}</p>
             </div>
-            <p className="mt-4 text-gray-700">{company.description}</p>
-          </div>
-        ) : (
-          <p className="text-gray-500">Company details not found.</p>
-        )}
+          ) : (
+            <p className="text-gray-500">Company details not found.</p>
+          )}
+        </div>
 
         <div className="mt-10">
           <h2 className="text-xl md:text-3xl font-bold">
@@ -130,7 +144,9 @@ const CompanyDashboard = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 mt-4">No jobs available at this time.</p>
+            <p className="text-gray-500 mt-4">
+              No jobs available at this time.
+            </p>
           )}
         </div>
       </div>
