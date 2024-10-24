@@ -7,7 +7,8 @@ const {
   getUserSearchHistory,
   clearUserSearchHistory,
   getRecommendedJobs,
-  getSearchResult
+  getSearchResult,
+  verifyEmail
 } = require("../controllers/user.controller.js");
 const isAuthenticated = require("../middlewares/auth.js");
 
@@ -21,4 +22,5 @@ userRouter.route("/search-history").get(isAuthenticated, getUserSearchHistory);
 userRouter.route("/search-history").delete(isAuthenticated, clearUserSearchHistory);
 userRouter.route("/recommended-jobs").get(isAuthenticated, getRecommendedJobs);
 userRouter.route("/search-result").get(isAuthenticated, getSearchResult)
+userRouter.route("/verify-email").get(verifyEmail);
 module.exports = userRouter;

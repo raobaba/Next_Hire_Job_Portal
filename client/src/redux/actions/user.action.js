@@ -41,12 +41,18 @@ export const fetchRecommendedJobs = async (params) => {
   return await fetchFromApiServer('GET', url, {}, { params })
 }
 
-export const fetchSearchResult = async (params)=>{
+export const fetchSearchResult = async (params) => {
   const url = `api/v1/user/search-result`;
-  return await fetchFromApiServer('GET',url,{},{params})
+  return await fetchFromApiServer('GET', url, {}, { params })
 }
 
-export const deleteSearchHistory = async()=>{
+export const deleteSearchHistory = async () => {
   const url = `api/v1/user/search-history`;
-  return await fetchFromApiServer('DELETE',url)
+  return await fetchFromApiServer('DELETE', url)
 }
+
+export const emailVerification = async (params) => {
+  const {token} = params;
+  const url = `api/v1/user/verify-email?token=${token}`;
+  return await fetchFromApiServer('GET', url);
+};

@@ -1,10 +1,12 @@
 const User = require("../models/user.model");
+const { sendMail } = require('../utils/sendEmail')
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const sendToken = require("./../utils/sendToken");
 const ErrorHandler = require("../utils/errorHandler");
 const cloudinary = require("cloudinary");
 const Job = require("../models/job.model");
 const cron = require("node-cron");
+const crypto = require("crypto");
 
 const registerUser = asyncErrorHandler(async (req, res, next) => {
   const { fullname, phoneNumber, email, password, role } = req.body;
@@ -39,8 +41,49 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
       },
     },
   });
+
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+  user.verificationToken = verificationToken;
+  await user.save();
+
+  // Send verification email
+  const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
+  const emailBody = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Email Verification",
+    text: `Please verify your email by clicking on the following link: ${verificationUrl}`,
+  };
+
+  await sendMail(emailBody);
+
+
   sendToken(user, 200, res);
 });
+
+const verifyEmail = asyncErrorHandler(async (req, res, next) => {
+  console.log("request",req)
+  const { token } = req.query;
+  console.log("token", token)
+
+  const user = await User.findOne({ verificationToken: token });
+
+  if (!user) {
+    const error = new ErrorHandler("Invalid or expired verification token", 400);
+    return error.sendError(res);
+  }
+
+  user.isVerified = true;
+  user.verificationToken = undefined;
+  await user.save();
+
+  return res.status(200).json({
+    success: true,
+    status: 200,
+    message: "Email verified successfully",
+  });
+});
+
 
 const loginUser = asyncErrorHandler(async (req, res, next) => {
   const { email, password, role } = req.body;
@@ -402,5 +445,6 @@ module.exports = {
   getUserSearchHistory,
   clearUserSearchHistory,
   getRecommendedJobs,
-  getSearchResult
+  getSearchResult,
+  verifyEmail
 };

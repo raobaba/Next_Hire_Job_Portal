@@ -27,6 +27,13 @@ const userSchema = new mongoose.Schema(
       enum: ["student", "recruiter"],
       required: true,
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+    },
     profile: {
       bio: { type: String },
       skills: [{ type: String }],
@@ -39,7 +46,6 @@ const userSchema = new mongoose.Schema(
         },
         resumeOriginalName: { type: String },
       },
-
       company: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
       profilePhoto: {
         public_id: {

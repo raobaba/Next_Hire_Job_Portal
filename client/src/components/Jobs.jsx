@@ -270,7 +270,6 @@ const Jobs = () => {
   return (
     <div>
       <Navbar />
-      {loading && <Loader />}
       <ReactHelmet
         title="Job Openings - Next_Hire"
         description="Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire."

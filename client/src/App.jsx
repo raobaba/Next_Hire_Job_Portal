@@ -15,6 +15,7 @@ import AdminJobs from "./components/admin/AdminJob";
 import PostJob from "./components/admin/PostJob";
 import Applicants from "./components/admin/Applicants";
 import ResetPassword from "./components/auth/ResetPassword";
+import EmailVarification from "./components/EmailVarification";
 
 // Router setup
 const appRouter = createBrowserRouter([
@@ -37,6 +38,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/company-dashboard/:id",
     element: <CompanyDashboard />,
+  },
+  {
+    path: "/verify-email",
+    element: <EmailVarification />,
   },
   {
     path: "/jobs",

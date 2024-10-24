@@ -9,6 +9,7 @@ import {
   fetchRecommendedJobs,
   fetchSearchResult,
   deleteSearchHistory,
+  emailVerification
 } from "../actions/user.action";
 
 
@@ -150,6 +151,19 @@ export const clearSearchHistory = createAsyncThunk(
     }
   }
 )
+export const verifyEmail = createAsyncThunk(
+  'profile/verifyEmail',
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await emailVerification(params);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to email verification"
+      );
+    }
+  }
+);
 
 
 
@@ -308,6 +322,18 @@ const userSlice = createSlice({
         state.searchResult = action.payload;
       })
       .addCase(getSearchResult.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(verifyEmail.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyEmail.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.message;
+      })
+      .addCase(verifyEmail.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
