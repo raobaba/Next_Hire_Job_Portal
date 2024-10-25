@@ -25,7 +25,9 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.15",
     "nodemon": "^3.1.4",
-    "openai": "^4.65.0"
+    "openai": "^4.65.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
