@@ -8,11 +8,12 @@ const {
   clearUserSearchHistory,
   getRecommendedJobs,
   getSearchResult,
-  verifyEmail
+  verifyEmail,
 } = require("../controllers/user.controller.js");
 const isAuthenticated = require("../middlewares/auth.js");
 
 const userRouter = express.Router();
+
 /**
  * @swagger
  * components:
@@ -24,9 +25,12 @@ const userRouter = express.Router();
  *           type: string
  *           format: uuid
  *           description: Unique identifier for the user
- *         name:
+ *         fullname:
  *           type: string
- *           description: Name of the user
+ *           description: Full name of the user
+ *         phoneNumber:
+ *           type: string
+ *           description: Phone number of the user
  *         email:
  *           type: string
  *           format: email
@@ -39,6 +43,41 @@ const userRouter = express.Router();
  *           type: string
  *           enum: [student, recruiter, admin]
  *           description: Role of the user in the system
+ *         profile:
+ *           type: object
+ *           properties:
+ *             profilePhoto:
+ *               type: object
+ *               properties:
+ *                 public_id:
+ *                   type: string
+ *                   description: Public ID for the profile photo
+ *                 url:
+ *                   type: string
+ *                   description: URL of the profile photo
+ *             bio:
+ *               type: string
+ *               description: Bio of the user
+ *             skills:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               description: List of skills of the user
+ *             resume:
+ *               type: object
+ *               properties:
+ *                 public_id:
+ *                   type: string
+ *                   description: Public ID for the resume
+ *                 url:
+ *                   type: string
+ *                   description: URL of the resume
+ *                 resumeOriginalName:
+ *                   type: string
+ *                   description: Original name of the resume file
+ *         isVerified:
+ *           type: boolean
+ *           description: Indicates whether the user's email is verified
  *         profileCompleted:
  *           type: boolean
  *           description: Indicates whether the user's profile is complete
@@ -51,7 +90,8 @@ const userRouter = express.Router();
  *           format: date-time
  *           description: Timestamp of the last update to the user information
  *       required:
- *         - name
+ *         - fullname
+ *         - phoneNumber
  *         - email
  *         - password
  *         - role
@@ -63,6 +103,7 @@ const userRouter = express.Router();
  *   name: User
  *   description: User management operations
  */
+
 /**
  * @swagger
  * /api/v1/user/register:
@@ -72,20 +113,28 @@ const userRouter = express.Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               fullname:
  *                 type: string
+ *                 description: Full name of the user
  *               phoneNumber:
  *                 type: string
+ *                 description: Phone number of the user
  *               email:
  *                 type: string
+ *                 format: email
+ *                 description: Email address of the user
  *               password:
  *                 type: string
+ *                 description: Password for the user account
+ *                 minLength: 6
  *               role:
  *                 type: string
+ *                 enum: [student, recruiter, admin]
+ *                 description: Role of the user in the system
  *             required:
  *               - fullname
  *               - phoneNumber
@@ -97,6 +146,8 @@ const userRouter = express.Router();
  *         description: User registered successfully
  *       400:
  *         description: All fields are required or user already exists
+ *       500:
+ *         description: Internal server error
  */
 userRouter.route("/register").post(registerUser);
 
@@ -115,10 +166,15 @@ userRouter.route("/register").post(registerUser);
  *             properties:
  *               email:
  *                 type: string
+ *                 format: email
+ *                 description: Email address of the user
  *               password:
  *                 type: string
+ *                 description: Password for the user account
  *               role:
  *                 type: string
+ *                 enum: [student, recruiter, admin]
+ *                 description: Role of the user in the system
  *             required:
  *               - email
  *               - password
@@ -128,88 +184,103 @@ userRouter.route("/register").post(registerUser);
  *         description: User logged in successfully
  *       400:
  *         description: Please enter email and password
- *       404:
- *         description: User does not exist or account doesn't exist with current role
  *       401:
- *         description: Incorrect Password
+ *         description: Incorrect password or account role mismatch
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
  */
 userRouter.route("/login").post(loginUser);
 
 /**
  * @swagger
  * /api/v1/user/logout:
- *   get:
- *     summary: Logout the user
+ *   post:
+ *     summary: Logout a user
  *     tags: [User]
  *     responses:
  *       200:
- *         description: Successfully logged out
+ *         description: User logged out successfully
+ *       500:
+ *         description: Internal server error
  */
-userRouter.route("/logout").get(logoutUser);
+userRouter.route("/logout").post(isAuthenticated, logoutUser);
 
 /**
  * @swagger
- * /api/v1/user/profile/update:
- *   post:
+ * /api/v1/user/profile:
+ *   put:
  *     summary: Update user profile
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               fullname:
  *                 type: string
+ *                 description: Full name of the user
  *               email:
  *                 type: string
+ *                 format: email
+ *                 description: Email address of the user
  *               phoneNumber:
  *                 type: string
+ *                 description: Phone number of the user
  *               bio:
  *                 type: string
+ *                 description: Bio of the user
  *               skills:
  *                 type: string
- *             required: []
+ *                 description: Comma-separated list of skills
+ *             required:
+ *               - fullname
+ *               - email
+ *               - phoneNumber
  *     responses:
  *       200:
  *         description: Profile updated successfully
  *       404:
  *         description: User not found
+ *       500:
+ *         description: Internal server error
  */
-userRouter.route("/profile/update").post(isAuthenticated, updateProfile);
+userRouter.route("/profile").put(isAuthenticated, updateProfile);
 
 /**
  * @swagger
  * /api/v1/user/search-history:
  *   get:
- *     summary: Get user search history
+ *     summary: Get user's search history
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Search history retrieved successfully
+ *         description: Successfully retrieved search history
  *       404:
  *         description: User not found
+ *       500:
+ *         description: Internal server error
  */
 userRouter.route("/search-history").get(isAuthenticated, getUserSearchHistory);
 
 /**
  * @swagger
- * /api/v1/user/search-history:
+ * /api/v1/user/search-history/clear:
  *   delete:
- *     summary: Clear user search history
+ *     summary: Clear user's search history
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Search history cleared successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
  */
-userRouter.route("/search-history").delete(isAuthenticated, clearUserSearchHistory);
+userRouter.route("/search-history/clear").delete(isAuthenticated, clearUserSearchHistory);
 
 /**
  * @swagger
@@ -217,91 +288,121 @@ userRouter.route("/search-history").delete(isAuthenticated, clearUserSearchHisto
  *   get:
  *     summary: Get recommended jobs for the user
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: title
+ *       - name: title
+ *         in: query
+ *         description: Filter by job title
+ *         required: false
  *         schema:
  *           type: string
- *       - in: query
- *         name: salaryMin
+ *       - name: salaryMin
+ *         in: query
+ *         description: Minimum salary filter
+ *         required: false
  *         schema:
- *           type: number
- *       - in: query
- *         name: salaryMax
+ *           type: integer
+ *       - name: salaryMax
+ *         in: query
+ *         description: Maximum salary filter
+ *         required: false
  *         schema:
- *           type: number
- *       - in: query
- *         name: experienceLevel
+ *           type: integer
+ *       - name: experienceLevel
+ *         in: query
+ *         description: Filter by experience level
+ *         required: false
  *         schema:
- *           type: number
- *       - in: query
- *         name: location
- *         schema:
- *           type: string
- *       - in: query
- *         name: jobType
- *         schema:
- *           type: string
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *       - in: query
- *         name: sortOrder
+ *           type: integer
+ *       - name: location
+ *         in: query
+ *         description: Filter by job location
+ *         required: false
  *         schema:
  *           type: string
- *       - in: query
- *         name: page
+ *       - name: jobType
+ *         in: query
+ *         description: Filter by job type
+ *         required: false
  *         schema:
- *           type: number
- *       - in: query
- *         name: limit
+ *           type: string
+ *       - name: sortBy
+ *         in: query
+ *         description: Sort jobs by a specific field
+ *         required: false
  *         schema:
- *           type: number
+ *           type: string
+ *       - name: sortOrder
+ *         in: query
+ *         description: Order of sorting (asc or desc)
+ *         required: false
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: Recommended jobs retrieved successfully
+ *         description: Successfully retrieved recommended jobs
  *       404:
  *         description: User not found
+ *       500:
+ *         description: Internal server error
  */
 userRouter.route("/recommended-jobs").get(isAuthenticated, getRecommendedJobs);
 
 /**
  * @swagger
- * /api/v1/user/search-result:
+ * /api/v1/user/search:
  *   get:
- *     summary: Get search results based on user's search history
+ *     summary: Get search results based on query
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
+ *     parameters:
+ *       - name: query
+ *         in: query
+ *         description: Search query
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - name: page
+ *         in: query
+ *         description: Page number for pagination
+ *         required: false
+ *         schema:
+ *           type: integer
+ *       - name: limit
+ *         in: query
+ *         description: Number of results per page
+ *         required: false
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Search results retrieved successfully
+ *         description: Successfully retrieved search results
  *       404:
- *         description: User not found
+ *         description: No results found
+ *       500:
+ *         description: Internal server error
  */
-userRouter.route("/search-result").get(isAuthenticated, getSearchResult);
+userRouter.route("/search").get(getSearchResult);
 
 /**
  * @swagger
  * /api/v1/user/verify-email:
- *   get:
+ *   post:
  *     summary: Verify user email
  *     tags: [User]
  *     parameters:
- *       - in: query
- *         name: token
+ *       - name: token
+ *         in: query
  *         required: true
+ *         description: Email verification token
  *         schema:
  *           type: string
  *     responses:
  *       200:
  *         description: Email verified successfully
  *       400:
- *         description: Invalid or expired verification token
+ *         description: Invalid token
+ *       500:
+ *         description: Internal server error
  */
-userRouter.route("/verify-email").get(verifyEmail);
+userRouter.route("/verify-email").post(verifyEmail);
 
 module.exports = userRouter;

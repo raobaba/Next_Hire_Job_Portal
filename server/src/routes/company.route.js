@@ -16,7 +16,6 @@ companyRouter.route("/get/:id").get(isAuthenticated, getCompanyById);
 companyRouter.route("/getJob/:id").get(isAuthenticated, getJobsByCompanyId);
 companyRouter.route("/update/:id").put(isAuthenticated, updateCompany);
 
-
 /**
  * @swagger
  * components:
@@ -181,7 +180,7 @@ companyRouter.route("/update/:id").put(isAuthenticated, updateCompany);
  *           type: string
  *     responses:
  *       200:
- *         description: List of jobs posted by the company
+ *         description: List of jobs for the company
  *         content:
  *           application/json:
  *             schema:
@@ -211,9 +210,21 @@ companyRouter.route("/update/:id").put(isAuthenticated, updateCompany);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Company'
+ *             type: object
+ *             properties:
+ *               companyName:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               website:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               logo:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Company information updated successfully
@@ -229,6 +240,5 @@ companyRouter.route("/update/:id").put(isAuthenticated, updateCompany);
  *       404:
  *         description: Company not found
  */
-
 
 module.exports = companyRouter;
