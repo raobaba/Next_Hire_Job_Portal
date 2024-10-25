@@ -107,7 +107,7 @@ const Navbar = () => {
                 <Link to="/jobs">Jobs</Link>
               </li>
               <li>
-                <Link to="/notifications">Notifications</Link>
+                <Link to="/browse-jobs">BrowseJobs</Link>
               </li>
             </ul>
             {token ? (

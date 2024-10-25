@@ -37,9 +37,8 @@ const EmailVerification = () => {
           setTimeout(() => {
             navigate("/login");
           }, 3000);
-        }else {
-          toast.error(res?.payload?.message)
-          
+        } else {
+          toast.error(res?.payload?.message);
         }
       })
       .catch(() => {

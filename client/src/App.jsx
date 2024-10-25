@@ -5,7 +5,7 @@ import Signup from "./components/auth/Signup";
 import Jobs from "./components/Jobs";
 import JobDescription from "./components/JobDescription";
 import CompanyDashboard from "./components/CompanyDashboard";
-import Notifications from "./components/Notifications";
+import BrowseJobs from "./components/BrowseJobs";
 import Profile from "./components/Profile";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Companies from "./components/admin/Companies";
@@ -52,8 +52,8 @@ const appRouter = createBrowserRouter([
     element: <JobDescription />,
   },
   {
-    path: "/notifications",
-    element: <Notifications />,
+    path: "/browse-jobs",
+    element: <BrowseJobs />,
   },
   {
     path: "/profile",
