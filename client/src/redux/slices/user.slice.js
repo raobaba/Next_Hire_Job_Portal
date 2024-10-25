@@ -190,13 +190,16 @@ const userSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        if (action?.payload?.token) {
-          localStorage.setItem("token", action?.payload?.token);
-          localStorage.setItem(
-            "profile",
-            action?.payload?.user?.profile?.profilePhoto?.url
-          );
+        if (action?.payload?.user?.isVerified === true) {
+          if (action?.payload?.token) {
+            localStorage.setItem("token", action?.payload?.token);
+            localStorage.setItem(
+              "profile",
+              action?.payload?.user?.profile?.profilePhoto?.url
+            );
+          }
         }
+
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -212,14 +215,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-
-        if (action.payload.token) {
-          localStorage.setItem("token", action.payload.token);
-          localStorage.setItem(
-            "profile",
-            action?.payload?.user?.profile?.profilePhoto?.url
-          );
-        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;

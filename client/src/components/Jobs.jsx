@@ -26,7 +26,6 @@ const Jobs = () => {
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const { jobs } = useSelector((state) => state.job);
-  console.log("JOB", jobs);
   const [searchParams, setSearchParams] = useState({
     title: "",
     salaryMin: "",

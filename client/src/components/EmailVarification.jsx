@@ -35,8 +35,11 @@ const EmailVerification = () => {
           setIsVerified(true);
           toast.success("Your email has been verified successfully!");
           setTimeout(() => {
-            navigate("/");
+            navigate("/login");
           }, 3000);
+        }else {
+          toast.error(res?.payload?.message)
+          
         }
       })
       .catch(() => {

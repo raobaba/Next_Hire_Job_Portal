@@ -80,8 +80,10 @@ const Signup = () => {
       .then((res) => {
         setLoading(false);
         if (res?.payload?.status === 200) {
-          toast.success("Signup successful!");
-          navigate("/"); // Redirect to homepage
+          toast.success("Signup successful! Please verify your email.");
+          setTimeout(() => {
+            navigate("/login");
+          }, 2000);
         } else {
           toast.error("Something went wrong! Please try again.");
         }

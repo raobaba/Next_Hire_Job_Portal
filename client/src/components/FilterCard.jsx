@@ -4,7 +4,7 @@ import { FiPlus, FiMinus, FiX } from "react-icons/fi";
 const filterData = [
   {
     filterType: "Location",
-    array: ["Delhi", "Bangalore", "Hyderabad", "Pune", "Mumbai"],
+    array: ["Delhi", "Bengaluru", "Hyderabad", "Pune", "Mumbai"],
   },
   {
     filterType: "Job Type",
@@ -13,12 +13,11 @@ const filterData = [
   {
     filterType: "Salary",
     array: [
-      "1-2Lakh",
-      "2-3Lakh",
-      "3-4Lakh",
-      "4-5Lakh",
-      "5-6Lakh",
-      "6-7Lakh",
+      "50,000-60,000",
+      "60,000-70,000",
+      "70,000-80,000",
+      "80,000-90,000",
+      "90,000-100,000",
       "More",
     ],
   },
@@ -107,24 +106,7 @@ const FilterCard = ({ setSearchParams }) => {
       title: debouncedSearchTerm,
       location: selectedFilters.find((f) => f.type === "location")?.value || "",
       jobType: selectedFilters.find((f) => f.type === "job type")?.value || "",
-      salaryMin: selectedFilters.find(
-        (f) => f.type === "salary" && f.value.includes("Lakh")
-      )
-        ? selectedFilters
-            .find((f) => f.type === "salary")
-            .value.split("-")[0]
-            .replace("Lakh", "")
-            .trim()
-        : "",
-      salaryMax: selectedFilters.find(
-        (f) => f.type === "salary" && f.value.includes("Lakh")
-      )
-        ? selectedFilters
-            .find((f) => f.type === "salary")
-            .value.split("-")[1]
-            .replace("Lakh", "")
-            .trim()
-        : "",
+      salary: selectedFilters.find((f) => f.type === "salary")?.value || "",
       page: 1,
     };
 
@@ -148,7 +130,7 @@ const FilterCard = ({ setSearchParams }) => {
           />
         </div>
         {selectedFilters.length > 0 && (
-          <div className="">
+          <div>
             <div className="flex flex-wrap">
               {selectedFilters.map((filter, index) => (
                 <div

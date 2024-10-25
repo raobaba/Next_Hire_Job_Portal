@@ -57,8 +57,13 @@ const Login = () => {
         setLoading(false);
         console.log(res?.payload?.status);
         if (res?.payload?.status === 200) {
-          toast.success("Login successful!");
-          navigate("/"); // Redirect on success
+          console.log("data", res?.payload?.user?.isVerified);
+          if (res?.payload?.user?.isVerified === false) {
+            toast.info("Email is not verified, Please verify your email!");
+          } else {
+            toast.success("Login successful!");
+            navigate("/");
+          }
         } else {
           console.log(res);
           setErrorMessage(res?.payload?.message);

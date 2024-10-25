@@ -138,7 +138,7 @@ const JobDescription = () => {
               label="Experience"
               value={`${singleJob.experienceLevel} yrs`}
             />
-            <JobDetail label="Salary" value={`${singleJob.salary} LPA`} />
+            <JobDetail label="Salary" value={`$${singleJob.salary}`} />
             <JobDetail
               label="Total Applicants"
               value={singleJob.applications.length}
@@ -165,7 +165,7 @@ const JobDescription = () => {
                   >
                     <h2 className="font-bold text-lg">{job.title}</h2>
                     <p className="text-gray-600">{job.location}</p>
-                    <p className="text-gray-800">{job.salary} LPA</p>
+                    <p className="text-gray-800">${job.salary} </p>
                     <p className="text-gray-500">{job.jobType}</p>
                     <Button
                       onClick={() => navigate(`/description/${job._id}`)}

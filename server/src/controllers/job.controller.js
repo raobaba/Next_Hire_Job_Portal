@@ -78,8 +78,7 @@ const postJob = asyncErrorHandler(async (req, res) => {
 const getAllJobs = asyncErrorHandler(async (req, res) => {
   const {
     title,
-    salaryMin,
-    salaryMax,
+    salary,
     experienceLevel,
     location,
     jobType,
@@ -102,6 +101,7 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
 
   const query = {};
 
+  // Handle title search
   if (keyword) {
     const companies = await Company.find({
       companyName: { $regex: keyword, $options: "i" },
@@ -120,12 +120,15 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     ];
   }
 
-  if (salaryMin || salaryMax) {
+  // Handle salary filtering based on a single salary parameter
+  if (salary) {
+    const [minSalary, maxSalary] = salary.split('-').map((s) => s.replace(/,/g, '').trim());
     query.salary = {};
-    if (salaryMin) query.salary.$gte = Number(salaryMin);
-    if (salaryMax) query.salary.$lte = Number(salaryMax);
+    if (minSalary) query.salary.$gte = Number(minSalary);
+    if (maxSalary && maxSalary.toLowerCase() !== 'more') query.salary.$lte = Number(maxSalary);
   }
 
+  // Handle other filters
   if (experienceLevel) {
     query.experienceLevel = Number(experienceLevel);
   }
@@ -180,6 +183,7 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     status: 200,
   });
 });
+
 
 const getJobById = asyncErrorHandler(async (req, res) => {
   const jobId = req.params.id;
