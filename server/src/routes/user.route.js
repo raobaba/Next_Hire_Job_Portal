@@ -9,6 +9,7 @@ const {
   getRecommendedJobs,
   getSearchResult,
   verifyEmail,
+  readResumeContent
 } = require("../controllers/user.controller.js");
 const isAuthenticated = require("../middlewares/auth.js");
 
@@ -404,5 +405,6 @@ userRouter.route("/search").get(getSearchResult);
  *         description: Internal server error
  */
 userRouter.route("/verify-email").post(verifyEmail);
+userRouter.route("/read-content").post(isAuthenticated, readResumeContent)
 
 module.exports = userRouter;

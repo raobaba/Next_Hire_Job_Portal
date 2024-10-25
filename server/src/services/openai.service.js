@@ -2,88 +2,63 @@ const { sendMail } = require("../utils/sendEmail");
 const User = require("../models/user.model");
 require("dotenv").config();
 const cron = require("node-cron");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+async function generateEmailContent(job, user, companyName) {
+  const content = `
+  Subject: Exciting Job Opportunity: ${job.title} at ${companyName}
+
+  Dear ${user.fullname},
+
+  We are thrilled to share an exciting opportunity at ${companyName}. As a valued candidate on NextHire, we believe you would be a perfect fit for the ${job.title} position, available at our rapidly growing tech company located in ${job.location}.
+
+  **Job Description:**
+  ${job.description}
+
+  In this role, you will collaborate with a talented team, utilizing your skills in ${job.requirements.join(", ")} to develop and maintain innovative web applications. Your contributions will help us deliver exceptional user experiences while maintaining high standards of quality and efficiency.
+
+  **Required Skills:**
+  - Proficiency in ${job.requirements.join(", ")}
+  - Over ${job.experienceLevel} years of experience in ${job.jobType}
+  - Strong communication and problem-solving abilities
+
+  **Job Details:**
+  - Salary: ${job.salary} per year
+  - Location: ${job.location}
+  - Type: ${job.jobType}
+  - Experience Level: ${job.experienceLevel}+ years
+
+  To apply, please visit this link: [job-link]. We encourage you to explore this exciting role and consider joining our dynamic team.
+
+  Warm regards,
+  The Hiring Team at ${companyName}`;
+
+  const result = await model.generateContent(content);
+  return result.content;
+}
+
 async function processJobAndNotifyUsers(job, companyName) {
   try {
-    const {
-      title,
-      description,
-      requirements,
-      salary,
-      location,
-      jobType,
-      experienceLevel,
-    } = job;
-
     const matchingUsers = await User.find({
-      "profile.skills": { $in: requirements },
+      "profile.skills": { $in: job.requirements },
     });
 
     for (const user of matchingUsers) {
       if (user.role === "student") {
-        const emailContent = `Subject: ${title} Opportunity at ${companyName}
-
-Dear ${user.fullname},
-
-We are excited to inform you of a great opportunity at ${companyName}. As a registered candidate on NextHire, we thought you might be interested in the ${title} position at ${companyName}, a rapidly growing tech company based in ${location}.
-
-Job Description:
-${description}
-
-In this role, you will work with ${requirements.join(
-          ", "
-        )} to develop and maintain web applications, collaborating with a talented team to deliver outstanding user experiences. You will contribute to building intuitive, responsive interfaces while ensuring the highest standards of quality and efficiency.
-
-Required Skills:
-- Proficiency in ${requirements.join(", ")}
-- Over ${experienceLevel} years of experience as a ${jobType}
-- Strong communication and problem-solving abilities
-
-Job Details:
-- Salary: ${salary} per year
-- Location: ${location}
-- Type: ${jobType}
-- Experience Level: ${experienceLevel}+ years
-
-To apply, please visit this link [job-link]. We encourage you to explore this exciting role and join a dynamic and innovative team.
-
-Best regards,
-The Hiring Team at ${companyName}`;
+        const emailContent = await generateEmailContent(job, user, companyName);
 
         const emailBody = {
           from: "NextHire <noreply@nexthire.com>",
           to: user.email,
-          subject: `${title} Opportunity at ${companyName}`,
+          subject: `Exciting Job Opportunity: ${job.title} at ${companyName}`,
           text: emailContent,
           html: `
             <p>Dear ${user.fullname},</p>
-            <p>We are excited to inform you of a great opportunity at <b>${companyName}</b>. As a registered candidate on NextHire, we thought you might be interested in the <b>${title}</b> position at ${companyName}, a rapidly growing tech company based in ${location}.</p>
-
-            <p><b>Job Description:</b><br>${description}</p>
-
-            <p>In this role, you will work with <b>${requirements.join(
-            ", "
-          )}</b> to develop and maintain web applications, collaborating with a talented team to deliver outstanding user experiences. You will contribute to building intuitive, responsive interfaces while ensuring the highest standards of quality and efficiency.</p>
-
-            <p><b>Required Skills:</b></p>
-            <ul>
-              ${requirements
-              .map((skill) => `<li>Proficiency in ${skill}</li>`)
-              .join("")}
-              <li>Over ${experienceLevel} years of experience as a ${jobType}</li>
-              <li>Strong communication and problem-solving abilities</li>
-            </ul>
-
-            <p><b>Job Details:</b></p>
-            <ul>
-              <li>Salary: ${salary} per year</li>
-              <li>Location: ${location}</li>
-              <li>Type: ${jobType}</li>
-              <li>Experience Level: ${experienceLevel}+ years</li>
-            </ul>
-
-            <p>To apply, please submit your resume and portfolio at <a href="job_link">this link</a>. We encourage you to explore this exciting role and join a dynamic and innovative team.</p>
-
-            <p>Best regards,<br>The Hiring Team at ${companyName}</p>
+            <p>${emailContent.replace(/(?:\r\n|\r|\n)/g, '<br>')}</p>
+            <p>Warm regards,<br>The Hiring Team at ${companyName}</p>
           `,
         };
 
@@ -109,26 +84,27 @@ async function notifyUsersToCompleteProfile() {
 
     for (const user of usersWithEmptySkills) {
       const userProfileLink = `http://localhost:5173/profile`; // Replace with your actual profile URL
-      const emailContent = `Subject: Complete Your Profile for Better Job Suggestions
+      const emailContent = `
+      Subject: Enhance Your Profile for Better Job Suggestions
 
-Dear ${user.fullname},
+      Dear ${user.fullname},
 
-We noticed that your profile is incomplete, specifically the skills section. Completing your profile will help us suggest more relevant job opportunities tailored to your expertise and interests.
+      We noticed that your profile is currently incomplete, specifically in the skills section. Completing your profile will significantly improve our ability to suggest relevant job opportunities tailored to your expertise and interests.
 
-To enhance your experience on NextHire and to get notified about exciting job openings that match your skills, please log in to your account and update your skills section at the following link: [Update Your Profile](${userProfileLink}).
+      To enhance your experience on NextHire and receive notifications about exciting job openings that match your skills, please log in to your account and update your skills section at the following link: [Update Your Profile](${userProfileLink}).
 
-Best regards,
-The NextHire Team`;
+      Best regards,
+      The NextHire Team`;
 
       const emailBody = {
         from: "NextHire <noreply@nexthire.com>",
         to: user.email,
-        subject: "Complete Your Profile for Better Job Suggestions",
+        subject: "Enhance Your Profile for Better Job Suggestions",
         text: emailContent,
         html: `
           <p>Dear ${user.fullname},</p>
-          <p>We noticed that your profile is incomplete, specifically the skills section. Completing your profile will help us suggest more relevant job opportunities tailored to your expertise and interests.</p>
-          <p>To enhance your experience on NextHire and to get notified about exciting job openings that match your skills, please log in to your account and update your skills section at the following link: <a href="${userProfileLink}">Update Your Profile</a>.</p>
+          <p>We noticed that your profile is currently incomplete, specifically in the skills section. Completing your profile will significantly improve our ability to suggest relevant job opportunities tailored to your expertise and interests.</p>
+          <p>To enhance your experience on NextHire and receive notifications about exciting job openings that match your skills, please log in to your account and update your skills section at the following link: <a href="${userProfileLink}">Update Your Profile</a>.</p>
           <p>Best regards,<br>The NextHire Team</p>
         `,
       };
@@ -138,51 +114,42 @@ The NextHire Team`;
 
     console.log("Profile completion notifications sent successfully.");
   } catch (error) {
-    console.error(
-      "Error in notifying users to complete their profiles:",
-      error
-    );
+    console.error("Error in notifying users to complete their profiles:", error);
   }
 }
 
-
 cron.schedule("0 0 * * *", () => {
-  console.log(
-    "Checking for users to notify about completing their profiles..."
-  );
+  console.log("Checking for users to notify about completing their profiles...");
   notifyUsersToCompleteProfile();
 });
-
 
 async function notifyApplicationReceived(user, job, companyName) {
   try {
     const emailContentText = `
-Dear ${user.fullname},
+    Dear ${user.fullname},
 
-Thank you for applying to the position of ${job.title} at ${companyName}. We have received your application, and it is currently under review.
+    Thank you for applying for the ${job.title} position at ${companyName}. We have received your application and are currently reviewing it.
 
-We value your interest in joining our team, and we will carefully evaluate your qualifications. Our hiring team will reach out to you if your skills and experience match the requirements of this role.
+    We appreciate your interest in joining our team and will reach out if your skills and experience align with the requirements for this role.
 
-In the meantime, feel free to explore other opportunities on our platform and update your profile to ensure we can suggest the most relevant job openings to you.
+    In the meantime, feel free to explore other opportunities on our platform and update your profile for more tailored job suggestions.
 
-Thank you again for your interest in ${companyName}. We wish you the best in the application process!
+    Thank you again for considering ${companyName}. We wish you the best in the application process!
 
-Best regards,
-The Hiring Team at ${companyName}
-    `;
+    Best regards,
+    The Hiring Team at ${companyName}`;
 
     const emailContentHtml = `
-<p>Dear ${user.fullname},</p>
-<p>Thank you for applying to the position of <strong>${job.title}</strong> at <strong>${companyName}</strong>. We have received your application, and it is currently under review.</p>
+    <p>Dear ${user.fullname},</p>
+    <p>Thank you for applying for the <strong>${job.title}</strong> position at <strong>${companyName}</strong>. We have received your application and are currently reviewing it.</p>
 
-<p>We value your interest in joining our team, and we will carefully evaluate your qualifications. Our hiring team will reach out to you if your skills and experience match the requirements of this role.</p>
+    <p>We appreciate your interest in joining our team and will reach out if your skills and experience align with the requirements for this role.</p>
 
-<p>In the meantime, feel free to explore other opportunities on our platform and update your profile to ensure we can suggest the most relevant job openings to you.</p>
+    <p>In the meantime, feel free to explore other opportunities on our platform and update your profile for more tailored job suggestions.</p>
 
-<p>Thank you again for your interest in <strong>${companyName}</strong>. We wish you the best in the application process!</p>
+    <p>Thank you again for considering <strong>${companyName}</strong>. We wish you the best in the application process!</p>
 
-<p>Best regards,<br>The Hiring Team at ${companyName}</p>
-    `;
+    <p>Best regards,<br>The Hiring Team at ${companyName}</p>`;
 
     const emailBody = {
       from: "NextHire <noreply@nexthire.com>",
@@ -203,114 +170,86 @@ async function notifyJobDeletion(jobTitle, companyName, applicants) {
   try {
     for (const applicant of applicants) {
       const emailContentText = `
-Dear ${applicant.fullname},
+      Dear ${applicant.fullname},
 
-We regret to inform you that the job position for ${jobTitle} at ${companyName} has been deleted, and the hiring process for this position has been stopped. 
+      We regret to inform you that the job position for ${jobTitle} at ${companyName} has been deleted, and the hiring process for this position has been halted.
 
-We understand that this news may be disappointing, and we encourage you to explore other opportunities that may align with your skills and interests.
+      We understand that this news may be disappointing, and we encourage you to explore other opportunities that may align with your skills and interests.
 
-Thank you for your understanding.
+      Thank you for your understanding.
 
-Best regards,
-The Hiring Team at ${companyName}
-`;
+      Best regards,
+      The Hiring Team at ${companyName}`;
 
       const emailContentHtml = `
-<p>Dear ${applicant.fullname},</p>
-<p>We regret to inform you that the job position for <strong>${jobTitle}</strong> at <strong>${companyName}</strong> has been deleted, and the hiring process for this position has been stopped.</p>
+      <p>Dear ${applicant.fullname},</p>
+      <p>We regret to inform you that the job position for <strong>${jobTitle}</strong> at <strong>${companyName}</strong> has been deleted, and the hiring process for this position has been halted.</p>
 
-<p>We understand that this news may be disappointing, and we encourage you to explore other opportunities that may align with your skills and interests.</p>
+      <p>We understand that this news may be disappointing, and we encourage you to explore other opportunities that may align with your skills and interests.</p>
 
-<p>Thank you for your understanding.</p>
+      <p>Thank you for your understanding.</p>
 
-<p>Best regards,<br>The Hiring Team at ${companyName}</p>
-`;
+      <p>Best regards,<br>The Hiring Team at ${companyName}</p>`;
 
       const emailBody = {
         from: "NextHire <noreply@nexthire.com>",
         to: applicant.email,
-        subject: `Job Deletion Notification: ${jobTitle} at ${companyName}`,
+        subject: `Update on Your Application for ${jobTitle}`,
         text: emailContentText,
         html: emailContentHtml,
       };
 
       await sendMail(emailBody);
-      console.log(`Notification email sent to: ${applicant.email}`);
+      console.log(`Job deletion notification sent to: ${applicant.email}`);
     }
-
-    console.log("All applicants notified about the job deletion.");
   } catch (error) {
-    console.error("Error notifying applicants about job deletion:", error);
+    console.error("Error in sending job deletion notifications:", error);
   }
 }
 
-
-async function sendStatusUpdateEmail(applicant, jobTitle, status, companyName) {
+async function notifyStatusUpdate(applicant, jobTitle, status, companyName) {
   try {
-    let emailContentText;
-    let emailContentHtml;
+    const emailContentText = `
+    Dear ${applicant.fullname},
 
-    // Determine the email content based on the application status
-    if (status === 'accepted') {
-      emailContentText = `
-Hi ${applicant.fullname},
+    We would like to inform you that the status of your application for the ${jobTitle} position at ${companyName} has been updated to "${status}". 
 
-We are excited to inform you that your application for the position of ${jobTitle} at ${companyName} has been accepted! Congratulations! We are looking forward to discussing the next steps with you.
+    We appreciate your interest in this role and encourage you to stay positive as we move forward in the hiring process.
 
-If you have any questions or need further information, feel free to reach out. We're here to help!
+    Thank you for your patience and understanding.
 
-Best wishes,
-The Hiring Team at ${companyName}
-      `;
+    Best regards,
+    The Hiring Team at ${companyName}`;
 
-      emailContentHtml = `
-<p>Hi ${applicant.fullname},</p>
-<p>We are excited to inform you that your application for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong> has been accepted! Congratulations! We are looking forward to discussing the next steps with you.</p>
+    const emailContentHtml = `
+    <p>Dear ${applicant.fullname},</p>
+    <p>We would like to inform you that the status of your application for the <strong>${jobTitle}</strong> position at <strong>${companyName}</strong> has been updated to "<strong>${status}</strong>".</p>
 
-<p>If you have any questions or need further information, feel free to reach out. We're here to help!</p>
+    <p>We appreciate your interest in this role and encourage you to stay positive as we move forward in the hiring process.</p>
 
-<p>Best wishes,<br>The Hiring Team at ${companyName}</p>
-      `;
-    } else if (status === 'rejected') {
-      emailContentText = `
-Hi ${applicant.fullname},
+    <p>Thank you for your patience and understanding.</p>
 
-Thank you for your interest in the position of ${jobTitle} at ${companyName}. We appreciate the time you took to apply and for your patience during the selection process. Unfortunately, we have decided to move forward with other candidates at this time.
-
-We encourage you to apply for future openings that match your skills and experience. Thank you once again for considering a career with us.
-
-Best wishes,
-The Hiring Team at ${companyName}
-      `;
-
-      emailContentHtml = `
-<p>Hi ${applicant.fullname},</p>
-<p>Thank you for your interest in the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>. We appreciate the time you took to apply and for your patience during the selection process. Unfortunately, we have decided to move forward with other candidates at this time.</p>
-
-<p>We encourage you to apply for future openings that match your skills and experience. Thank you once again for considering a career with us.</p>
-
-<p>Best wishes,<br>The Hiring Team at ${companyName}</p>
-      `;
-    } else {
-      throw new Error("Invalid status");
-    }
+    <p>Best regards,<br>The Hiring Team at ${companyName}</p>`;
 
     const emailBody = {
       from: "NextHire <noreply@nexthire.com>",
       to: applicant.email,
-      subject: `Application Status Update: ${jobTitle} at ${companyName}`,
+      subject: `Application Status Update for ${jobTitle}`,
       text: emailContentText,
       html: emailContentHtml,
     };
 
     await sendMail(emailBody);
-    console.log(`Status update email sent to: ${applicant.email}`);
+    console.log(`Application status update sent to: ${applicant.email}`);
   } catch (error) {
-    console.error("Error sending application status update email:", error);
+    console.error("Error sending application status update:", error);
   }
 }
 
-
-
-
-module.exports = { processJobAndNotifyUsers, notifyApplicationReceived, notifyJobDeletion, sendStatusUpdateEmail };
+module.exports = {
+  processJobAndNotifyUsers,
+  notifyUsersToCompleteProfile,
+  notifyApplicationReceived,
+  notifyJobDeletion,
+  notifyStatusUpdate,
+};

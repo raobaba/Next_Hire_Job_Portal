@@ -2,7 +2,7 @@ const Application = require("../models/application.model");
 const Job = require("../models/job.model");
 const Company = require("../models/company.model")
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
-const { notifyApplicationReceived, sendStatusUpdateEmail } = require('../services/openai.service')
+const { notifyApplicationReceived, notifyStatusUpdate } = require('../services/openai.service')
 const ErrorHandler = require("../utils/errorHandler");
 
 const applyJob = asyncErrorHandler(async (req, res) => {
@@ -151,7 +151,7 @@ const updateStatus = asyncErrorHandler(async (req, res) => {
     console.log("company", company)
     const applicant = application.applicant;
 
-    await sendStatusUpdateEmail(applicant, job.title, application.status, company.companyName); // Call the function to send email
+    await notifyStatusUpdate(applicant, job.title, application.status, company.companyName); // Call the function to send email
 
     return res.status(200).json({
       message: "Status updated successfully.",

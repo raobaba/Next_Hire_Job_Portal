@@ -7,6 +7,44 @@ const cloudinary = require("cloudinary");
 const Job = require("../models/job.model");
 const cron = require("node-cron");
 const crypto = require("crypto");
+const fs = require('fs');
+const path = require('path');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+
+const readResumeContent = asyncErrorHandler(async (req, res, next) => {
+  console.log("resume",req.files)
+  
+  // Assuming resume file is uploaded as a file in req.files.resume
+  if (!req.files || !req.files.resume) {
+    return next(new ErrorHandler("Please upload a resume file.", 400));
+  }
+
+  // Read the resume file
+  const resumeFilePath = req.files.resume.tempFilePath;
+  const resumeData = fs.readFileSync(resumeFilePath);
+
+  // Prepare the prompt for the AI
+  const prompt = "Extract key information from the following resume:";
+  const image = {
+    inlineData: {
+      data: Buffer.from(resumeData).toString("base64"),
+      mimeType: "application/pdf", // Adjust MIME type according to the file type
+    },
+  };
+
+  // Use the Generative AI to process the resume content
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const result = await model.generateContent([prompt, image]);
+
+  // Return the extracted content
+  return res.status(200).json({
+    success: true,
+    status: 200,
+    extractedContent: result.response.text(),
+  });
+});
 
 const registerUser = asyncErrorHandler(async (req, res, next) => {
   const { fullname, phoneNumber, email, password, role } = req.body;
@@ -446,5 +484,6 @@ module.exports = {
   clearUserSearchHistory,
   getRecommendedJobs,
   getSearchResult,
-  verifyEmail
+  verifyEmail,
+  readResumeContent 
 };
