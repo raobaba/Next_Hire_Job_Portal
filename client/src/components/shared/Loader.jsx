@@ -1,5 +1,5 @@
 import React from "react";
-import LoaderLogo from "@/assets/NexthireLogo.png"; // Ensure the image path is correct
+import LoaderLogo from "@/assets/nexthire.png"; // Ensure the image path is correct
 
 const Loader = () => {
   return (
