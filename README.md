@@ -201,6 +201,17 @@ If your application relies on external APIs, document them and include any neces
 
 ## UI 
 
+![Screenshot (212)](https://github.com/user-attachments/assets/c8802014-cf65-48a6-9230-2b9e0e046290)
+![Screenshot (213)](https://github.com/user-attachments/assets/e8af01bf-3e7c-4b99-a51e-0a7d31b4c3fe)
+![Screenshot (214)](https://github.com/user-attachments/assets/b6fcbbd4-28be-4ac5-af97-620e6ec1bde8)
+![Screenshot (215)](https://github.com/user-attachments/assets/45d36396-2865-49c1-ade0-ccf46f82b89e)
+![Screenshot (205)](https://github.com/user-attachments/assets/71f358da-95ae-4af7-9df7-062fad90473c)
+![Screenshot (206)](https://github.com/user-attachments/assets/75ac03bb-b9cc-4b04-9852-1a34c7636dec)
+![Screenshot (207)](https://github.com/user-attachments/assets/6a9bf5f1-a369-4b49-b654-9155aa1a847f)
+![Screenshot (208)](https://github.com/user-attachments/assets/e2c8e808-4c4d-4a03-9c0a-36fb95ceebda)
+![Screenshot (209)](https://github.com/user-attachments/assets/d69cb69a-6bec-4788-9771-fe34a7eb692c)
+![Screenshot (210)](https://github.com/user-attachments/assets/67a83de2-22e1-4944-9ba5-4291a1e21988)
+![Screenshot (211)](https://github.com/user-attachments/assets/b19d0176-ba90-4f80-b031-30a948361550)
 ## Technology Stack
 - Node.js
 - Express.js
