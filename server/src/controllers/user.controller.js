@@ -13,37 +13,57 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
 
-const readResumeContent = asyncErrorHandler(async (req, res, next) => {
-  console.log("resume",req.files)
-  
-  // Assuming resume file is uploaded as a file in req.files.resume
-  if (!req.files || !req.files.resume) {
-    return next(new ErrorHandler("Please upload a resume file.", 400));
+const readDocumentContent = asyncErrorHandler(async (req, res, next) => {
+  console.log("uploaded file:", req.files);
+
+  if (!req.files || !req.files.document) {
+    const error = new ErrorHandler("Please upload a document file.", 400);
+    return error.sendError(res);
   }
 
-  // Read the resume file
-  const resumeFilePath = req.files.resume.tempFilePath;
-  const resumeData = fs.readFileSync(resumeFilePath);
+  const documentFilePath = req.files.document.tempFilePath;
+  const documentData = fs.readFileSync(documentFilePath);
 
-  // Prepare the prompt for the AI
-  const prompt = "Extract key information from the following resume:";
+  // Update the prompt to allow for dynamic heading extraction
+  const prompt = `Extract key information from the following document. Identify and return the relevant sections and headings based on the content. Format the response in JSON.`;
+
   const image = {
     inlineData: {
-      data: Buffer.from(resumeData).toString("base64"),
-      mimeType: "application/pdf", // Adjust MIME type according to the file type
+      data: Buffer.from(documentData).toString("base64"),
+      mimeType: req.files.document.mimetype, // Use the correct MIME type
     },
   };
 
-  // Use the Generative AI to process the resume content
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   const result = await model.generateContent([prompt, image]);
 
-  // Return the extracted content
-  return res.status(200).json({
-    success: true,
-    status: 200,
-    extractedContent: result.response.text(),
-  });
+  // Extract and clean the response
+  const responseText = result.response ? result.response.text() : '';
+
+  // Clean the response to remove backticks and unwanted leading text
+  const cleanedText = responseText.replace(/`/g, ''); // Remove backticks
+  const cleanedTextWithoutLeadingComments = cleanedText.replace(/^.*?\{/s, '{'); // Remove any leading text before the JSON
+
+  try {
+    // Attempt to parse the cleaned response
+    const formattedContent = JSON.parse(cleanedTextWithoutLeadingComments);
+
+    // Return the formatted, structured response to the client
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      extractedContent: formattedContent,
+    });
+  } catch (error) {
+    // Handle JSON parsing error
+    console.error("Error parsing AI response:", error);
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Failed to parse extracted content.",
+      error: error.message,
+    });
+  }
 });
 
 const registerUser = asyncErrorHandler(async (req, res, next) => {
@@ -100,7 +120,7 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
 });
 
 const verifyEmail = asyncErrorHandler(async (req, res, next) => {
-  console.log("request",req)
+  console.log("request", req)
   const { token } = req.query;
   console.log("token", token)
 
@@ -360,8 +380,7 @@ cron.schedule("* * * * *", async () => {
 const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
   const {
     title,
-    salaryMin,
-    salaryMax,
+    salary,
     experienceLevel,
     location,
     jobType,
@@ -403,11 +422,12 @@ const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
     query.title = { $regex: keyword, $options: "i" };
   }
 
-  // Add salary filtering
-  if (salaryMin || salaryMax) {
+  // Add salary filtering based on the range
+  if (salary) {
+    const [minSalary, maxSalary] = salary.split('-').map((s) => s.replace(/,/g, '').trim());
     query.salary = {};
-    if (salaryMin) query.salary.$gte = Number(salaryMin);
-    if (salaryMax) query.salary.$lte = Number(salaryMax);
+    if (minSalary) query.salary.$gte = Number(minSalary);
+    if (maxSalary) query.salary.$lte = Number(maxSalary);
   }
 
   // Add experience level filtering
@@ -475,6 +495,7 @@ const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
 
 
 
+
 module.exports = {
   registerUser,
   loginUser,
@@ -485,5 +506,5 @@ module.exports = {
   getRecommendedJobs,
   getSearchResult,
   verifyEmail,
-  readResumeContent 
+  readDocumentContent
 };

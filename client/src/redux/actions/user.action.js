@@ -42,12 +42,12 @@ export const fetchRecommendedJobs = async (params) => {
 }
 
 export const fetchSearchResult = async (params) => {
-  const url = `api/v1/user/search-result`;
+  const url = `api/v1/user/search`;
   return await fetchFromApiServer('GET', url, {}, { params })
 }
 
 export const deleteSearchHistory = async () => {
-  const url = `api/v1/user/search-history`;
+  const url = `api/v1/user/search-history/clear`;
   return await fetchFromApiServer('DELETE', url)
 }
 

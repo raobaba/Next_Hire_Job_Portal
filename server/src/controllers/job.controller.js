@@ -74,7 +74,6 @@ const postJob = asyncErrorHandler(async (req, res) => {
     status: 200,
   });
 });
-
 const getAllJobs = asyncErrorHandler(async (req, res) => {
   const {
     title,
@@ -89,8 +88,9 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
   } = req.query;
 
   const userId = req.user.id;
-
   const keyword = title || "";
+
+  // Update search history if keyword exists
   if (keyword) {
     await User.findByIdAndUpdate(
       userId,
@@ -101,7 +101,7 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
 
   const query = {};
 
-  // Handle title search
+  // Handle title search with company names or requirements
   if (keyword) {
     const companies = await Company.find({
       companyName: { $regex: keyword, $options: "i" },
@@ -112,39 +112,41 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
       { company: { $in: companies.map((company) => company._id) } },
       {
         requirements: {
-          $in: keyword
-            .split(" ")
-            .map((term) => new RegExp(term.trim(), "i")),
+          $in: keyword.split(" ").map((term) => new RegExp(term.trim(), "i")),
         },
       },
     ];
   }
 
-  // Handle salary filtering based on a single salary parameter
+  // Handle salary filtering based on a range
   if (salary) {
     const [minSalary, maxSalary] = salary.split('-').map((s) => s.replace(/,/g, '').trim());
     query.salary = {};
     if (minSalary) query.salary.$gte = Number(minSalary);
-    if (maxSalary && maxSalary.toLowerCase() !== 'more') query.salary.$lte = Number(maxSalary);
+    if (maxSalary) query.salary.$lte = Number(maxSalary);
   }
 
-  // Handle other filters
+  // Handle experience level filter
   if (experienceLevel) {
     query.experienceLevel = Number(experienceLevel);
   }
 
+  // Handle location filter with case-insensitive regex
   if (location) {
     query.location = { $regex: location, $options: "i" };
   }
 
+  // Handle job type filter with case-insensitive regex
   if (jobType) {
     query.jobType = { $regex: jobType, $options: "i" };
   }
 
+  // Pagination settings
   const pageNumber = parseInt(page, 10) || 1;
   const limitNumber = parseInt(limit, 10) || 10;
   const skip = (pageNumber - 1) * limitNumber;
 
+  // Sorting settings
   const sortOptions = {};
   if (sortBy) {
     const order = sortOrder === "asc" ? 1 : -1;
@@ -153,6 +155,7 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     sortOptions.createdAt = -1;
   }
 
+  // Retrieve jobs based on the constructed query
   const jobs = await Job.find(query)
     .populate({
       path: "company",
@@ -165,14 +168,9 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     .sort(sortOptions);
 
   const totalJobs = await Job.countDocuments(query);
-
-  if (jobs.length === 0) {
-    const error = new ErrorHandler("Jobs Not Found", 404);
-    return error.sendError(res);
-  }
-
   const totalPages = Math.ceil(totalJobs / limitNumber);
 
+  // Return a response even if no jobs are found
   return res.status(200).json({
     jobs,
     currentPage: pageNumber,
@@ -181,8 +179,11 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     limit: limitNumber,
     success: true,
     status: 200,
+    message: jobs.length === 0 ? "No jobs found matching your criteria" : "Jobs retrieved successfully",
   });
 });
+
+
 
 
 const getJobById = asyncErrorHandler(async (req, res) => {

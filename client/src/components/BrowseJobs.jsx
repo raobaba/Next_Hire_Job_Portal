@@ -16,53 +16,23 @@ const BrowseJobs = () => {
   const currentPageRef = useRef(1);
   const totalPagesRef = useRef(null);
 
-  // Initial search parameters
-  const [searchParams, setSearchParams] = useState({
-    title: "",
-    salaryMin: "",
-    salaryMax: "",
-    experienceLevel: "",
-    location: "",
-    jobType: "",
-    sortBy: "createdAt",
-    sortOrder: "desc",
-    page: currentPageRef.current,
-    limit: 10,
-  });
-
   const fetchSearchResult = () => {
     if (!hasMore || loading) return;
     setLoading(true);
     setError(null);
-    const sanitizedParams = {
-      ...searchParams,
-      page: currentPageRef.current,
-      limit: searchParams.limit || 10,
-    };
 
-    dispatch(getSearchResult(sanitizedParams))
+    dispatch(getSearchResult({ page: currentPageRef.current, limit: 10 }))
       .then((res) => {
         if (res?.payload?.status === 200) {
-          const newJobs = res?.payload?.jobs;
-
-          if (currentPageRef.current === 1) {
-            setSearchResult(newJobs);
-          } else {
-            const uniqueJobs = [
-              ...new Set([...searchResult, ...newJobs].map((job) => job._id)),
-            ].map((id) =>
-              [...searchResult, ...newJobs].find((job) => job._id === id)
-            );
-
-            setSearchResult(uniqueJobs);
-          }
+          const newJobs = res.payload.jobs;
+          const uniqueJobs = [...new Set([...searchResult, ...newJobs].map((job) => job._id))]
+            .map((id) => [...searchResult, ...newJobs].find((job) => job._id === id));
+          setSearchResult(uniqueJobs);
 
           const { currentPage, totalPages } = res.payload;
           totalPagesRef.current = totalPages;
           setHasMore(currentPage < totalPages);
-          if (sanitizedParams.page === currentPageRef.current) {
-            currentPageRef.current += 1;
-          }
+          currentPageRef.current += 1;
         } else {
           setError("Failed to load jobs.");
         }
@@ -77,29 +47,23 @@ const BrowseJobs = () => {
   };
 
   useEffect(() => {
-    currentPageRef.current = 1;
-    setHasMore(true);
     fetchSearchResult();
-  }, [searchParams]);
-
-  useEffect(() => {
-    fetchSearchResult();
-  }, [hasMore, loading]);
+  }, []);
 
   const handleClearSearchHistory = () => {
     setLoading(true);
     dispatch(clearSearchHistory())
       .then((res) => {
         if (res?.payload?.status === 200) {
-          toast.success(res?.payload?.message);
-          setSearchResult([]); // Clear the search results after history is cleared
+          toast.success(res.payload.message);
+          setSearchResult([]);
         } else {
-          toast.error("Failed while deleting search history");
+          toast.error("Failed to delete search history.");
         }
       })
       .catch((error) => {
         console.error(error);
-        toast.error("Failed while deleting search history");
+        toast.error("Failed to delete search history.");
       })
       .finally(() => {
         setLoading(false);
@@ -111,7 +75,7 @@ const BrowseJobs = () => {
       <Navbar />
       <ReactHelmet
         title="Browse Jobs - Next_Hire"
-        description="Browse a wide range of job openings across various industries and locations. Filter by role, experience, and more to find your ideal career opportunity."
+        description="Browse a wide range of job openings across various industries and locations."
         canonicalUrl="http://mysite.com/browse"
       />
 
@@ -133,7 +97,7 @@ const BrowseJobs = () => {
             searchResult.map((job) => <Job key={job._id} job={job} />)
           ) : (
             <div className="col-span-full text-center py-5">
-              <span>No jobs found matching the criteria.</span>
+              <span>No jobs found.</span>
             </div>
           )}
         </div>

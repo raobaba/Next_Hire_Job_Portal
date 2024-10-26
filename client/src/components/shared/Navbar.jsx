@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 import ReactHelmet from "./ReactHelmet";
 import { toast } from "react-toastify";
@@ -17,9 +17,9 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const token = getToken(); // Example token, replace with your authentication logic.
+  const token = getToken();
   const profilePic = getProfilePic();
-  const navigate = useNavigate(); // Use useNavigate to redirect
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropDownOpen((prev) => !prev);
@@ -44,15 +44,13 @@ const Navbar = () => {
   }, []);
 
   const handleLogOut = () => {
-    setIsLoading(true); // Set loading state to true
-    dispatch(logoutUser()) // Call the action creator
+    setIsLoading(true);
+    dispatch(logoutUser())
       .then((res) => {
         console.log(res);
         if (res?.payload?.status === 200) {
-          localStorage.removeItem("token"); // Clear the token
-          localStorage.removeItem("profile"); // Clear the profile
-          toast.success("Successfully logged out!"); // Success toast
-          navigate("/login"); // Redirect to login page
+          toast.success("Successfully logged out!");
+          navigate("/login");
         } else {
           toast.error(
             "Logout failed: " + (res?.payload?.message || "Unknown error")

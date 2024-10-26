@@ -14,38 +14,33 @@ const AppliedJobTable = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchAppliedJobs = () => {
+    const fetchAppliedJobs = async () => {
       setLoading(true);
       setError(null);
 
-      dispatch(getAppliedJobs())
-        .then((res) => {
-          if (res?.payload?.status === 200) {
-            const validJobs = res.payload.applications.filter(
-              (job) => job?.job?._id // Filter out jobs where job ID is not available
-            );
-            setAppliedJobs(validJobs);
-          } else {
-            setError("Failed to load applied jobs.");
-          }
-        })
-        .catch((error) => {
-          setError("An error occurred while fetching your applied jobs.");
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      try {
+        const res = await dispatch(getAppliedJobs()).unwrap();
+        if (res?.status === 200) {
+          const validJobs = res.applications.filter((job) => job?.job?._id); // Filter out jobs without job IDs
+          setAppliedJobs(validJobs);
+        } else {
+          setError("Failed to load applied jobs.");
+        }
+      } catch (error) {
+        setError("An error occurred while fetching your applied jobs.");
+      } finally {
+        setLoading(false);
+      }
     };
 
+    // Fetch only if applications are not already loaded
     if (!application?.applications?.length) {
       fetchAppliedJobs();
     } else {
-      const validJobs = application.applications.filter(
-        (job) => job?.job?._id // Filter out jobs where job ID is not available
-      );
+      const validJobs = application.applications.filter((job) => job?.job?._id); // Filter out jobs without job IDs
       setAppliedJobs(validJobs);
     }
-  }, [dispatch, application?.applications]);
+  }, [dispatch, application?.applications?.length]);
 
   const handleCardClick = (jobId) => {
     navigate(`/description/${jobId}`);
@@ -131,12 +126,10 @@ const AppliedJobTable = () => {
               {/* Additional Info: Salary, Experience, and Requirements */}
               <div className="text-gray-700 text-xs mb-2 flex-grow">
                 <p>
-                  <strong>Salary:</strong> $
-                  {appliedJob?.job?.salary.toLocaleString()}
+                  <strong>Salary:</strong> ${appliedJob?.job?.salary.toLocaleString()}
                 </p>
                 <p>
-                  <strong>Experience:</strong>{" "}
-                  {appliedJob?.job?.experienceLevel} years
+                  <strong>Experience:</strong> {appliedJob?.job?.experienceLevel} years
                 </p>
                 <p>
                   <strong>Key Skills:</strong>{" "}

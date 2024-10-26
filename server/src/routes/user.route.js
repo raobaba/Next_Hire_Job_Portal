@@ -9,7 +9,7 @@ const {
   getRecommendedJobs,
   getSearchResult,
   verifyEmail,
-  readResumeContent
+  readDocumentContent
 } = require("../controllers/user.controller.js");
 const isAuthenticated = require("../middlewares/auth.js");
 
@@ -206,7 +206,7 @@ userRouter.route("/login").post(loginUser);
  *       500:
  *         description: Internal server error
  */
-userRouter.route("/logout").post(isAuthenticated, logoutUser);
+userRouter.route("/logout").get(isAuthenticated, logoutUser);
 
 /**
  * @swagger
@@ -249,7 +249,7 @@ userRouter.route("/logout").post(isAuthenticated, logoutUser);
  *       500:
  *         description: Internal server error
  */
-userRouter.route("/profile").put(isAuthenticated, updateProfile);
+userRouter.route("/profile/update").post(isAuthenticated, updateProfile);
 
 /**
  * @swagger
@@ -381,7 +381,7 @@ userRouter.route("/recommended-jobs").get(isAuthenticated, getRecommendedJobs);
  *       500:
  *         description: Internal server error
  */
-userRouter.route("/search").get(getSearchResult);
+userRouter.route("/search").get(isAuthenticated, getSearchResult);
 
 /**
  * @swagger
@@ -405,6 +405,46 @@ userRouter.route("/search").get(getSearchResult);
  *         description: Internal server error
  */
 userRouter.route("/verify-email").post(verifyEmail);
-userRouter.route("/read-content").post(isAuthenticated, readResumeContent)
+/**
+ * @swagger
+ * /api/v1/user/read-content:
+ *   post:
+ *     summary: Extract key information from a user's documents
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               document:
+ *                 type: string
+ *                 format: binary
+ *                 description: PDF file of the user's document
+ *     responses:
+ *       200:
+ *         description: Successfully extracted content from the document
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful
+ *                 status:
+ *                   type: integer
+ *                   description: HTTP status code
+ *                 extractedContent:
+ *                   type: string
+ *                   description: Text content extracted from the document
+ *       400:
+ *         description: No document file was uploaded
+ *       500:
+ *         description: Internal server error
+ */
+
+userRouter.route("/read-content").post(isAuthenticated, readDocumentContent)
 
 module.exports = userRouter;

@@ -25,8 +25,6 @@ const Jobs = () => {
   const { jobs } = useSelector((state) => state.job);
   const [searchParams, setSearchParams] = useState({
     title: "",
-    salaryMin: "",
-    salaryMax: "",
     experienceLevel: "",
     location: "",
     jobType: "",
