@@ -30,7 +30,6 @@ const CompanySetup = () => {
       dispatch(getCompanyById(params.id))
         .then((res) => {
           const company = res?.payload.company;
-          console.log(company);
           if (company) {
             setName(company.companyName || "");
             setDescription(company.description || "");

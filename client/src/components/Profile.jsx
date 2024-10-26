@@ -14,7 +14,6 @@ import ReactHelmet from "./shared/ReactHelmet";
 const Profile = () => {
   const [open, setOpen] = useState(false);
   const user = useSelector((state) => state.user.user);
-  console.log("user", user);
 
   return (
     <div className="min-h-screen mt-20 bg-gray-50">

@@ -100,7 +100,6 @@ const applicationSlice = createSlice({
       })
       .addCase(applyJob.rejected, (state, action) => {
         state.loading = false;
-        console.log(action.payload)
         state.error = action.payload;
       })
 

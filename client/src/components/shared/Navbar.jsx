@@ -5,7 +5,7 @@ import { FiMenu, FiX } from "react-icons/fi";
 import ReactHelmet from "./ReactHelmet";
 import { toast } from "react-toastify";
 import { RiMenu2Fill } from "react-icons/ri";
-import NextHireLogo from "@/assets/NextHireLogo.png";
+import NextHireLogo from "./../../../../client/src/assets/NextHireLogo.png";
 import { getProfilePic, getToken } from "@/utils/constant";
 import { FaUser, FaCog, FaShieldAlt, FaSignOutAlt } from "react-icons/fa";
 import { logoutUser } from "@/redux/slices/user.slice";
@@ -47,7 +47,6 @@ const Navbar = () => {
     setIsLoading(true);
     dispatch(logoutUser())
       .then((res) => {
-        console.log(res);
         if (res?.payload?.status === 200) {
           toast.success("Successfully logged out!");
           navigate("/login");

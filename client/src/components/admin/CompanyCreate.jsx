@@ -22,7 +22,6 @@ const CompanyCreate = () => {
     };
     dispatch(registerCompany(companyData)).then((res) => {
       if (res?.payload?.status === 200) {
-        console.log(res?.payload);
         toast.success(res?.payload?.message);
         setLoading(false);
         navigate(`/profile/admin/companies/${res?.payload?.company._id}`);

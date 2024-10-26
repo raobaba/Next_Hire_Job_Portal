@@ -14,7 +14,7 @@ const CompaniesTable = () => {
     if (!companies || companies?.length === 0) {
       dispatch(getCompanies()).then((res) => {
         if (res?.payload?.status === 200) {
-          console.log(res?.payload);
+          // console.log(res?.payload);
         } else {
           toast.error("Failed to fetch companies.");
         }

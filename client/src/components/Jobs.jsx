@@ -5,9 +5,7 @@ import Job from "./Job";
 import { motion } from "framer-motion";
 import ReactHelmet from "./shared/ReactHelmet";
 import { getAllJobs } from "@/redux/slices/job.slice";
-import {
-  getRecommendedJobs
-} from "@/redux/slices/user.slice";
+import { getRecommendedJobs } from "@/redux/slices/user.slice";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "./shared/Loader";
 import { toast } from "react-toastify";
@@ -134,7 +132,6 @@ const Jobs = () => {
       });
   };
 
-
   const handleScroll = () => {
     if (observerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = observerRef.current;
@@ -186,11 +183,10 @@ const Jobs = () => {
 
     if (category === "recommended") {
       fetchRecommendedJobs();
-    }  else {
+    } else {
       fetchJobs();
     }
   };
-
 
   return (
     <div>
@@ -215,34 +211,31 @@ const Jobs = () => {
             className="flex-1 h-[85vh] overflow-y-auto pb-5"
             ref={observerRef}
           >
-              <div className="flex flex-col sm:flex-row items-center justify-between my-1 sm:space-x-4 space-y-3 sm:space-y-0">
-                <h2
-                  onClick={() => handleCategoryChange("all")}
-                  className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
-                    currentCategory === "all"
-                      ? "text-blue-600"
-                      : "text-gray-800"
-                  }`}
-                >
-                  All Jobs ({allJobs?.length || 0})
-                </h2>
-                {user?.role !== "recruiter" && (
-                  <>
-                    <h2
-                      onClick={() => handleCategoryChange("recommended")}
-                      className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
-                        currentCategory === "recommended"
-                          ? "text-blue-600"
-                          : "text-gray-800"
-                      }`}
-                    >
-                      Recommended ({recommendedJobs?.length || 0})
-                    </h2>
-                   
-                  </>
-                )}
-              </div>
-           
+            <div className="flex flex-col sm:flex-row items-center justify-between my-1 sm:space-x-4 space-y-3 sm:space-y-0">
+              <h2
+                onClick={() => handleCategoryChange("all")}
+                className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                  currentCategory === "all" ? "text-blue-600" : "text-gray-800"
+                }`}
+              >
+                All Jobs ({allJobs?.length || 0})
+              </h2>
+              {user?.role !== "recruiter" && (
+                <>
+                  <h2
+                    onClick={() => handleCategoryChange("recommended")}
+                    className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
+                      currentCategory === "recommended"
+                        ? "text-blue-600"
+                        : "text-gray-800"
+                    }`}
+                  >
+                    Recommended ({recommendedJobs?.length || 0})
+                  </h2>
+                </>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {filterJobs?.length > 0 ? (
                 filterJobs?.map((job) => (
@@ -258,7 +251,10 @@ const Jobs = () => {
                 ))
               ) : (
                 <div className="col-span-full text-center py-5">
-                  <span>No jobs found matching the criteria.</span>
+                  <span>
+                    No jobs found matching the criteria or update the profile to
+                    get recommendation.
+                  </span>
                 </div>
               )}
             </div>

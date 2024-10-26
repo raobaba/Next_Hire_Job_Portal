@@ -10,7 +10,9 @@ const ProtectedRoute = ({ children }) => {
   };
 
   useEffect(() => {
-    if (!token || !user || user.role !== "recruiter") {
+    if (!token) {
+      navigate("/login"); 
+    } else if (user.role !== "recruiter") {
       navigate("/");
     }
   }, [token, user, navigate]);

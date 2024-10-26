@@ -20,7 +20,6 @@ const Companies = () => {
     setIsLoading(true);
     dispatch(getCompanies()).then((res) => {
       if (res?.payload?.status === 200) {
-        console.log(res?.payload);
         setIsLoading(false);
         setCompanies(res?.payload);
       } else {
@@ -28,8 +27,6 @@ const Companies = () => {
       }
     });
   }, [dispatch]);
-
-  console.log(companies);
 
   return (
     <div>

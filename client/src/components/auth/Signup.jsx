@@ -106,12 +106,11 @@ const Signup = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const token = GoogleAuthProvider.credentialFromResult(result).accessToken;
-
-      // Dispatch Google login information to the Redux store or backend
+      console.log("firebaseUser", user);
       dispatch(registerUser({ email: user.email, token }))
         .then((res) => {
           setLoading(false);
-          if (res?.meta?.requestStatus === "fulfilled") {
+          if (res?.payload?.status === 200) {
             toast.success("Google Signup successful!");
             navigate("/");
           } else {
@@ -164,7 +163,7 @@ const Signup = () => {
 
       <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 max-h-[calc(100vh-100px)] overflow-y-auto hide-scrollbar">
         <h1 className="text-2xl font-bold text-center mt-2">Sign Up</h1>
-        <div className="text-center flex items-center justify-center mt-2">
+        {/* <div className="text-center flex items-center justify-center mt-2">
           <Button
             className="bg-red-600 text-white flex items-center mr-2"
             onClick={handleGoogleSignup}
@@ -173,10 +172,10 @@ const Signup = () => {
             <FaGoogle className="mr-2" />
             Continue with Google
           </Button>
-        </div>
-        <div className="text-center my-2">
+        </div> */}
+        {/* <div className="text-center my-2">
           <span className="text-gray-500">or</span>
-        </div>
+        </div> */}
         <form onSubmit={submitHandler}>
           <div className="mb-4">
             <Label>Full Name</Label>

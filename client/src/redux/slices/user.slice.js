@@ -270,7 +270,6 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        console.log(action.payload.data.user);
         if (action.payload.data.user.fullname) {
           state.user.fullname = action.payload.data.user.fullname;
         }

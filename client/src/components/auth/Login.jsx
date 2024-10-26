@@ -55,9 +55,7 @@ const Login = () => {
     dispatch(loginUser(formData))
       .then((res) => {
         setLoading(false);
-        console.log(res?.payload?.status);
         if (res?.payload?.status === 200) {
-          console.log("data", res?.payload?.user?.isVerified);
           if (res?.payload?.user?.isVerified === false) {
             toast.info("Email is not verified, Please verify your email!");
           } else {
@@ -65,7 +63,6 @@ const Login = () => {
             navigate("/");
           }
         } else {
-          console.log(res);
           setErrorMessage(res?.payload?.message);
           toast.error(res?.payload?.message || "Something went wrong");
         }
@@ -156,7 +153,7 @@ const Login = () => {
       <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 max-h-[calc(100vh-100px)] overflow-y-auto hide-scrollbar">
         <h1 className="text-2xl font-bold text-center mt-2">Login</h1>
 
-        <div className="text-center flex items-center justify-center mt-2">
+        {/* <div className="text-center flex items-center justify-center mt-2">
           <Button
             className="bg-red-600 text-white flex items-center mr-2"
             onClick={handleGoogleSignup}
@@ -164,11 +161,11 @@ const Login = () => {
             <FaGoogle className="mr-2" />
             Continue with Google
           </Button>
-        </div>
+        </div> */}
 
-        <div className="text-center my-2">
+        {/* <div className="text-center my-2">
           <span className="text-gray-500">or</span>
-        </div>
+        </div> */}
 
         <form onSubmit={submitHandler}>
           <div className="mb-4">

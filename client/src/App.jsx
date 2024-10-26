@@ -45,7 +45,11 @@ const appRouter = createBrowserRouter([
   },
   {
     path: "/jobs",
-    element: <Jobs />,
+    element: (
+      <ProtectedRoute>
+        <Jobs />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/description/:id",
