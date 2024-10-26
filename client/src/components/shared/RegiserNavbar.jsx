@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import NextHireLogo from "@/assets/NextHireLogo.png";
+import NextHireLogo from "@/assets/nexthire.png";
 
 const RegisterNavbar = () => {
   return (
