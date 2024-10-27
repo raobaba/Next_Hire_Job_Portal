@@ -5,12 +5,12 @@ NextHire Job Portal
 ## Introduction
 
 ### User Management API
--Recruiter Functionality: Recruiters can register, create company profiles, and post job openings.
--Student Registration: Students can register to find jobs that match their skills and interests.
--Job Applications: Students can apply for jobs and track the status of their applications.
--Email Notifications: Users receive notifications via email for job matches, application status changes, and if hiring is halted.
--Advanced Job Filtering: Users can filter jobs based on salary, job type, and location.
--Profile-Based Recommendations: Students receive job recommendations tailored to their profiles and search queries.
+- Recruiter Functionality: Recruiters can register, create company profiles, and post job openings.
+- Student Registration: Students can register to find jobs that match their skills and interests.
+- Job Applications: Students can apply for jobs and track the status of their applications.
+- Email Notifications: Users receive notifications via email for job matches, application status changes, and if hiring is halted.
+- Advanced Job Filtering: Users can filter jobs based on salary, job type, and location.
+- Profile-Based Recommendations: Students receive job recommendations tailored to their profiles and search queries.
 
 ## Project Type
 Frontend & Backend 
