@@ -14,12 +14,13 @@ NextHire Job Portal
 
 ## Project Type
 Frontend & Backend 
+- [Frontend](https://user-data-manage-by-rajan.netlify.app/)
+- [Backend](https://nexthire.onrender.com/)
+- [Swagger API Documentation](https://nexthire-onrender.com/api-docs)
+
 
 ## Deplolyed App
 ```bash
-Frontend: https://user-data-manage-by-rajan.netlify.app/
-Backend: https://nexthire.onrender.com/
-SwaggerAPI: https://nexthire-onrender.com/api-docs
 Database: mongodb+srv://YOUR_USERNAME:YUOR_PASSWORD@cluster0.vvtoxbl.mongodb.net/JobPortal?retryWrites=true&w=majority
 ```
 
