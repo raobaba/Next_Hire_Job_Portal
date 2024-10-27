@@ -14,7 +14,7 @@ NextHire Job Portal
 
 ## Project Type
 Frontend & Backend 
-- [Frontend](https://user-data-manage-by-rajan.netlify.app/)
+- [Frontend](https://nexthire-portal.netlify.app/)
 - [Backend](https://nexthire.onrender.com/)
 - [Swagger API Documentation](https://nexthire.onrender.com/api-docs/)
 
