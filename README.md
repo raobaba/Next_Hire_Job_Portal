@@ -19,7 +19,7 @@ Frontend & Backend
 - [Swagger API Documentation](https://nexthire-onrender.com/api-docs)
 
 
-## Deplolyed App
+## Database url
 ```bash
 Database: mongodb+srv://YOUR_USERNAME:YUOR_PASSWORD@cluster0.vvtoxbl.mongodb.net/JobPortal?retryWrites=true&w=majority
 ```
