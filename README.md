@@ -16,7 +16,7 @@ NextHire Job Portal
 Frontend & Backend 
 - [Frontend](https://user-data-manage-by-rajan.netlify.app/)
 - [Backend](https://nexthire.onrender.com/)
-- [Swagger API Documentation](https://nexthire-onrender.com/api-docs)
+- [Swagger API Documentation](https://nexthire.onrender.com/api-docs/)
 
 
 ## Database url
