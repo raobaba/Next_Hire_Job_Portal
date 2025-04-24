@@ -35,6 +35,10 @@ const getHeaderConfig = (requestType, options, Authorization) => {
 };
 
 const fetchApiWrapper = (url, requestType, data, config) => {
+  console.log(`Final URL: ${url}`);
+  console.log(`Request Type: ${requestType}`);
+  console.log(`Config:`, config);
+  console.log(`Data:`, data);
   switch (requestType) {
     case "GET":
       return axios.get(url, config);

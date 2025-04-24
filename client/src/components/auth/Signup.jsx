@@ -12,8 +12,6 @@ import JobSearch from "@/assets/job_search.png";
 import RegisterNavbar from "../shared/RegiserNavbar";
 import Loader from "../shared/Loader";
 import { registerUser } from "@/redux/slices/user.slice";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { app } from "@/services/firebase"; // Import Firebase app
 
 const Signup = () => {
   const [fullname, setFullname] = useState("");
@@ -75,15 +73,29 @@ const Signup = () => {
     formData.append("avatar", avatar);
 
     setLoading(true);
-
+    console.log("formData", formData);
     dispatch(registerUser(formData))
       .then((res) => {
         setLoading(false);
         if (res?.payload?.status === 200) {
-          toast.success("Signup successful! Please verify your email.");
-          setTimeout(() => {
-            navigate("/login");
-          }, 2000);
+          toast.success("Signup successful! Please verify your email.", {
+            onClose: () => {
+              toast.info(
+                "We've sent a verification link to your email. Please check your inbox and verify your email to complete the registration.",
+                {
+                  autoClose: 30000,
+                  onClose: () => {
+                    setFullname("");
+                    setEmail("");
+                    setPhoneNumber("");
+                    setPassword("");
+                    setRole("");
+                    setAvatar(null);
+                  },
+                }
+              );
+            },
+          });
         } else {
           toast.error("Something went wrong! Please try again.");
         }
@@ -94,75 +106,41 @@ const Signup = () => {
       });
   };
 
-  // Google Signup Handler
-  const handleGoogleSignup = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const token = GoogleAuthProvider.credentialFromResult(result).accessToken;
-      console.log("firebaseUser", user);
-      dispatch(registerUser({ email: user.email, token }))
-        .then((res) => {
-          setLoading(false);
-          if (res?.payload?.status === 200) {
-            toast.success("Google Signup successful!");
-            navigate("/");
-          } else {
-            toast.error("Error signing up with Google.");
-          }
-        })
-        .catch((err) => {
-          setLoading(false);
-          toast.error("Google Signup failed. Please try again.");
-        });
-    } catch (error) {
-      setLoading(false);
-      console.error("Error during Google signup: ", error);
-      toast.error("Google Signup failed. Please try again.");
-    }
-  };
-
   return (
-    <div className="flex flex-col md:flex-row gap-1 items-start justify-center min-h-screen overflow-hidden px-4">
+    <div className='flex flex-col md:flex-row gap-1 items-start justify-center min-h-screen overflow-hidden px-4'>
       <RegisterNavbar />
       <ReactHelmet
-        title="Signup - Next_Hire"
-        description="Signup to access job opportunities and recruitments"
-        canonicalUrl="http://mysite.com/signup"
+        title='Signup - Next_Hire'
+        description='Signup to access job opportunities and recruitments'
+        canonicalUrl='http://mysite.com/signup'
       />
-      <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 md:h-[400px] sticky top-[100px] mb-8 md:mb-0 flex flex-col items-center">
-        <div className="w-40 h-40 border rounded-full overflow-hidden flex items-center justify-center mb-4">
+      <div className='bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 md:h-[400px] sticky top-[100px] mb-8 md:mb-0 flex flex-col items-center'>
+        <div className='w-40 h-40 border rounded-full overflow-hidden flex items-center justify-center mb-4'>
           <img
             src={JobSearch}
-            alt="Job Search"
-            className="w-full h-full object-cover"
+            alt='Job Search'
+            className='w-full h-full object-cover'
           />
         </div>
-        <h4 className="text-lg font-semibold mb-2">On Registering, You can:</h4>
-        <ul className="list-disc list-inside space-y-4">
-          <li className="flex items-center text-sm md:text-xs">
-            <span className="text-green-500 mr-2">✓</span>
+        <h4 className='text-lg font-semibold mb-2'>On Registering, You can:</h4>
+        <ul className='list-disc list-inside space-y-4'>
+          <li className='flex items-center text-sm md:text-xs'>
+            <span className='text-green-500 mr-2'>✓</span>
             <span>Build your profile and let recruiters find you</span>
           </li>
-          <li className="flex items-center text-sm md:text-xs">
-            <span className="text-green-500 mr-2">✓</span>
+          <li className='flex items-center text-sm md:text-xs'>
+            <span className='text-green-500 mr-2'>✓</span>
             <span>Get job postings delivered right to your email</span>
           </li>
-          <li className="flex items-center text-sm md:text-xs">
-            <span className="text-green-500 mr-2">✓</span>
+          <li className='flex items-center text-sm md:text-xs'>
+            <span className='text-green-500 mr-2'>✓</span>
             <span>Find a job and grow your career</span>
           </li>
         </ul>
       </div>
 
-      <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 max-h-[calc(100vh-100px)] overflow-y-auto hide-scrollbar">
-        <h1 className="text-2xl font-bold text-center mt-2">Sign Up</h1>
+      <div className='bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 max-h-[calc(100vh-100px)] overflow-y-auto hide-scrollbar'>
+        <h1 className='text-2xl font-bold text-center mt-2'>Sign Up</h1>
         {/* <div className="text-center flex items-center justify-center mt-2">
           <Button
             className="bg-red-600 text-white flex items-center mr-2"
@@ -177,113 +155,113 @@ const Signup = () => {
           <span className="text-gray-500">or</span>
         </div> */}
         <form onSubmit={submitHandler}>
-          <div className="mb-4">
+          <div className='mb-4'>
             <Label>Full Name</Label>
             <Input
-              type="text"
+              type='text'
               value={fullname}
               onChange={(e) => setFullname(e.target.value)}
-              placeholder="John Doe"
-              className="mt-1 w-full"
+              placeholder='John Doe'
+              className='mt-1 w-full'
               required
             />
           </div>
-          <div className="mb-4">
+          <div className='mb-4'>
             <Label>Email</Label>
             <Input
-              type="email"
+              type='email'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@gmail.com"
-              className="mt-1 w-full"
+              placeholder='example@gmail.com'
+              className='mt-1 w-full'
               required
             />
           </div>
-          <div className="mb-4">
+          <div className='mb-4'>
             <Label>Phone Number</Label>
             <Input
-              type="text"
+              type='text'
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="8080808080"
-              className="mt-1 w-full"
+              placeholder='8080808080'
+              className='mt-1 w-full'
               required
             />
           </div>
-          <div className="mb-4">
+          <div className='mb-4'>
             <Label>Password</Label>
             <Input
-              type="password"
+              type='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              className="mt-1 w-full"
+              placeholder='Enter your password'
+              className='mt-1 w-full'
               required
             />
           </div>
-          <div className="mb-4">
+          <div className='mb-4'>
             <Label>Role</Label>
-            <div className="flex flex-row">
-              <div className="flex items-center mr-4">
+            <div className='flex flex-row'>
+              <div className='flex items-center mr-4'>
                 <Input
-                  type="radio"
-                  name="role"
-                  value="student"
+                  type='radio'
+                  name='role'
+                  value='student'
                   onChange={(e) => setRole(e.target.value)}
-                  className="mr-2"
+                  className='mr-2'
                   required
                 />
                 <Label>Student</Label>
               </div>
-              <div className="flex items-center">
+              <div className='flex items-center'>
                 <Input
-                  type="radio"
-                  name="role"
-                  value="recruiter"
+                  type='radio'
+                  name='role'
+                  value='recruiter'
                   onChange={(e) => setRole(e.target.value)}
-                  className="mr-2"
+                  className='mr-2'
                   required
                 />
                 <Label>Recruiter</Label>
               </div>
             </div>
           </div>
-          <div className="mb-4">
+          <div className='mb-4'>
             <Label>Profile Picture</Label>
-            <div className="flex items-center">
-              <label className="cursor-pointer">
+            <div className='flex items-center'>
+              <label className='cursor-pointer'>
                 <Input
-                  accept="image/*"
-                  type="file"
+                  accept='image/*'
+                  type='file'
                   onChange={changeFileHandler}
-                  className="hidden"
+                  className='hidden'
                 />
-                <span className="mt-1 w-32 h-10 bg-blue-500 text-white flex items-center justify-center rounded-md cursor-pointer">
+                <span className='mt-1 w-32 h-10 bg-blue-500 text-white flex items-center justify-center rounded-md cursor-pointer'>
                   Choose File
                 </span>
               </label>
-              <div className="ml-2 w-12 h-12 border border-dashed border-gray-400 rounded-full flex items-center justify-center overflow-hidden">
+              <div className='ml-2 w-12 h-12 border border-dashed border-gray-400 rounded-full flex items-center justify-center overflow-hidden'>
                 {avatar ? (
                   <img
                     src={URL.createObjectURL(avatar)}
-                    alt="Uploaded Profile"
-                    className="w-full h-full object-cover rounded-full"
+                    alt='Uploaded Profile'
+                    className='w-full h-full object-cover rounded-full'
                   />
                 ) : (
-                  <FaCircleUser className="text-gray-400 w-10 h-10" />
+                  <FaCircleUser className='text-gray-400 w-10 h-10' />
                 )}
               </div>
             </div>
           </div>
           {loading && <Loader />}
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type='submit' className='w-full' disabled={loading}>
             Signup
           </Button>
 
-          <div className="text-center mt-4">
+          <div className='text-center mt-4'>
             <span>
               Already have an account?{" "}
-              <Link to="/login" className="text-blue-600">
+              <Link to='/login' className='text-blue-600'>
                 Login
               </Link>
             </span>

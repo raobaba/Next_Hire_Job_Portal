@@ -7,13 +7,17 @@ import { FaCheckCircle } from "react-icons/fa";
 
 const EmailVerification = () => {
   const [isVerified, setIsVerified] = useState(false);
+  const [called, setCalled] = useState(false);
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    handleEmailVerification();
-  }, [dispatch, location]);
+    if (!called) {
+      handleEmailVerification();
+      setCalled(true);
+    }
+  }, [dispatch, location, called]);
 
   const handleEmailVerification = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -47,18 +51,18 @@ const EmailVerification = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-md max-w-sm text-center">
+    <div className='flex items-center justify-center h-screen bg-gray-100'>
+      <div className='bg-white p-6 rounded-lg shadow-md max-w-sm text-center'>
         {isVerified ? (
-          <div className="flex flex-col items-center justify-center">
-            <FaCheckCircle className="text-green-500" size={60} />{" "}
-            <h2 className="text-lg font-semibold text-gray-800 mt-4">
+          <div className='flex flex-col items-center justify-center'>
+            <FaCheckCircle className='text-green-500' size={60} />{" "}
+            <h2 className='text-lg font-semibold text-gray-800 mt-4'>
               Email Verified!
             </h2>
-            <p className="text-gray-600 mt-2">Redirecting to login...</p>
+            <p className='text-gray-600 mt-2'>Redirecting to login...</p>
           </div>
         ) : (
-          <h2 className="text-lg font-semibold text-gray-800">Verifying...</h2>
+          <h2 className='text-lg font-semibold text-gray-800'>Verifying...</h2>
         )}
       </div>
     </div>

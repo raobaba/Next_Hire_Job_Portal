@@ -8,6 +8,7 @@ export const loginUserApi = async (data) => {
 
 // User register API
 export const registerUserApi = async (data) => {
+  console.log("data",data)
   const url = `api/v1/user/register`;
   return await fetchFromApiServer("MULTIPART", url, data);
 };
@@ -54,5 +55,5 @@ export const deleteSearchHistory = async () => {
 export const emailVerification = async (params) => {
   const {token} = params;
   const url = `api/v1/user/verify-email?token=${token}`;
-  return await fetchFromApiServer('GET', url);
+  return await fetchFromApiServer('POST', url);
 };

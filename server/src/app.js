@@ -27,7 +27,7 @@ const options = {
         url: 'http://localhost:8000'
       },
       {
-        url: "https://digitalpaani-book-management.onrender.com"
+        url: "https://nexthire.onrender.com"
       }
     ],
     components: {

@@ -8,9 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ReactHelmet from "@/components/shared/ReactHelmet";
 import Loader from "../shared/Loader";
-import { FaGoogle } from "react-icons/fa6";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { app } from "@/services/firebase";
 import { loginUser } from "@/redux/slices/user.slice";
 
 // Email validation regex pattern
@@ -45,11 +43,11 @@ const Login = () => {
   const submitHandler = (e) => {
     e.preventDefault();
 
-    // Validate form before submission
     if (!validateForm()) return;
 
     const formData = { email, password, role };
 
+    console.log("clicked",formData)
     setLoading(true);
 
     dispatch(loginUser(formData))
@@ -73,38 +71,6 @@ const Login = () => {
       });
   };
 
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-
-  const handleGoogleSignup = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const token = GoogleAuthProvider.credentialFromResult(result).accessToken;
-
-      dispatch(loginUser({ email: user.email, token }))
-        .then((res) => {
-          setLoading(false);
-          if (res?.meta?.requestStatus === "fulfilled") {
-            toast.success("Google login successful!");
-            navigate("/");
-          } else {
-            toast.error("Error logging in with Google.");
-          }
-        })
-        .catch((err) => {
-          setLoading(false);
-          toast.error("Google Login failed. Please try again.");
-        });
-    } catch (error) {
-      setLoading(false);
-      console.error("Error during Google login: ", error);
-      toast.error("Google Login failed. Please try again.");
-    }
-  };
 
   return (
     <div className="flex flex-col md:flex-row gap-1 items-start justify-center min-h-screen overflow-hidden px-4">

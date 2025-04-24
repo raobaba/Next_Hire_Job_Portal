@@ -2,7 +2,6 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBlBqVTl5qTuqAFnBURH2UuA4LAOE7bYY8",
   authDomain: "job-portal-website-6a198.firebaseapp.com",
@@ -13,9 +12,7 @@ const firebaseConfig = {
   measurementId: "G-BFBN1SG1HT",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
-// Export the initialized Firebase app
 export { app };

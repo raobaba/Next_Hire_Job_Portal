@@ -9,9 +9,8 @@ import {
   fetchRecommendedJobs,
   fetchSearchResult,
   deleteSearchHistory,
-  emailVerification
+  emailVerification,
 } from "../actions/user.action";
-
 
 // Initial state for user
 const initialState = {
@@ -24,7 +23,6 @@ const initialState = {
   error: null,
   message: null,
 };
-
 
 // Thunk for user login
 export const loginUser = createAsyncThunk(
@@ -45,6 +43,7 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await registerUserApi(userData);
+      console.log("response", response);
       return response.data;
     } catch (error) {
       return rejectWithValue(error?.response?.data);
@@ -111,7 +110,7 @@ export const updateUserProfile = createAsyncThunk(
 );
 
 export const getRecommendedJobs = createAsyncThunk(
-  'profile/recommend',
+  "profile/recommend",
   async (searchParams, { rejectWithValue }) => {
     try {
       const response = await fetchRecommendedJobs(searchParams);
@@ -122,10 +121,10 @@ export const getRecommendedJobs = createAsyncThunk(
       );
     }
   }
-)
+);
 
 export const getSearchResult = createAsyncThunk(
-  'profile/search',
+  "profile/search",
   async (searchParams, { rejectWithValue }) => {
     try {
       const response = await fetchSearchResult(searchParams);
@@ -133,13 +132,13 @@ export const getSearchResult = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error?.response?.data || "Failed to get Search Result"
-      )
+      );
     }
   }
-)
+);
 
 export const clearSearchHistory = createAsyncThunk(
-  'profile/search',
+  "profile/search",
   async (_, { rejectWithValue }) => {
     try {
       const response = await deleteSearchHistory();
@@ -147,12 +146,12 @@ export const clearSearchHistory = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error?.response?.data || "Failed to get Search Result"
-      )
+      );
     }
   }
-)
+);
 export const verifyEmail = createAsyncThunk(
-  'profile/verifyEmail',
+  "profile/verifyEmail",
   async (params, { rejectWithValue }) => {
     try {
       const response = await emailVerification(params);
@@ -164,9 +163,6 @@ export const verifyEmail = createAsyncThunk(
     }
   }
 );
-
-
-
 
 const userSlice = createSlice({
   name: "user",
@@ -199,7 +195,6 @@ const userSlice = createSlice({
             );
           }
         }
-
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -330,8 +325,7 @@ const userSlice = createSlice({
       .addCase(verifyEmail.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
-      ;
+      });
   },
 });
 

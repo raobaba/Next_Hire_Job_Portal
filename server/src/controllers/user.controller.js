@@ -1,5 +1,5 @@
 const User = require("../models/user.model");
-const { sendMail } = require('../utils/sendEmail')
+const { sendMail } = require("../utils/sendEmail");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const sendToken = require("./../utils/sendToken");
 const ErrorHandler = require("../utils/errorHandler");
@@ -7,8 +7,8 @@ const cloudinary = require("cloudinary");
 const Job = require("../models/job.model");
 const cron = require("node-cron");
 const crypto = require("crypto");
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
@@ -24,38 +24,32 @@ const readDocumentContent = asyncErrorHandler(async (req, res, next) => {
   const documentFilePath = req.files.document.tempFilePath;
   const documentData = fs.readFileSync(documentFilePath);
 
-  // Update the prompt to allow for dynamic heading extraction
   const prompt = `Extract key information from the following document. Identify and return the relevant sections and headings based on the content. Format the response in JSON.`;
 
   const image = {
     inlineData: {
       data: Buffer.from(documentData).toString("base64"),
-      mimeType: req.files.document.mimetype, // Use the correct MIME type
+      mimeType: req.files.document.mimetype,
     },
   };
 
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   const result = await model.generateContent([prompt, image]);
 
-  // Extract and clean the response
-  const responseText = result.response ? result.response.text() : '';
+  const responseText = result.response ? result.response.text() : "";
 
-  // Clean the response to remove backticks and unwanted leading text
-  const cleanedText = responseText.replace(/`/g, ''); // Remove backticks
-  const cleanedTextWithoutLeadingComments = cleanedText.replace(/^.*?\{/s, '{'); // Remove any leading text before the JSON
+  const cleanedText = responseText.replace(/`/g, "");
+  const cleanedTextWithoutLeadingComments = cleanedText.replace(/^.*?\{/s, "{");
 
   try {
-    // Attempt to parse the cleaned response
     const formattedContent = JSON.parse(cleanedTextWithoutLeadingComments);
 
-    // Return the formatted, structured response to the client
     return res.status(200).json({
       success: true,
       status: 200,
       extractedContent: formattedContent,
     });
   } catch (error) {
-    // Handle JSON parsing error
     console.error("Error parsing AI response:", error);
     return res.status(500).json({
       success: false,
@@ -81,7 +75,7 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
   const myCloud = await cloudinary.uploader.upload(
     req.files.avatar.tempFilePath,
     {
-      folder: "avatars",
+      folder: "avatar",
       width: 150,
       crop: "scale",
     }
@@ -104,30 +98,37 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
   user.verificationToken = verificationToken;
   await user.save();
 
-  // Send verification email
   const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
+
   const emailBody = {
     from: process.env.EMAIL_USER,
     to: email,
     subject: "Email Verification",
     text: `Please verify your email by clicking on the following link: ${verificationUrl}`,
+    html: `
+      <p>Hello,</p>
+      <p>Please verify your email by clicking the link below:</p>
+      <a href="${verificationUrl}" style="color:blue;">Verify Email</a>
+      <p>If you didn't request this, please ignore this email.</p>
+    `,
   };
 
   await sendMail(emailBody);
-
-
   sendToken(user, 200, res);
 });
 
 const verifyEmail = asyncErrorHandler(async (req, res, next) => {
-  console.log("request", req)
+  console.log("request", req);
   const { token } = req.query;
-  console.log("token", token)
+  console.log("token", token);
 
   const user = await User.findOne({ verificationToken: token });
 
   if (!user) {
-    const error = new ErrorHandler("Invalid or expired verification token", 400);
+    const error = new ErrorHandler(
+      "Invalid or expired verification token",
+      400
+    );
     return error.sendError(res);
   }
 
@@ -142,7 +143,6 @@ const verifyEmail = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-
 const loginUser = asyncErrorHandler(async (req, res, next) => {
   const { email, password, role } = req.body;
 
@@ -150,14 +150,11 @@ const loginUser = asyncErrorHandler(async (req, res, next) => {
     const error = new ErrorHandler("Please Enter Email And Password", 400);
     return error.sendError(res);
   }
-
   const user = await User.findOne({ email }).select("+password");
-
   if (!user) {
     const error = new ErrorHandler("User does not exist. Please sign up.", 404);
     return error.sendError(res);
   }
-
   if (role !== user.role) {
     const error = new ErrorHandler(
       "Account doesn't exist with current role.",
@@ -165,14 +162,11 @@ const loginUser = asyncErrorHandler(async (req, res, next) => {
     );
     return error.sendError(res);
   }
-
   const isPasswordMatched = await user.comparePassword(password);
-
   if (!isPasswordMatched) {
     const error = new ErrorHandler("Incorrect Password", 401);
     return error.sendError(res);
   }
-
   sendToken(user, 200, res);
 });
 
@@ -261,7 +255,9 @@ const getUserSearchHistory = asyncErrorHandler(async (req, res) => {
     return next(new ErrorHandler("User not found", 404));
   }
 
-  const cleanedSearchHistory = [...new Set(user.searchHistory.map(term => term.trim().toLowerCase()))];
+  const cleanedSearchHistory = [
+    ...new Set(user.searchHistory.map((term) => term.trim().toLowerCase())),
+  ];
 
   return res.status(200).json({
     success: true,
@@ -273,11 +269,7 @@ const getUserSearchHistory = asyncErrorHandler(async (req, res) => {
 const clearUserSearchHistory = asyncErrorHandler(async (req, res) => {
   const userId = req.user.id;
 
-  await User.findByIdAndUpdate(
-    userId,
-    { searchHistory: [] },
-    { new: true }
-  );
+  await User.findByIdAndUpdate(userId, { searchHistory: [] }, { new: true });
 
   return res.status(200).json({
     success: true,
@@ -293,22 +285,36 @@ const getSearchResult = asyncErrorHandler(async (req, res, next) => {
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
   }
-  const searchKeywords = [...new Set(user.searchHistory.map(term => term.trim().toLowerCase()))];
+  const searchKeywords = [
+    ...new Set(user.searchHistory.map((term) => term.trim().toLowerCase())),
+  ];
 
   if (searchKeywords.length === 0) {
     return res.status(200).json({
       success: true,
       status: 200,
       message: "No search history found",
-      jobs: []
+      jobs: [],
     });
   }
   const jobQuery = {
     $or: [
-      { title: { $in: searchKeywords.map(keyword => new RegExp(keyword, "i")) } },
-      { companyName: { $in: searchKeywords.map(keyword => new RegExp(keyword, "i")) } },
-      { requirements: { $in: searchKeywords.map(keyword => new RegExp(keyword, "i")) } }
-    ]
+      {
+        title: {
+          $in: searchKeywords.map((keyword) => new RegExp(keyword, "i")),
+        },
+      },
+      {
+        companyName: {
+          $in: searchKeywords.map((keyword) => new RegExp(keyword, "i")),
+        },
+      },
+      {
+        requirements: {
+          $in: searchKeywords.map((keyword) => new RegExp(keyword, "i")),
+        },
+      },
+    ],
   };
 
   const jobs = await Job.find(jobQuery)
@@ -320,25 +326,26 @@ const getSearchResult = asyncErrorHandler(async (req, res, next) => {
       success: true,
       status: 200,
       message: "No jobs found matching the search history",
-      jobs: []
+      jobs: [],
     });
   }
 
-  const uniqueJobs = jobs.reduce((acc, job) => {
-    if (!acc.jobIds.has(job._id.toString())) {
-      acc.jobIds.add(job._id.toString());
-      acc.jobs.push(job);
-    }
-    return acc;
-  }, { jobIds: new Set(), jobs: [] });
+  const uniqueJobs = jobs.reduce(
+    (acc, job) => {
+      if (!acc.jobIds.has(job._id.toString())) {
+        acc.jobIds.add(job._id.toString());
+        acc.jobs.push(job);
+      }
+      return acc;
+    },
+    { jobIds: new Set(), jobs: [] }
+  );
   return res.status(200).json({
     success: true,
     status: 200,
     jobs: uniqueJobs.jobs,
   });
 });
-
-
 
 const recommendJobsToUsers = async () => {
   const users = await User.find().populate("jobRecommendations");
@@ -392,14 +399,12 @@ const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
 
   const userId = req.user.id;
 
-  // Fetch user with job recommendations
   const user = await User.findById(userId).populate("jobRecommendations");
 
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
   }
 
-  // If no job recommendations found
   if (!user.jobRecommendations || user.jobRecommendations.length === 0) {
     return res.status(200).json({
       success: true,
@@ -409,57 +414,50 @@ const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
     });
   }
 
-  const jobIds = user.jobRecommendations.map(job => job._id);
+  const jobIds = user.jobRecommendations.map((job) => job._id);
 
-  // Build query for recommended jobs
   const query = {
     _id: { $in: jobIds },
   };
 
-  // Add filtering by title
   if (title) {
     const keyword = title.trim();
     query.title = { $regex: keyword, $options: "i" };
   }
 
-  // Add salary filtering based on the range
   if (salary) {
-    const [minSalary, maxSalary] = salary.split('-').map((s) => s.replace(/,/g, '').trim());
+    const [minSalary, maxSalary] = salary
+      .split("-")
+      .map((s) => s.replace(/,/g, "").trim());
     query.salary = {};
     if (minSalary) query.salary.$gte = Number(minSalary);
     if (maxSalary) query.salary.$lte = Number(maxSalary);
   }
 
-  // Add experience level filtering
   if (experienceLevel) {
     query.experienceLevel = Number(experienceLevel);
   }
 
-  // Add location filtering
   if (location) {
     query.location = { $regex: location, $options: "i" };
   }
 
-  // Add job type filtering
   if (jobType) {
     query.jobType = { $regex: jobType, $options: "i" };
   }
 
-  // Pagination
   const pageNumber = parseInt(page, 10) || 1;
   const limitNumber = parseInt(limit, 10) || 10;
   const skip = (pageNumber - 1) * limitNumber;
 
-  // Sorting options
   const sortOptions = {};
   if (sortBy) {
     const order = sortOrder === "asc" ? 1 : -1;
     sortOptions[sortBy] = order;
   } else {
-    sortOptions.createdAt = -1; // Default sorting by creation date
+    sortOptions.createdAt = -1;
   }
 
-  // Fetching the recommended jobs based on the built query
   const recommendedJobs = await Job.find(query)
     .populate({ path: "company" })
     .populate({ path: "applications" })
@@ -467,7 +465,6 @@ const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
     .limit(limitNumber)
     .sort(sortOptions);
 
-  // Get total count of recommended jobs for pagination
   const totalJobs = await Job.countDocuments(query);
 
   if (recommendedJobs.length === 0) {
@@ -492,10 +489,6 @@ const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-
-
-
-
 module.exports = {
   registerUser,
   loginUser,
@@ -506,5 +499,5 @@ module.exports = {
   getRecommendedJobs,
   getSearchResult,
   verifyEmail,
-  readDocumentContent
+  readDocumentContent,
 };
