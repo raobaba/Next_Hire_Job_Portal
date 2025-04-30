@@ -13,10 +13,11 @@ const EmailVerification = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!called) {
-      handleEmailVerification();
-      setCalled(true);
-    }
+    // Avoid making the API call if it has already been made
+    if (called) return;
+
+    handleEmailVerification();
+    setCalled(true);
   }, [dispatch, location, called]);
 
   const handleEmailVerification = () => {
@@ -42,7 +43,7 @@ const EmailVerification = () => {
             navigate("/login");
           }, 3000);
         } else {
-          toast.error(res?.payload?.message);
+          toast.error(res?.payload?.message || "Verification failed.");
         }
       })
       .catch(() => {
@@ -55,7 +56,7 @@ const EmailVerification = () => {
       <div className='bg-white p-6 rounded-lg shadow-md max-w-sm text-center'>
         {isVerified ? (
           <div className='flex flex-col items-center justify-center'>
-            <FaCheckCircle className='text-green-500' size={60} />{" "}
+            <FaCheckCircle className='text-green-500' size={60} />
             <h2 className='text-lg font-semibold text-gray-800 mt-4'>
               Email Verified!
             </h2>

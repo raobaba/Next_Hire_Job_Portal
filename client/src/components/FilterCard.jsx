@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiMinus, FiX } from "react-icons/fi";
 
-const FilterCard = ({ setSearchParams,filterOptions }) => {
-
+const FilterCard = ({ setSearchParams, filterOptions }) => {
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-
 
   const toggleExpand = (index) => {
     setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
@@ -16,13 +14,11 @@ const FilterCard = ({ setSearchParams,filterOptions }) => {
   const handleFilterSelection = (filterType, filterValue) => {
     const filterKey = filterType.toLowerCase();
 
-    // Handle unique selections for Location, Job Type, and Salary
     if (["location", "job type", "salary"].includes(filterKey)) {
       const existingFilter = selectedFilters.find(
         (filter) => filter.type === filterKey
       );
 
-      // Update or add new filter
       if (existingFilter) {
         setSelectedFilters((prev) =>
           prev.map((filter) =>
@@ -58,7 +54,6 @@ const FilterCard = ({ setSearchParams,filterOptions }) => {
     }
   };
 
-  // Remove a filter chip
   const removeFilter = (filterType, filterValue) => {
     setSelectedFilters((prev) =>
       prev.filter(
@@ -69,6 +64,10 @@ const FilterCard = ({ setSearchParams,filterOptions }) => {
           )
       )
     );
+  };
+
+  const clearAllFilters = () => {
+    setSelectedFilters([]);
   };
 
   useEffect(() => {
@@ -125,6 +124,12 @@ const FilterCard = ({ setSearchParams,filterOptions }) => {
                 </div>
               ))}
             </div>
+            <button
+              onClick={clearAllFilters}
+              className='text-red-500 text-sm mt-2'
+            >
+              Clear All Filters
+            </button>
           </div>
         )}
         {filterOptions.map((filter, index) => (

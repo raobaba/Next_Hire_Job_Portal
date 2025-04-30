@@ -19,8 +19,16 @@ const ResetPassword = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Check if passwords match
     if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
+      setLoading(false);
+      return;
+    }
+
+    // Check if fields are empty
+    if (!email || !password || !confirmPassword) {
+      toast.error("All fields are required!");
       setLoading(false);
       return;
     }
@@ -44,64 +52,64 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+    <div className='flex flex-col items-center justify-center min-h-screen px-4'>
       <RegisterNavbar />
       <ReactHelmet
-        title="Reset Password - Next_Hire"
-        description="Reset your password for NextHire"
-        canonicalUrl="http://mysite.com/reset-password"
+        title='Reset Password - Next_Hire'
+        description='Reset your password for NextHire'
+        canonicalUrl='http://mysite.com/reset-password'
       />
-      <div className="bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3">
-        <h1 className="text-2xl font-bold mb-6 text-center">Reset Password</h1>
+      <div className='bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3'>
+        <h1 className='text-2xl font-bold mb-6 text-center'>Reset Password</h1>
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+          <div className='mb-4'>
             <Label>Email</Label>
             <Input
-              type="email"
+              type='email'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@gmail.com"
-              className="mt-1 w-full"
+              placeholder='example@gmail.com'
+              className='mt-1 w-full'
               required
             />
           </div>
-          <div className="mb-4">
+          <div className='mb-4'>
             <Label>New Password</Label>
             <Input
-              type="password"
+              type='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your new password"
-              className="mt-1 w-full"
+              placeholder='Enter your new password'
+              className='mt-1 w-full'
               required
             />
           </div>
-          <div className="mb-4">
+          <div className='mb-4'>
             <Label>Confirm Password</Label>
             <Input
-              type="password"
+              type='password'
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your new password"
-              className="mt-1 w-full"
+              placeholder='Confirm your new password'
+              className='mt-1 w-full'
               required
             />
           </div>
-          <div className="mt-6">
+          <div className='mt-6'>
             {loading ? (
-              <Button className="w-full" disabled>
+              <Button className='w-full' disabled>
                 Please wait...
               </Button>
             ) : (
-              <Button type="submit" className="w-full">
+              <Button type='submit' className='w-full'>
                 Reset Password
               </Button>
             )}
           </div>
-          <div className="text-center mt-4">
+          <div className='text-center mt-4'>
             <span>
               Remembered your password?{" "}
-              <Link to="/login" className="text-blue-600">
+              <Link to='/login' className='text-blue-600'>
                 Login
               </Link>
             </span>

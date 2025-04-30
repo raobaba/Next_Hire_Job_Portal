@@ -34,8 +34,8 @@ const AdminJobs = () => {
       setFilteredJobs(
         jobs.filter(
           (job) =>
-            job.title.toLowerCase().includes(input.toLowerCase()) ||
-            job.company?.companyName.toLowerCase().includes(input.toLowerCase())
+            job?.title?.toLowerCase().includes(input?.toLowerCase()) ||
+            job?.company?.companyName?.toLowerCase().includes(input.toLowerCase())
         )
       );
     } else {
@@ -44,9 +44,9 @@ const AdminJobs = () => {
   }, [input, jobs]);
 
   const handleJobDeletion = (deletedJobId) => {
-    setJobs((prevJobs) => prevJobs.filter((job) => job._id !== deletedJobId));
+    setJobs((prevJobs) => prevJobs?.filter((job) => job?._id !== deletedJobId));
     setFilteredJobs((prevFilteredJobs) =>
-      prevFilteredJobs.filter((job) => job._id !== deletedJobId)
+      prevFilteredJobs?.filter((job) => job?._id !== deletedJobId)
     );
   };
 

@@ -9,6 +9,7 @@ import { getJobById, getSimilarJobs } from "@/redux/slices/job.slice";
 import { applyJob } from "@/redux/slices/application.slice";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "./shared/Loader";
+import { getToken } from "@/utils/constant";
 
 const JobDescription = () => {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ const JobDescription = () => {
           setSingleJob(response);
           const findApplications = res?.payload?.job?.applications;
           const alreadyApplied = findApplications?.some(
-            (application) => application.applicant === user._id
+            (application) => application?.applicant === user?._id
           );
           setIsApplied(alreadyApplied);
 
@@ -45,6 +46,8 @@ const JobDescription = () => {
   }, [dispatch, jobId, user]);
 
   const applyJobHandler = () => {
+    const token = getToken();
+    if (!token) return navigate("/login");
     dispatch(applyJob(jobId))
       .then((res) => {
         if (res?.payload?.status === 200) {
@@ -69,41 +72,41 @@ const JobDescription = () => {
   if (!singleJob) return <Loader />;
 
   return (
-    <div className="w-11/12 mx-auto md:p-8">
+    <div className='w-11/12 mx-auto md:p-8'>
       <ReactHelmet
-        title="Job Details - Next_Hire"
-        description="Discover detailed information about the job role, responsibilities, qualifications, and how to apply. Learn more to see if this is the right opportunity for you."
-        canonicalUrl="http://mysite.com/job-details"
+        title='Job Details - Next_Hire'
+        description='Discover detailed information about the job role, responsibilities, qualifications, and how to apply. Learn more to see if this is the right opportunity for you.'
+        canonicalUrl='http://mysite.com/job-details'
       />
 
       <Button
         onClick={() => navigate(-1)}
-        className="mb-2 rounded-lg bg-gray-400 hover:bg-gray-500"
+        className='mb-2 rounded-lg bg-gray-400 hover:bg-gray-500'
       >
         Go Back
       </Button>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className='flex flex-col md:flex-row gap-6'>
         {/* Job Description Section */}
-        <div className="flex-1">
-          <div className="flex flex-col mb-2">
-            <h1 className="font-bold text-2xl md:text-3xl">
+        <div className='flex-1'>
+          <div className='flex flex-col mb-2'>
+            <h1 className='font-bold text-2xl md:text-3xl'>
               {singleJob.title}
             </h1>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <Badge className={"text-blue-700 font-bold"} variant="ghost">
+            <div className='flex items-center gap-2 mt-1 flex-wrap'>
+              <Badge className={"text-blue-700 font-bold"} variant='ghost'>
                 {singleJob.position} Positions
               </Badge>
-              <Badge className={"text-[#F83002] font-bold"} variant="ghost">
+              <Badge className={"text-[#F83002] font-bold"} variant='ghost'>
                 {singleJob.jobType}
               </Badge>
-              <Badge className={"text-[#7209b7] font-bold"} variant="ghost">
+              <Badge className={"text-[#7209b7] font-bold"} variant='ghost'>
                 {singleJob.salary} LPA
               </Badge>
             </div>
           </div>
 
-          <div className=" flex justify-between text-center align-baseline space-x-4">
+          <div className=' flex justify-between text-center align-baseline space-x-4'>
             <Button
               onClick={isApplied ? null : applyJobHandler}
               disabled={isApplied}
@@ -119,55 +122,55 @@ const JobDescription = () => {
             {/* New Button for Company Details */}
             <Button
               onClick={viewCompanyDetails}
-              className="rounded-lg bg-[#007BFF] hover:bg-[#0056b3]"
+              className='rounded-lg bg-[#007BFF] hover:bg-[#0056b3]'
             >
               View Company Details
             </Button>
           </div>
 
-          <h1 className="border-b-2 border-b-gray-300 font-medium py-4 mt-6">
+          <h1 className='border-b-2 border-b-gray-300 font-medium py-4 mt-6'>
             Job Description
           </h1>
-          <div className="my-4 space-y-2">
-            <JobDetail label="Role" value={singleJob.title} />
-            <JobDetail label="Location" value={singleJob.location} />
-            <JobDetail label="Description" value={singleJob.description} />
+          <div className='my-4 space-y-2'>
+            <JobDetail label='Role' value={singleJob.title} />
+            <JobDetail label='Location' value={singleJob.location} />
+            <JobDetail label='Description' value={singleJob.description} />
             <JobDetail
-              label="Experience"
+              label='Experience'
               value={`${singleJob.experienceLevel} yrs`}
             />
-            <JobDetail label="Salary" value={`$${singleJob.salary}`} />
+            <JobDetail label='Salary' value={`$${singleJob.salary}`} />
             <JobDetail
-              label="Total Applicants"
+              label='Total Applicants'
               value={singleJob.applications.length}
             />
             <JobDetail
-              label="Posted Date"
+              label='Posted Date'
               value={singleJob.createdAt.split("T")[0]}
             />
           </div>
         </div>
 
         {/* Similar Jobs Section */}
-        <div className="w-full md:w-1/3 border border-black rounded-md shadow-md p-4">
-          <h1 className="border-b-2 border-b-gray-300 font-medium py-2">
+        <div className='w-full md:w-1/3 border border-black rounded-md shadow-md p-4'>
+          <h1 className='border-b-2 border-b-gray-300 font-medium py-2'>
             Similar Jobs
           </h1>
-          <div className="max-h-[400px] overflow-y-auto mt-1 scrollbar-hidden">
+          <div className='max-h-[400px] overflow-y-auto mt-1 scrollbar-hidden'>
             {similarJobs.length > 0 ? (
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 {similarJobs.map((job) => (
                   <div
                     key={job._id}
-                    className="p-4 border rounded-md flex flex-col"
+                    className='p-4 border rounded-md flex flex-col'
                   >
-                    <h2 className="font-bold text-lg">{job.title}</h2>
-                    <p className="text-gray-600">{job.location}</p>
-                    <p className="text-gray-800">₹{job.salary} </p>
-                    <p className="text-gray-500">{job.jobType}</p>
+                    <h2 className='font-bold text-lg'>{job.title}</h2>
+                    <p className='text-gray-600'>{job.location}</p>
+                    <p className='text-gray-800'>₹{job.salary} </p>
+                    <p className='text-gray-500'>{job.jobType}</p>
                     <Button
                       onClick={() => navigate(`/description/${job._id}`)}
-                      className="mt-2 rounded-lg bg-[#7209b7] hover:bg-[#5f32ad]"
+                      className='mt-2 rounded-lg bg-[#7209b7] hover:bg-[#5f32ad]'
                     >
                       View Job
                     </Button>
@@ -185,8 +188,8 @@ const JobDescription = () => {
 };
 
 const JobDetail = ({ label, value }) => (
-  <h1 className="font-bold my-1">
-    {label}: <span className="pl-4 font-normal text-gray-800">{value}</span>
+  <h1 className='font-bold my-1'>
+    {label}: <span className='pl-4 font-normal text-gray-800'>{value}</span>
   </h1>
 );
 

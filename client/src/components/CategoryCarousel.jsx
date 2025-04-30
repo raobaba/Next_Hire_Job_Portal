@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -11,44 +11,44 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { getCarouselData } from "@/redux/slices/job.slice";
 
-const category = [
-  "Frontend Developer",
-  "Backend Developer",
-  "Data Science",
-  "Graphic Designer",
-  "FullStack Developer",
-];
-
 const CategoryCarousel = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { carousel } = useSelector((state) => state.job);
   const [carousels, setCarousels] = useState(carousel?.jobs);
+
+  // Search job handler
   const searchJobHandler = (query) => {
     navigate(`/description/${query?._id}`);
   };
 
+  // Fetch carousel data if not available
   useEffect(() => {
     if (!carousels) {
       dispatch(getCarouselData())
         .then((res) => {
-          if (res?.payload?.status == 200) {
-            setCarousels("res", res?.payload?.jobs);
+          if (res?.payload?.status === 200) {
+            setCarousels(res?.payload?.jobs);
           }
         })
         .catch((error) => {
-          console.log("error", error);
+          console.error("Error fetching carousel data:", error);
         });
     }
-  }, []);
+  }, [carousels, dispatch]);
 
-  console.log("carousels", carousels);
+  // Memoized sliced carousels for performance
+  const carouselItems = useMemo(() => carousels?.slice(0, 10), [carousels]);
+
+  if (!carousels) {
+    return <div>Loading...</div>; // Or use a loading spinner
+  }
 
   return (
     <div>
       <Carousel className='w-full max-w-xl mx-auto my-10'>
         <CarouselContent className='grow-0 shrink-0 min-w-0 flex'>
-          {carousels.slice(0, 10).map((cat, index) => (
+          {carouselItems.map((cat, index) => (
             <CarouselItem
               key={index}
               className='grow-0 shrink-0 min-w-0 md:basis-1/2'

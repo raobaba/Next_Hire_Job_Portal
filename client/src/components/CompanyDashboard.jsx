@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
 import { useDispatch } from "react-redux";
 import { getCompanyById, getJobsByCompany } from "@/redux/slices/company.slice";
@@ -16,9 +16,18 @@ const CompanyDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Helper function for truncating long descriptions
+  const truncateDescription = (description) => {
+    return description.length > 100
+      ? description.substring(0, 100) + "..."
+      : description;
+  };
+
   // Fetch company and jobs by companyId
-  const fetchCompanyAndJobs = () => {
+  const fetchCompanyAndJobs = useCallback(() => {
     setLoading(true);
+
+    // Fetch company details
     dispatch(getCompanyById(id))
       .then((res) => {
         if (res?.payload?.company) {
@@ -29,6 +38,7 @@ const CompanyDashboard = () => {
       })
       .catch(() => toast.error("Error fetching company details."));
 
+    // Fetch jobs by company
     dispatch(getJobsByCompany(id))
       .then((res) => {
         if (res?.payload?.status === 200) {
@@ -39,11 +49,11 @@ const CompanyDashboard = () => {
       })
       .catch(() => toast.error("Error fetching jobs."))
       .finally(() => setLoading(false));
-  };
+  }, [id, dispatch]);
 
   useEffect(() => {
     fetchCompanyAndJobs();
-  }, [id]);
+  }, [fetchCompanyAndJobs]);
 
   if (loading) {
     return <Loader />;
@@ -81,27 +91,29 @@ const CompanyDashboard = () => {
                   {/* Company Info: Name, Location, Website */}
                   <div>
                     <h1 className='text-2xl md:text-4xl font-bold'>
-                      {company.companyName}
+                      {company.companyName || "Company Name not available"}
                     </h1>
                     <p className='text-sm md:text-base text-gray-600'>
-                      Location: {company.location}
+                      Location: {company.location || "Not available"}
                     </p>
                     <p className='text-sm md:text-base text-gray-600'>
                       Website:{" "}
                       <a
-                        href={company.website}
+                        href={company.website || "#"}
                         className='text-blue-500'
                         target='_blank'
                         rel='noopener noreferrer'
                       >
-                        {company.website}
+                        {company.website || "No website available"}
                       </a>
                     </p>
                   </div>
                 </div>
               </div>
 
-              <p className='mt-4 text-gray-700'>{company.description}</p>
+              <p className='mt-4 text-gray-700'>
+                {company.description || "Description not available."}
+              </p>
             </div>
           ) : (
             <p className='text-gray-500'>Company details not found.</p>
@@ -110,7 +122,7 @@ const CompanyDashboard = () => {
 
         <div className='mt-10'>
           <h2 className='text-xl md:text-3xl font-bold'>
-            Jobs Posted by {company?.companyName}
+            Jobs Posted by {company?.companyName || "This Company"}
           </h2>
           {jobs.length > 0 ? (
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6'>
@@ -123,9 +135,7 @@ const CompanyDashboard = () => {
                     {job.title}
                   </h3>
                   <p className='text-gray-600 mb-4'>
-                    {job.description.length > 100
-                      ? job.description.substring(0, 100) + "..."
-                      : job.description}
+                    {truncateDescription(job.description)}
                   </p>
                   <p className='text-gray-700'>Location: {job.location}</p>
                   <p className='text-gray-700'>
@@ -139,9 +149,7 @@ const CompanyDashboard = () => {
                     <Button
                       variant='outline'
                       className='w-full'
-                      onClick={() =>
-                        (window.location.href = `/description/${job._id}`)
-                      }
+                      onClick={() => navigate(`/description/${job._id}`)}
                     >
                       View Job
                     </Button>

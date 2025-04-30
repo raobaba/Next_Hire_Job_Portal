@@ -44,7 +44,7 @@ const PostJob = () => {
 
   const selectChangeHandler = (value) => {
     const selectedCompany = company?.companies?.find(
-      (company) => company.companyName === value // Remove lowercase comparison
+      (company) => company?.companyName === value // Use optional chaining
     );
     setInput({
       ...input,
@@ -67,18 +67,17 @@ const PostJob = () => {
       });
   }, [dispatch]);
 
-  const submitHandler = async (e) => {
+  const submitHandler = (e) => {
     e.preventDefault();
     setLoading(true);
 
     const formData = {
       ...input,
     };
-    setLoading(true);
     dispatch(postJob(formData))
       .then((res) => {
         if (res?.payload?.status === 200) {
-          toast.success(res?.payload?.message);
+          toast.success(res?.payload?.message ?? "Job posted successfully.");
           setLoading(false);
           navigate(-1);
         } else {
@@ -88,125 +87,125 @@ const PostJob = () => {
       })
       .catch((error) => {
         console.error(error);
-        toast.error("An unexpected error occurred."); // Avoid accessing res inside catch
+        toast.error("An unexpected error occurred.");
         setLoading(false);
       });
   };
 
   return (
-    <div className="m-auto flex items-center justify-center w-11/12">
+    <div className='m-auto flex items-center justify-center w-11/12'>
       <Navbar />
       {loading && <Loader />}
       <ReactHelmet
-        title="Post a Job - Next_Hire"
-        description="Easily post job openings to attract qualified candidates. Fill out the job details, including role, responsibilities, and requirements, to find the perfect fit for your team."
-        canonicalUrl="http://mysite.com/post-job"
+        title='Post a Job - Next_Hire'
+        description='Easily post job openings to attract qualified candidates. Fill out the job details, including role, responsibilities, and requirements, to find the perfect fit for your team.'
+        canonicalUrl='http://mysite.com/post-job'
       />
 
-      <div className="flex items-center justify-center w-11/12 my-5 px-4 mt-20 md:px-0">
+      <div className='flex items-center justify-center w-11/12 my-5 px-4 mt-20 md:px-0'>
         <form
           onSubmit={submitHandler}
-          className="p-8 max-w-4xl border border-gray-200 shadow-lg rounded-md w-full"
+          className='p-8 max-w-4xl border border-gray-200 shadow-lg rounded-md w-full'
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
               <Label>Title</Label>
               <Input
-                type="text"
-                name="title"
+                type='text'
+                name='title'
                 value={input.title}
                 onChange={changeEventHandler}
-                className="w-full max-w-md my-1"
+                className='w-full max-w-md my-1'
                 required
               />
             </div>
             <div>
               <Label>Description</Label>
               <Input
-                type="text"
-                name="description"
+                type='text'
+                name='description'
                 value={input.description}
                 onChange={changeEventHandler}
-                className="w-full max-w-md my-1"
+                className='w-full max-w-md my-1'
                 required
               />
             </div>
             <div>
               <Label>Requirements</Label>
               <Input
-                type="text"
-                name="requirements"
+                type='text'
+                name='requirements'
                 value={input.requirements}
                 onChange={changeEventHandler}
-                className="w-full max-w-md my-1"
+                className='w-full max-w-md my-1'
               />
             </div>
             <div>
               <Label>Salary</Label>
               <Input
-                type="text"
-                name="salary"
+                type='text'
+                name='salary'
                 value={input.salary}
                 onChange={changeEventHandler}
-                className="w-full max-w-md my-1"
+                className='w-full max-w-md my-1'
               />
             </div>
             <div>
               <Label>Location</Label>
               <Input
-                type="text"
-                name="location"
+                type='text'
+                name='location'
                 value={input.location}
                 onChange={changeEventHandler}
-                className="w-full max-w-md my-1"
+                className='w-full max-w-md my-1'
               />
             </div>
             <div>
               <Label>Job Type</Label>
               <Input
-                type="text"
-                name="jobType"
+                type='text'
+                name='jobType'
                 value={input.jobType}
                 onChange={changeEventHandler}
-                className="w-full max-w-md my-1"
+                className='w-full max-w-md my-1'
               />
             </div>
             <div>
               <Label>Experience Level</Label>
               <Input
-                type="text"
-                name="experience"
+                type='text'
+                name='experience'
                 value={input.experience}
                 onChange={changeEventHandler}
-                className="w-full max-w-md my-1"
+                className='w-full max-w-md my-1'
               />
             </div>
             <div>
               <Label>No of Positions</Label>
               <Input
-                type="number"
-                name="position"
+                type='number'
+                name='position'
                 value={input.position}
                 onChange={changeEventHandler}
-                className="w-full max-w-md my-1"
-                min="1"
+                className='w-full max-w-md my-1'
+                min='1'
               />
             </div>
             {company?.companies?.length > 0 && (
               <div>
                 <Label>Select Company</Label>
                 <Select onValueChange={selectChangeHandler}>
-                  <SelectTrigger className="w-full max-w-md">
-                    <SelectValue placeholder="Select a Company" />
+                  <SelectTrigger className='w-full max-w-md'>
+                    <SelectValue placeholder='Select a Company' />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       {company?.companies?.map((company) => (
                         <SelectItem
-                          key={company._id}
-                          value={company.companyName} // Do not lowercase here
+                          key={company?._id}
+                          value={company?.companyName} // Ensure data integrity
                         >
-                          {company.companyName}
+                          {company?.companyName}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -215,17 +214,19 @@ const PostJob = () => {
               </div>
             )}
           </div>
+
           {loading ? (
-            <Button className="w-full my-4" disabled>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
+            <Button className='w-full my-4' disabled>
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait
             </Button>
           ) : (
-            <Button type="submit" className="w-full my-4">
+            <Button type='submit' className='w-full my-4'>
               Post New Job
             </Button>
           )}
+
           {company?.companies?.length === 0 && (
-            <p className="text-xs text-red-600 font-bold text-center my-3">
+            <p className='text-xs text-red-600 font-bold text-center my-3'>
               *Please register a company first before posting a job
             </p>
           )}

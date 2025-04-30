@@ -55,7 +55,14 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
   // Handle form submission to update profile
   const submitHandler = (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading to true at the start
+    setLoading(true);
+
+    // Simple validation
+    if (!input.fullname || !input.email || !input.phoneNumber) {
+      toast.error("Please fill in all required fields.");
+      setLoading(false);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("fullname", input.fullname);
@@ -91,107 +98,107 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     <Dialog open={open}>
       {loading && <Loader />}
       <DialogContent
-        className="sm:max-w-[425px]"
+        className='sm:max-w-[425px]'
         onInteractOutside={() => setOpen(false)}
       >
         <DialogHeader>
           <DialogTitle>Update Profile</DialogTitle>
           <Button
-            variant="ghost"
-            className="absolute top-2 right-2"
+            variant='ghost'
+            className='absolute top-2 right-2'
             onClick={() => setOpen(false)}
           >
-            <X className="w-5 h-5" /> {/* Cross icon */}
+            <X className='w-5 h-5' /> {/* Cross icon */}
           </Button>
         </DialogHeader>
         <form onSubmit={submitHandler}>
-          <div className="grid gap-4 py-4">
+          <div className='grid gap-4 py-4'>
             {/* Fullname input */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="fullname" className="text-right">
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='fullname' className='text-right'>
                 Name
               </Label>
               <Input
-                id="fullname"
-                name="fullname"
-                type="text"
+                id='fullname'
+                name='fullname'
+                type='text'
                 value={input.fullname}
                 onChange={changeEventHandler}
-                className="col-span-3"
+                className='col-span-3'
               />
             </div>
 
             {/* Email input */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='email' className='text-right'>
                 Email
               </Label>
               <Input
-                id="email"
-                name="email"
-                type="email"
+                id='email'
+                name='email'
+                type='email'
                 value={input.email}
                 onChange={changeEventHandler}
-                className="col-span-3"
+                className='col-span-3'
               />
             </div>
 
             {/* Phone number input */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="phoneNumber" className="text-right">
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='phoneNumber' className='text-right'>
                 Number
               </Label>
               <Input
-                id="phoneNumber"
-                name="phoneNumber"
+                id='phoneNumber'
+                name='phoneNumber'
                 value={input.phoneNumber}
                 onChange={changeEventHandler}
-                className="col-span-3"
+                className='col-span-3'
               />
             </div>
 
             {/* Bio input */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="bio" className="text-right">
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='bio' className='text-right'>
                 Bio
               </Label>
               <Input
-                id="bio"
-                name="bio"
+                id='bio'
+                name='bio'
                 value={input.bio}
                 onChange={changeEventHandler}
-                className="col-span-3"
+                className='col-span-3'
               />
             </div>
 
             {/* Conditional rendering for student role */}
             {user?.role === "student" && (
               <>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="skills" className="text-right">
+                <div className='grid grid-cols-4 items-center gap-4'>
+                  <Label htmlFor='skills' className='text-right'>
                     Skills
                   </Label>
                   <Input
-                    id="skills"
-                    name="skills"
+                    id='skills'
+                    name='skills'
                     value={input.skills}
                     onChange={changeEventHandler}
-                    className="col-span-3"
+                    className='col-span-3'
                   />
                 </div>
 
                 {/* Resume file input */}
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="file" className="text-right">
+                <div className='grid grid-cols-4 items-center gap-4'>
+                  <Label htmlFor='file' className='text-right'>
                     Resume
                   </Label>
                   <Input
-                    id="file"
-                    name="file"
-                    type="file"
-                    accept="image/png"
+                    id='file'
+                    name='file'
+                    type='file'
+                    accept='image/png'
                     onChange={fileChangeHandler}
-                    className="col-span-3"
+                    className='col-span-3'
                   />
                 </div>
               </>
@@ -201,11 +208,11 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
           {/* Submit button with loading state */}
           <DialogFooter>
             {loading ? (
-              <Button className="w-full my-4" disabled>
+              <Button className='w-full my-4' disabled>
                 Please wait
               </Button>
             ) : (
-              <Button type="submit" className="w-full my-4">
+              <Button type='submit' className='w-full my-4'>
                 Update
               </Button>
             )}

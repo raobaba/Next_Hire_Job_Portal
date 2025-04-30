@@ -27,7 +27,12 @@ const Signup = () => {
 
   // Handle profile picture change
   const changeFileHandler = (e) => {
-    setAvatar(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      setAvatar(file);
+    } else {
+      toast.error("Please select a valid image file.");
+    }
   };
 
   // Form validation function
@@ -141,19 +146,6 @@ const Signup = () => {
 
       <div className='bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3 max-h-[calc(100vh-100px)] overflow-y-auto hide-scrollbar'>
         <h1 className='text-2xl font-bold text-center mt-2'>Sign Up</h1>
-        {/* <div className="text-center flex items-center justify-center mt-2">
-          <Button
-            className="bg-red-600 text-white flex items-center mr-2"
-            onClick={handleGoogleSignup}
-            disabled={loading} // Disable button while loading
-          >
-            <FaGoogle className="mr-2" />
-            Continue with Google
-          </Button>
-        </div> */}
-        {/* <div className="text-center my-2">
-          <span className="text-gray-500">or</span>
-        </div> */}
         <form onSubmit={submitHandler}>
           <div className='mb-4'>
             <Label>Full Name</Label>

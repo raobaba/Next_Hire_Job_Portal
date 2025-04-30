@@ -15,9 +15,9 @@ const {
 const jobRouter = express.Router();
 
 jobRouter.route("/post").post(isAuthenticated, postJob);
-jobRouter.route("/get").get(isAuthenticated, getAllJobs);
+jobRouter.route("/get").get(getAllJobs);
 jobRouter.route("/getadminjobs").get(isAuthenticated, getAdminJobs);
-jobRouter.route("/get/:id").get(isAuthenticated, getJobById);
+jobRouter.route("/get/:id").get(getJobById);
 jobRouter.route("/update/:id").put(isAuthenticated, updateJob);
 jobRouter.route("/delete/:id").delete(isAuthenticated, deleteAdminJobs);
 jobRouter.route("/:id/similar").get(getSimilarJobs);

@@ -90,11 +90,11 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     limit = 10,
   } = req.query;
 
-  const userId = req.user.id;
+  const userId = req?.user?.id;
   const keyword = title || "";
-
-  // Update search history if keyword exists
-  if (keyword) {
+  
+  // Update search history only if user is logged in and keyword exists
+  if (userId && keyword) {
     await User.findByIdAndUpdate(
       userId,
       { $addToSet: { searchHistory: keyword } },

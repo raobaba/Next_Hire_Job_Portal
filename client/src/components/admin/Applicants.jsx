@@ -14,17 +14,20 @@ const Applicants = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dispatch(getApplicants(id))
-      .then((res) => {
+    const fetchApplicants = async () => {
+      try {
+        const res = await dispatch(getApplicants(id));
         if (res?.payload?.status === 200) {
-          setApplicants(res.payload.applicants || []);
-          setLoading(false);
+          setApplicants(res?.payload?.applicants ?? []);
         }
+      } catch (error) {
+        console.error("Failed to fetch applicants:", error);
+      } finally {
         setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchApplicants();
   }, [dispatch, id]);
 
   return (
@@ -38,7 +41,7 @@ const Applicants = () => {
 
       <div className="max-w-7xl mx-auto p-4">
         <h1 className="font-bold text-xl my-5">
-          Applicants {loading ? "..." : applicants.length}
+          Applicants {loading ? "..." : applicants?.length}
         </h1>
         {loading ? <Loader /> : <ApplicantsTable applicants={applicants} />}
       </div>

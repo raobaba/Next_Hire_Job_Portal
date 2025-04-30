@@ -21,14 +21,13 @@ const Navbar = () => {
   const profilePic = getProfilePic();
   const navigate = useNavigate();
 
-  const toggleDropdown = () => {
-    setIsDropDownOpen((prev) => !prev);
-  };
+  // Toggle dropdown visibility
+  const toggleDropdown = () => setIsDropDownOpen((prev) => !prev);
 
-  const toggleMenu = () => {
-    setIsOpen((prev) => !prev);
-  };
+  // Toggle mobile menu visibility
+  const toggleMenu = () => setIsOpen((prev) => !prev);
 
+  // Close dropdown if click is outside
   const closeDropdown = (e) => {
     if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
       setIsDropDownOpen(false);
@@ -37,32 +36,30 @@ const Navbar = () => {
 
   useEffect(() => {
     document.addEventListener("mousedown", closeDropdown);
-
     return () => {
       document.removeEventListener("mousedown", closeDropdown);
     };
   }, []);
 
-  const handleLogOut = () => {
+  // Logout logic
+  const handleLogOut = async () => {
     setIsLoading(true);
-    dispatch(logoutUser())
-      .then((res) => {
-        if (res?.payload?.status === 200) {
-          toast.success("Successfully logged out!");
-          navigate("/login");
-        } else {
-          toast.error(
-            "Logout failed: " + (res?.payload?.message || "Unknown error")
-          ); // Error toast
-        }
-      })
-      .catch((error) => {
-        console.error("Error during logout:", error);
-        toast.error("Error during logout: " + error.message); // Error toast
-      })
-      .finally(() => {
-        setIsLoading(false); // Reset loading state
-      });
+    try {
+      const res = await dispatch(logoutUser());
+      if (res?.payload?.status === 200) {
+        toast.success("Successfully logged out!");
+        navigate("/login");
+      } else {
+        toast.error(
+          `Logout failed: ${res?.payload?.message || "Unknown error"}`
+        );
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error(`Error during logout: ${error?.message || "Unknown error"}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -95,7 +92,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Menu */}
-          <div className={`hidden md:flex items-center gap-12`}>
+          <div className='hidden md:flex items-center gap-12'>
             <ul className='flex items-center gap-8 font-medium text-gray-600'>
               <li>
                 <Link to='/'>Home</Link>
@@ -110,15 +107,15 @@ const Navbar = () => {
                 <Link to='/other-jobs'>Other Jobs</Link>
               </li>
             </ul>
+
+            {/* User Profile Dropdown */}
             {token ? (
               <div className='relative inline-block' ref={dropdownRef}>
                 <div
                   className='py-1 flex items-center px-2 border rounded-2xl cursor-pointer hover:bg-gray-200'
                   onClick={toggleDropdown}
                 >
-                  <span>
-                    <RiMenu2Fill />
-                  </span>
+                  <RiMenu2Fill />
                   <div className='w-6 h-6 bg-gray-300 rounded-full overflow-hidden ml-3'>
                     <img
                       src={profilePic}

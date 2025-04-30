@@ -13,7 +13,7 @@ import { getCompanyById, updateCompany } from "@/redux/slices/company.slice";
 
 const CompanySetup = () => {
   const dispatch = useDispatch();
-  const params = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -24,17 +24,17 @@ const CompanySetup = () => {
   const [loading, setLoading] = useState(false);
   const [isBackNavigation, setIsBackNavigation] = useState(false);
 
-  const fetchCompanyData = () => {
-    if (params.id && !isBackNavigation) {
+  useEffect(() => {
+    if (id && !isBackNavigation) {
       setLoading(true);
-      dispatch(getCompanyById(params.id))
+      dispatch(getCompanyById(id))
         .then((res) => {
-          const company = res?.payload.company;
+          const company = res?.payload?.company;
           if (company) {
-            setName(company.companyName || "");
-            setDescription(company.description || "");
-            setWebsite(company.website || "");
-            setLocation(company.location || "");
+            setName(company?.companyName ?? "");
+            setDescription(company?.description ?? "");
+            setWebsite(company?.website ?? "");
+            setLocation(company?.location ?? "");
             setLogo(null);
           } else {
             toast.error("Failed to fetch company data.");
@@ -47,11 +47,7 @@ const CompanySetup = () => {
           setLoading(false);
         });
     }
-  };
-
-  useEffect(() => {
-    fetchCompanyData();
-  }, [params.id]);
+  }, [id, isBackNavigation, dispatch]);
 
   const handleBackClick = (e) => {
     e.preventDefault();
@@ -60,7 +56,8 @@ const CompanySetup = () => {
   };
 
   const changeFileHandler = (e) => {
-    setLogo(e.target.files[0]);
+    const file = e?.target?.files?.[0];
+    if (file) setLogo(file);
   };
 
   const submitHandler = (e) => {
@@ -70,19 +67,18 @@ const CompanySetup = () => {
     formData.append("description", description);
     formData.append("website", website);
     formData.append("location", location);
-
-    if (logo) {
-      formData.append("logo", logo);
-    }
+    if (logo) formData.append("logo", logo);
 
     setLoading(true);
-    dispatch(updateCompany({ companyId: params.id, companyData: formData }))
+    dispatch(updateCompany({ companyId: id, companyData: formData }))
       .then((res) => {
-        if (res?.payload?.status === 200) {
-          toast.success(res?.payload?.message);
+        const status = res?.payload?.status;
+        const message = res?.payload?.message;
+        if (status === 200) {
+          toast.success(message ?? "Company updated successfully.");
           navigate("/profile");
         } else {
-          toast.error("Failed to update the company.");
+          toast.error(message ?? "Failed to update the company.");
         }
       })
       .catch(() => {
@@ -94,72 +90,75 @@ const CompanySetup = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className='flex flex-col min-h-screen'>
       <Navbar />
       {loading && <Loader />}
+
       <ReactHelmet
-        title="Setup Company - Next_Hire"
+        title='Setup Company - Next_Hire'
         description="Configure your company's profile, including details like location, industry, and values. Ensure your organization stands out to potential candidates on Next_Hire."
-        canonicalUrl="http://mysite.com/company-setup"
+        canonicalUrl='http://mysite.com/company-setup'
       />
 
-      <div className="max-w-xl mx-auto my-10 flex-1 p-4">
+      <div className='max-w-xl mx-auto my-10 flex-1 p-4'>
         <form onSubmit={submitHandler}>
-          <div className="flex items-center gap-5 p-8">
+          <div className='flex items-center gap-5 p-8'>
             <Button
-              onClick={handleBackClick} // Use the updated back handler
-              variant="outline"
-              className="flex items-center gap-2 text-gray-500 font-semibold"
+              onClick={handleBackClick}
+              variant='outline'
+              className='flex items-center gap-2 text-gray-500 font-semibold'
             >
               <ArrowLeft />
               <span>Back</span>
             </Button>
-            <h1 className="font-bold text-xl">Company Setup</h1>
+            <h1 className='font-bold text-xl'>Company Setup</h1>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
               <Label>Company Name</Label>
               <Input
-                type="text"
+                type='text'
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(e?.target?.value ?? "")}
                 required
               />
             </div>
             <div>
               <Label>Description</Label>
               <Input
-                type="text"
+                type='text'
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => setDescription(e?.target?.value ?? "")}
               />
             </div>
             <div>
               <Label>Website</Label>
               <Input
-                type="url"
+                type='url'
                 value={website}
-                onChange={(e) => setWebsite(e.target.value)}
+                onChange={(e) => setWebsite(e?.target?.value ?? "")}
               />
             </div>
             <div>
               <Label>Location</Label>
               <Input
-                type="text"
+                type='text'
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                onChange={(e) => setLocation(e?.target?.value ?? "")}
               />
             </div>
             <div>
               <Label>Logo</Label>
               <Input
-                type="file"
-                accept="image/*"
+                type='file'
+                accept='image/*'
                 onChange={changeFileHandler}
               />
             </div>
           </div>
-          <Button type="submit" className="w-full my-4" disabled={loading}>
+
+          <Button type='submit' className='w-full my-4' disabled={loading}>
             {loading ? "Updating..." : "Update"}
           </Button>
         </form>

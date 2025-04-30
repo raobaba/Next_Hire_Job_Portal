@@ -46,11 +46,7 @@ const appRouter = createBrowserRouter([
   },
   {
     path: "/jobs",
-    element: (
-      <ProtectedRoute>
-        <Jobs />
-      </ProtectedRoute>
-    ),
+    element: <Jobs />,
   },
   {
     path: "/description/:id",
@@ -121,7 +117,7 @@ const appRouter = createBrowserRouter([
 // Main App component
 function App() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className='flex flex-col min-h-screen'>
       <RouterProvider router={appRouter} />
     </div>
   );
