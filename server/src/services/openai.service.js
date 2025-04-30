@@ -123,6 +123,11 @@ cron.schedule("0 0 * * *", () => {
   notifyUsersToCompleteProfile();
 });
 
+// cron.schedule("* * * * *", () => {
+//   console.log("Checking for users to notify about completing their profiles...");
+//   notifyUsersToCompleteProfile();
+// });
+
 async function notifyApplicationReceived(user, job, companyName) {
   try {
     const emailContentText = `

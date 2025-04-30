@@ -43,7 +43,6 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await registerUserApi(userData);
-      console.log("response", response);
       return response.data;
     } catch (error) {
       return rejectWithValue(error?.response?.data);

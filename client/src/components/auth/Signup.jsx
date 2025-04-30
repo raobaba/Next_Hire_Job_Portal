@@ -73,7 +73,7 @@ const Signup = () => {
     formData.append("avatar", avatar);
 
     setLoading(true);
-    console.log("formData", formData);
+
     dispatch(registerUser(formData))
       .then((res) => {
         setLoading(false);
@@ -81,7 +81,7 @@ const Signup = () => {
           toast.success("Signup successful! Please verify your email.", {
             onClose: () => {
               toast.info(
-                "We've sent a verification link to your email. Please check your inbox and verify your email to complete the registration.",
+                "We've sent a verification link to your email. Please check your inbox and spam folder to verify your email to complete the registration.",
                 {
                   autoClose: 30000,
                   onClose: () => {
@@ -97,7 +97,7 @@ const Signup = () => {
             },
           });
         } else {
-          toast.error("Something went wrong! Please try again.");
+          toast.error(res?.payload?.message);
         }
       })
       .catch((err) => {

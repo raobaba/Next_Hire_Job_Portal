@@ -16,6 +16,7 @@ import PostJob from "./components/admin/PostJob";
 import Applicants from "./components/admin/Applicants";
 import ResetPassword from "./components/auth/ResetPassword";
 import EmailVarification from "./components/EmailVarification";
+import OtherJobs from "./components/OtherJobs";
 
 // Router setup
 const appRouter = createBrowserRouter([
@@ -58,6 +59,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/browse-jobs",
     element: <BrowseJobs />,
+  },
+  {
+    path: "/other-jobs",
+    element: <OtherJobs />,
   },
   {
     path: "/profile",

@@ -14,7 +14,6 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
 
 const readDocumentContent = asyncErrorHandler(async (req, res, next) => {
-  console.log("uploaded file:", req.files);
 
   if (!req.files || !req.files.document) {
     const error = new ErrorHandler("Please upload a document file.", 400);
@@ -118,9 +117,7 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
 });
 
 const verifyEmail = asyncErrorHandler(async (req, res, next) => {
-  console.log("request", req);
   const { token } = req.query;
-  console.log("token", token);
 
   const user = await User.findOne({ verificationToken: token });
 
@@ -184,7 +181,7 @@ const logoutUser = asyncErrorHandler(async (req, res, next) => {
 });
 
 const updateProfile = asyncErrorHandler(async (req, res, next) => {
-  const { fullname, email, phoneNumber, bio, skills, resume } = req.body;
+  const { fullname, email, phoneNumber, bio, skills } = req.body;
   console.log(req.body);
   const userId = req.user.id;
   let user = await User.findById(userId);

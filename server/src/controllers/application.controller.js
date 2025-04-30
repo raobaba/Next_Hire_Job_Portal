@@ -1,8 +1,12 @@
 const Application = require("../models/application.model");
 const Job = require("../models/job.model");
-const Company = require("../models/company.model")
+const Company = require("../models/company.model");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
-const { notifyApplicationReceived, notifyStatusUpdate } = require('../services/openai.service')
+const {
+  notifyApplicationReceived,
+  notifyStatusUpdate,
+} = require("../services/openai.service");
+
 const ErrorHandler = require("../utils/errorHandler");
 
 const applyJob = asyncErrorHandler(async (req, res) => {
@@ -130,7 +134,9 @@ const updateStatus = asyncErrorHandler(async (req, res) => {
       return new ErrorHandler("Status is required", 400).sendError(res);
     }
 
-    const application = await Application.findById(applicationId).populate('applicant'); // Populate to get applicant details
+    const application = await Application.findById(applicationId).populate(
+      "applicant"
+    ); // Populate to get applicant details
     if (!application) {
       return new ErrorHandler("Application not found", 404).sendError(res);
     }
@@ -144,14 +150,19 @@ const updateStatus = asyncErrorHandler(async (req, res) => {
       return new ErrorHandler("Job not found", 404).sendError(res);
     }
 
-    const company = await Company.findById(job.company)
+    const company = await Company.findById(job.company);
     if (!company) {
       return new ErrorHandler("company not found", 404).sendError(res);
     }
-    console.log("company", company)
+
     const applicant = application.applicant;
 
-    await notifyStatusUpdate(applicant, job.title, application.status, company.companyName); // Call the function to send email
+    await notifyStatusUpdate(
+      applicant,
+      job.title,
+      application.status,
+      company.companyName
+    ); // Call the function to send email
 
     return res.status(200).json({
       message: "Status updated successfully.",

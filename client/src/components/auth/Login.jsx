@@ -47,7 +47,6 @@ const Login = () => {
 
     const formData = { email, password, role };
 
-    console.log("clicked",formData)
     setLoading(true);
 
     dispatch(loginUser(formData))

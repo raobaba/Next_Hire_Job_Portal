@@ -8,7 +8,6 @@ export const loginUserApi = async (data) => {
 
 // User register API
 export const registerUserApi = async (data) => {
-  console.log("data",data)
   const url = `api/v1/user/register`;
   return await fetchFromApiServer("MULTIPART", url, data);
 };

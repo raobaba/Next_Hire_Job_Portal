@@ -183,9 +183,6 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
   });
 });
 
-
-
-
 const getJobById = asyncErrorHandler(async (req, res) => {
   const jobId = req.params.id;
   const job = await Job.findById(jobId).populate("applications");
@@ -243,7 +240,6 @@ const deleteAdminJobs = asyncErrorHandler(async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 });
-
 
 const getSimilarJobs = asyncErrorHandler(async (req, res) => {
   const jobId = req.params.id;
