@@ -4,7 +4,7 @@ import FilterCard from "./FilterCard";
 import Job from "./Job";
 import { motion } from "framer-motion";
 import ReactHelmet from "./shared/ReactHelmet";
-import { getAllJobs } from "@/redux/slices/job.slice";
+import { getAllJobs, getFitlerOptions } from "@/redux/slices/job.slice";
 import { getRecommendedJobs } from "@/redux/slices/user.slice";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "./shared/Loader";
@@ -12,7 +12,9 @@ import { toast } from "react-toastify";
 
 const Jobs = () => {
   const dispatch = useDispatch();
+  const { filterOption } = useSelector((state) => state.job);
   const user = useSelector((state) => state.user.user);
+  const [filterOptions, setFilterOptions] = useState(filterOption);
   const [allJobs, setAllJobs] = useState([]);
   const [recommendedJobs, setRecommendedJobs] = useState([]);
   const [filterJobs, setFilterJobs] = useState([]);
@@ -188,30 +190,44 @@ const Jobs = () => {
     }
   };
 
+  console.log("filterOptions", filterOptions);
+  useEffect(() => {
+  
+      dispatch(getFitlerOptions())
+        .then((res) => {
+          setFilterOptions(res?.payload?.filterData);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+  
+  }, []);
+
   return (
     <div>
       <Navbar />
       <ReactHelmet
-        title="Job Openings - Next_Hire"
-        description="Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire."
-        canonicalUrl="http://mysite.com/job"
+        title='Job Openings - Next_Hire'
+        description='Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire.'
+        canonicalUrl='http://mysite.com/job'
       />
-      <div className="max-w-7xl mt-20 mx-auto px-4">
-        <div className="flex flex-col md:flex-row gap-5">
+      <div className='max-w-7xl mt-20 mx-auto px-4'>
+        <div className='flex flex-col md:flex-row gap-5'>
           {currentCategory !== "searchedBased" ? (
-            <div className="w-full md:w-1/4 lg:w-1/5">
+            <div className='w-full md:w-1/4 lg:w-1/5'>
               <FilterCard
                 setFilterJobs={setFilterJobs}
                 setSearchParams={setSearchParams}
+                filterOptions={filterOptions}
               />
             </div>
           ) : null}
 
           <div
-            className="flex-1 h-[85vh] overflow-y-auto pb-5"
+            className='flex-1 h-[85vh] overflow-y-auto pb-5'
             ref={observerRef}
           >
-            <div className="flex flex-col sm:flex-row items-center justify-between my-1 sm:space-x-4 space-y-3 sm:space-y-0">
+            <div className='flex flex-col sm:flex-row items-center justify-between my-1 sm:space-x-4 space-y-3 sm:space-y-0'>
               <h2
                 onClick={() => handleCategoryChange("all")}
                 className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
@@ -236,7 +252,7 @@ const Jobs = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
               {filterJobs?.length > 0 ? (
                 filterJobs?.map((job) => (
                   <motion.div
@@ -250,7 +266,7 @@ const Jobs = () => {
                   </motion.div>
                 ))
               ) : (
-                <div className="col-span-full text-center py-5">
+                <div className='col-span-full text-center py-5'>
                   <span>
                     No jobs found matching the criteria or update the profile to
                     get recommendation.

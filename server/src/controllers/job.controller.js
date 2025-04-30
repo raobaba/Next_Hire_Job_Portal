@@ -3,8 +3,11 @@ const User = require("../models/user.model");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const ErrorHandler = require("../utils/errorHandler");
 const Company = require("../models/company.model");
-const Application = require('../models/application.model')
-const { processJobAndNotifyUsers, notifyJobDeletion } = require("../services/openai.service");
+const Application = require("../models/application.model");
+const {
+  processJobAndNotifyUsers,
+  notifyJobDeletion,
+} = require("../services/openai.service");
 const postJob = asyncErrorHandler(async (req, res) => {
   const {
     title,
@@ -120,7 +123,9 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
 
   // Handle salary filtering based on a range
   if (salary) {
-    const [minSalary, maxSalary] = salary.split('-').map((s) => s.replace(/,/g, '').trim());
+    const [minSalary, maxSalary] = salary
+      .split("-")
+      .map((s) => s.replace(/,/g, "").trim());
     query.salary = {};
     if (minSalary) query.salary.$gte = Number(minSalary);
     if (maxSalary) query.salary.$lte = Number(maxSalary);
@@ -179,7 +184,10 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     limit: limitNumber,
     success: true,
     status: 200,
-    message: jobs.length === 0 ? "No jobs found matching your criteria" : "Jobs retrieved successfully",
+    message:
+      jobs.length === 0
+        ? "No jobs found matching your criteria"
+        : "Jobs retrieved successfully",
   });
 });
 
@@ -284,7 +292,9 @@ const deleteAdminJobs = asyncErrorHandler(async (req, res) => {
 
     const companyName = job.company.companyName;
     const jobTitle = job.title;
-    const applicantIds = job.applications.map(application => application.applicant);
+    const applicantIds = job.applications.map(
+      (application) => application.applicant
+    );
     const applicants = await User.find({ _id: { $in: applicantIds } });
 
     await Job.findByIdAndDelete(jobId);
@@ -347,5 +357,98 @@ const getSimilarJobs = asyncErrorHandler(async (req, res) => {
   }
 });
 
-module.exports = { postJob, getAllJobs, getJobById, getAdminJobs,updateJob, deleteAdminJobs, getSimilarJobs };
+const getJobFilters = asyncErrorHandler(async (req, res, next) => {
+  // Get distinct values from Job collection
+  const locations = await Job.distinct("location");
+  const jobTypes = await Job.distinct("jobType");
 
+  // Get min and max salary for calculating ranges
+  const salaryStats = await Job.aggregate([
+    {
+      $group: {
+        _id: null,
+        minSalary: { $min: "$salary" },
+        maxSalary: { $max: "$salary" },
+      },
+    },
+  ]);
+
+  let salaryRanges = [];
+
+  if (salaryStats.length > 0) {
+    const { minSalary, maxSalary } = salaryStats[0];
+
+    // Generate salary ranges in steps of 10,000 or based on your preferred logic
+    for (
+      let start = Math.floor(minSalary / 10000) * 10000;
+      start < maxSalary;
+      start += 10000
+    ) {
+      const end = start + 10000;
+      if (end >= maxSalary) {
+        salaryRanges.push("More");
+        break;
+      }
+      salaryRanges.push(`${start.toLocaleString()}-${end.toLocaleString()}`);
+    }
+  }
+
+  const filterData = [
+    { filterType: "Location", array: locations },
+    { filterType: "Job Type", array: jobTypes },
+    { filterType: "Salary", array: salaryRanges },
+  ];
+
+  return res.status(200).json({
+    filterData,
+    success: true,
+    status: 200,
+  });
+});
+
+const getJobsForCarousel = asyncErrorHandler(async (req, res) => {
+  try {
+    const jobs = await Job.aggregate([
+      {
+        $sort: { createdAt: -1 }, // Latest job per title
+      },
+      {
+        $group: {
+          _id: "$title", // Group by title
+          job: { $first: "$$ROOT" }, // Pick the latest job with this title
+        },
+      },
+      {
+        $replaceRoot: { newRoot: "$job" }, // Flatten the job object to top level
+      },
+    ]);
+
+    return res.status(200).json({
+      jobs,
+      success: true,
+      status: 200,
+      message: jobs.length
+        ? "Unique title jobs retrieved successfully."
+        : "No jobs found.",
+    });
+  } catch (error) {
+    console.error("Error fetching unique jobs:", error);
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Internal server error while fetching jobs.",
+    });
+  }
+});
+
+module.exports = {
+  postJob,
+  getAllJobs,
+  getJobById,
+  getAdminJobs,
+  updateJob,
+  deleteAdminJobs,
+  getSimilarJobs,
+  getJobFilters,
+  getJobsForCarousel,
+};

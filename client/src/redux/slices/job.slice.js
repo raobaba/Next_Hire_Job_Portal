@@ -6,6 +6,8 @@ import {
   getJobByIdApi,
   removeJobApi,
   fetchSimilarJobApi,
+  filterOptionData,
+  carouselData,
 } from "../actions/job.action";
 
 export const postJob = createAsyncThunk(
@@ -93,6 +95,32 @@ export const getSimilarJobs = createAsyncThunk(
   }
 );
 
+export const getFitlerOptions = createAsyncThunk(
+  "job/fitlerOption",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await filterOptionData();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "issue in getting filter option data"
+      );
+    }
+  }
+);
+export const getCarouselData = createAsyncThunk(
+  "job/carousel",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await carouselData();
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Getting issue in carousel data"
+      );
+    }
+  }
+);
 
 // Initial state
 const initialState = {
@@ -103,6 +131,8 @@ const initialState = {
   loading: false,
   error: null,
   success: false,
+  filterOption: [],
+  carousel: [],
 };
 
 // Job slice
@@ -135,7 +165,19 @@ const jobSlice = createSlice({
         state.error = action.payload;
         state.success = false;
       })
-
+      // Get Filter Options
+      .addCase(getFitlerOptions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getFitlerOptions.fulfilled, (state, action) => {
+        state.loading = false;
+        state.filterOption = action.payload.filterData; // Set filter options
+      })
+      .addCase(getFitlerOptions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       // Get all jobs cases
       .addCase(getAllJobs.pending, (state) => {
         state.loading = true;
@@ -150,6 +192,19 @@ const jobSlice = createSlice({
         state.error = action.payload;
       })
 
+      //Get all carousel data
+      .addCase(getCarouselData.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getCarouselData.fulfilled, (state, action) => {
+        state.loading = false;
+        state.carousel = action.payload;
+      })
+      .addCase(getCarouselData.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       // Get admin jobs cases
       .addCase(getAdminJobs.pending, (state) => {
         state.loading = true;

@@ -149,6 +149,8 @@ const updateCompany = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
+
+
 module.exports = {
   registerCompany,
   getCompany,

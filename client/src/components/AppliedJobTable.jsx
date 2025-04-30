@@ -126,7 +126,7 @@ const AppliedJobTable = () => {
               {/* Additional Info: Salary, Experience, and Requirements */}
               <div className="text-gray-700 text-xs mb-2 flex-grow">
                 <p>
-                  <strong>Salary:</strong> ${appliedJob?.job?.salary.toLocaleString()}
+                  <strong>Salary:</strong> ₹{appliedJob?.job?.salary.toLocaleString()}
                 </p>
                 <p>
                   <strong>Experience:</strong> {appliedJob?.job?.experienceLevel} years

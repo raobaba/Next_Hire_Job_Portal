@@ -24,13 +24,22 @@ export const getJobByIdApi = async (jobId) => {
   return await fetchFromApiServer("GET", url);
 };
 
-
 export const removeJobApi = async (jobId) => {
   const url = `api/v1/job/delete/${jobId}`;
-  return await fetchFromApiServer('DELETE', url)
-}
+  return await fetchFromApiServer("DELETE", url);
+};
 
 export const fetchSimilarJobApi = async (jobId) => {
   const url = `api/v1/job/${jobId}/similar`;
-  return await fetchFromApiServer('GET', url)
-}
+  return await fetchFromApiServer("GET", url);
+};
+
+export const filterOptionData = async () => {
+  const url = `api/v1/job/filters`;
+  return await fetchFromApiServer("GET", url);
+};
+
+export const carouselData = async () => {
+  const url = `api/v1/job/carousel`;
+  return await fetchFromApiServer("GET", url);
+};

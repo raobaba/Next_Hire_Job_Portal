@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { applyJob } from "@/redux/slices/application.slice";
 import { toast } from "react-toastify";
 
-const Job = ({ job }) => {
+const Job = ({job }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
@@ -82,7 +82,7 @@ const Job = ({ job }) => {
           {job?.jobType}
         </Badge>
         <Badge className={"text-[#7209b7] font-bold"} variant="ghost">
-          ${job?.salary}
+          ₹{job?.salary}
         </Badge>
       </div>
 

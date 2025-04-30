@@ -206,7 +206,7 @@ userRouter.route("/login").post(loginUser);
  *       500:
  *         description: Internal server error
  */
-userRouter.route("/logout").get(isAuthenticated, logoutUser);
+userRouter.route("/logout").get(logoutUser);
 
 /**
  * @swagger

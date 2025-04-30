@@ -13,12 +13,18 @@ async function generateEmailContent(job, user, companyName) {
 
   Dear ${user.fullname},
 
-  We are thrilled to share an exciting opportunity at ${companyName}. As a valued candidate on NextHire, we believe you would be a perfect fit for the ${job.title} position, available at our rapidly growing tech company located in ${job.location}.
+  We are thrilled to share an exciting opportunity at ${companyName}. As a valued candidate on NextHire, we believe you would be a perfect fit for the ${
+    job.title
+  } position, available at our rapidly growing tech company located in ${
+    job.location
+  }.
 
   **Job Description:**
   ${job.description}
 
-  In this role, you will collaborate with a talented team, utilizing your skills in ${job.requirements.join(", ")} to develop and maintain innovative web applications. Your contributions will help us deliver exceptional user experiences while maintaining high standards of quality and efficiency.
+  In this role, you will collaborate with a talented team, utilizing your skills in ${job.requirements.join(
+    ", "
+  )} to develop and maintain innovative web applications. Your contributions will help us deliver exceptional user experiences while maintaining high standards of quality and efficiency.
 
   **Required Skills:**
   - Proficiency in ${job.requirements.join(", ")}
@@ -57,7 +63,7 @@ async function processJobAndNotifyUsers(job, companyName) {
           text: emailContent,
           html: `
             <p>Dear ${user.fullname},</p>
-            <p>${emailContent.replace(/(?:\r\n|\r|\n)/g, '<br>')}</p>
+            <p>${emailContent.replace(/(?:\r\n|\r|\n)/g, "<br>")}</p>
             <p>Warm regards,<br>The Hiring Team at ${companyName}</p>
           `,
         };
@@ -114,12 +120,17 @@ async function notifyUsersToCompleteProfile() {
 
     console.log("Profile completion notifications sent successfully.");
   } catch (error) {
-    console.error("Error in notifying users to complete their profiles:", error);
+    console.error(
+      "Error in notifying users to complete their profiles:",
+      error
+    );
   }
 }
 
 cron.schedule("0 0 * * *", () => {
-  console.log("Checking for users to notify about completing their profiles...");
+  console.log(
+    "Checking for users to notify about completing their profiles..."
+  );
   notifyUsersToCompleteProfile();
 });
 
@@ -213,26 +224,51 @@ async function notifyJobDeletion(jobTitle, companyName, applicants) {
 }
 
 async function notifyStatusUpdate(applicant, jobTitle, status, companyName) {
+  const isRejected = status === "rejected";
+  const statusFormatted = isRejected ? "Rejected" : "Accepted";
+
   try {
-    const emailContentText = `
+    const emailContentText = isRejected
+      ? `
     Dear ${applicant.fullname},
 
-    We would like to inform you that the status of your application for the ${jobTitle} position at ${companyName} has been updated to "${status}". 
+    Thank you for applying for the ${jobTitle} position at ${companyName}. After careful consideration, we regret to inform you that your application status has been updated to ${statusFormatted}.
 
-    We appreciate your interest in this role and encourage you to stay positive as we move forward in the hiring process.
+    We appreciate the time and effort you invested in the application process. Please do not be discouraged — we encourage you to apply for future openings that match your qualifications and experience.
 
-    Thank you for your patience and understanding.
+    Wishing you the best in your job search.
+
+    Best regards,
+    The Hiring Team at ${companyName}`
+          : `
+    Dear ${applicant.fullname},
+
+    Congratulations! We are pleased to inform you that your application for the ${jobTitle} position at ${companyName} has been ${statusFormatted}.
+
+    Our team was impressed with your background and qualifications. We will be in touch with the next steps in the hiring process soon.
+
+    Thank you for your interest and enthusiasm.
 
     Best regards,
     The Hiring Team at ${companyName}`;
 
-    const emailContentHtml = `
+        const emailContentHtml = isRejected
+          ? `
     <p>Dear ${applicant.fullname},</p>
-    <p>We would like to inform you that the status of your application for the <strong>${jobTitle}</strong> position at <strong>${companyName}</strong> has been updated to "<strong>${status}</strong>".</p>
+    <p>Thank you for applying for the <strong>${jobTitle}</strong> position at <strong>${companyName}</strong>. After careful consideration, we regret to inform you that your application status has been updated to "<strong>${statusFormatted}</strong>".</p>
 
-    <p>We appreciate your interest in this role and encourage you to stay positive as we move forward in the hiring process.</p>
+    <p>We appreciate the time and effort you invested in the application process. Please do not be discouraged — we encourage you to apply for future openings that match your qualifications and experience.</p>
 
-    <p>Thank you for your patience and understanding.</p>
+    <p>Wishing you the best in your job search.</p>
+
+    <p>Best regards,<br>The Hiring Team at ${companyName}</p>`
+          : `
+    <p>Dear ${applicant.fullname},</p>
+    <p>Congratulations! We are pleased to inform you that your application for the <strong>${jobTitle}</strong> position at <strong>${companyName}</strong> has been <strong>${statusFormatted}</strong>.</p>
+
+    <p>Our team was impressed with your background and qualifications. We will be in touch with the next steps in the hiring process soon.</p>
+
+    <p>Thank you for your interest and enthusiasm.</p>
 
     <p>Best regards,<br>The Hiring Team at ${companyName}</p>`;
 

@@ -50,89 +50,95 @@ const CompanyDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen mt-7 bg-gray-50">
+    <div className='min-h-screen mt-7 bg-gray-50'>
       <Navbar />
-      <div className="max-w-7xl mx-auto my-10 px-4 sm:px-6 lg:px-8">
+      <div className='max-w-7xl mx-auto my-10 px-4 sm:px-6 lg:px-8'>
         {/* Go Back and Company Details Layout */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-6'>
           {/* Go Back Button on the left */}
           <Button
             onClick={() => navigate(-1)}
-            variant="outline"
-            className="md:mr-8 mb-4 md:mb-0"
+            variant='outline'
+            className='md:mr-8 mb-4 md:mb-0'
           >
             Go Back
           </Button>
 
           {/* Company Details on the right */}
           {company ? (
-            <div className="bg-white p-6 rounded-lg shadow-md w-full md:w-auto">
-              <div className="md:flex md:justify-between md:items-center">
-                <div className="flex items-center mb-4 md:mb-0">
+            <div className='bg-white p-6 rounded-lg shadow-md w-full md:w-auto'>
+              <div className='md:flex md:justify-between md:items-center'>
+                <div className='flex items-center mb-4 md:mb-0'>
                   {/* Company Logo */}
                   {company.logo?.url && (
                     <img
                       src={company.logo.url}
                       alt={`${company.companyName} logo`}
-                      className="h-16 w-16 object-cover rounded-full mr-4"
+                      className='h-16 w-16 object-cover rounded-full mr-4'
                     />
                   )}
-                  {/* Company Name */}
-                  <h1 className="text-2xl md:text-4xl font-bold">
-                    {company.companyName}
-                  </h1>
-                </div>
 
-                <div className="space-y-1">
-                  <p className="text-sm md:text-base text-gray-600">
-                    Location: {company.location}
-                  </p>
-                  <p className="text-sm md:text-base text-gray-600">
-                    Website:{" "}
-                    <a href={company.website} className="text-blue-500">
-                      {company.website}
-                    </a>
-                  </p>
+                  {/* Company Info: Name, Location, Website */}
+                  <div>
+                    <h1 className='text-2xl md:text-4xl font-bold'>
+                      {company.companyName}
+                    </h1>
+                    <p className='text-sm md:text-base text-gray-600'>
+                      Location: {company.location}
+                    </p>
+                    <p className='text-sm md:text-base text-gray-600'>
+                      Website:{" "}
+                      <a
+                        href={company.website}
+                        className='text-blue-500'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        {company.website}
+                      </a>
+                    </p>
+                  </div>
                 </div>
               </div>
-              <p className="mt-4 text-gray-700">{company.description}</p>
+
+              <p className='mt-4 text-gray-700'>{company.description}</p>
             </div>
           ) : (
-            <p className="text-gray-500">Company details not found.</p>
+            <p className='text-gray-500'>Company details not found.</p>
           )}
         </div>
 
-        <div className="mt-10">
-          <h2 className="text-xl md:text-3xl font-bold">
+        <div className='mt-10'>
+          <h2 className='text-xl md:text-3xl font-bold'>
             Jobs Posted by {company?.companyName}
           </h2>
           {jobs.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6'>
               {jobs.map((job) => (
                 <div
                   key={job._id}
-                  className="flex flex-col border border-gray-300 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+                  className='flex flex-col border border-gray-300 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow'
                 >
-                  <h3 className="text-lg md:text-xl font-semibold mb-2">
+                  <h3 className='text-lg md:text-xl font-semibold mb-2'>
                     {job.title}
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className='text-gray-600 mb-4'>
                     {job.description.length > 100
                       ? job.description.substring(0, 100) + "..."
                       : job.description}
                   </p>
-                  <p className="text-gray-700">Location: {job.location}</p>
-                  <p className="text-gray-700">
-                    Salary: ${job.salary.toLocaleString()}
+                  <p className='text-gray-700'>Location: {job.location}</p>
+                  <p className='text-gray-700'>
+                    Salary: ₹{job.salary.toLocaleString()}
                   </p>
-                  <p className="text-gray-700">
+                  <p className='text-gray-700'>
                     Experience: {job.experienceLevel} years
                   </p>
 
-                  <div className="mt-auto pt-4">
+                  <div className='mt-auto pt-4'>
                     <Button
-                      variant="outline"
-                      className="w-full"
+                      variant='outline'
+                      className='w-full'
                       onClick={() =>
                         (window.location.href = `/description/${job._id}`)
                       }
@@ -144,7 +150,7 @@ const CompanyDashboard = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 mt-4">
+            <p className='text-gray-500 mt-4'>
               No jobs available at this time.
             </p>
           )}
