@@ -14,7 +14,6 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
 
 const readDocumentContent = asyncErrorHandler(async (req, res, next) => {
-
   if (!req.files || !req.files.document) {
     const error = new ErrorHandler("Please upload a document file.", 400);
     return error.sendError(res);

@@ -211,6 +211,66 @@ const getAdminJobs = asyncErrorHandler(async (req, res) => {
   });
 });
 
+const updateJob = asyncErrorHandler(async (req, res) => {
+  const jobId = req.params.id;
+  const {
+    title,
+    description,
+    requirements,
+    salary,
+    location,
+    jobType,
+    experienceLevel,
+    position,
+    companyId,
+  } = req.body;
+
+  const userId = req.user.id;
+
+  // Find the job to be updated
+  const job = await Job.findById(jobId);
+  if (!job) {
+    const error = new ErrorHandler("Job not found", 404);
+    return error.sendError(res);
+  }
+
+  // Ensure the user is authorized to update this job
+  const company = await Company.findById(companyId);
+  if (!company || company.userId.toString() !== userId) {
+    const error = new ErrorHandler(
+      "You do not have permission to update this job.",
+      403
+    );
+    return error.sendError(res);
+  }
+
+  // Update job details
+  if (title) job.title = title;
+  if (description) job.description = description;
+  if (requirements) {
+    job.requirements = Array.isArray(requirements)
+      ? requirements.map((req) => req.trim())
+      : requirements.split(",").map((req) => req.trim());
+  }
+  if (salary) job.salary = Number(salary);
+  if (location) job.location = location;
+  if (jobType) job.jobType = jobType;
+  if (experienceLevel) job.experienceLevel = experienceLevel;
+  if (position) job.position = position;
+  if (companyId) job.company = companyId;
+
+  // Save the updated job
+  await job.save();
+
+  // Return the updated job
+  return res.status(200).json({
+    message: "Job updated successfully.",
+    job,
+    success: true,
+    status: 200,
+  });
+});
+
 const deleteAdminJobs = asyncErrorHandler(async (req, res) => {
   const jobId = req.params.id;
   try {
@@ -287,5 +347,5 @@ const getSimilarJobs = asyncErrorHandler(async (req, res) => {
   }
 });
 
-module.exports = { postJob, getAllJobs, getJobById, getAdminJobs, deleteAdminJobs, getSimilarJobs };
+module.exports = { postJob, getAllJobs, getJobById, getAdminJobs,updateJob, deleteAdminJobs, getSimilarJobs };
 

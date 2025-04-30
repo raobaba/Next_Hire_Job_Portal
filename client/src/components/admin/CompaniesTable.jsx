@@ -44,7 +44,7 @@ const CompaniesTable = () => {
               </h2>
 
               {/* Company Description */}
-              <p className="text-gray-600 text-sm text-center mb-4 overflow-hidden overflow-ellipsis">
+              <p className="text-gray-600 text-sm text-center mb-2 overflow-hidden overflow-ellipsis">
                 {company?.description?.length > 80
                   ? `${company?.description?.slice(0, 80)}...`
                   : company?.description}

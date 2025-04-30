@@ -6,7 +6,8 @@ const {
   getJobById,
   postJob,
   deleteAdminJobs,
-  getSimilarJobs
+  getSimilarJobs,
+  updateJob
 } = require("../controllers/job.controller.js");
 
 const jobRouter = express.Router();
@@ -15,6 +16,7 @@ jobRouter.route("/post").post(isAuthenticated, postJob);
 jobRouter.route("/get").get(isAuthenticated, getAllJobs);
 jobRouter.route("/getadminjobs").get(isAuthenticated, getAdminJobs);
 jobRouter.route("/get/:id").get(isAuthenticated, getJobById);
+jobRouter.route("/update/:id").put(isAuthenticated,updateJob)
 jobRouter.route("/delete/:id").delete(isAuthenticated, deleteAdminJobs)
 jobRouter.route("/:id/similar").get(isAuthenticated, getSimilarJobs)
 
@@ -228,6 +230,44 @@ jobRouter.route("/:id/similar").get(isAuthenticated, getSimilarJobs)
  *                     $ref: '#/components/schemas/Job'
  *       404:
  *         description: Jobs Not Found
+ */
+/**
+ * @swagger
+ * /api/v1/job/update/{id}:
+ *   put:
+ *     summary: Update an existing job
+ *     tags: [Job]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the job to update
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Job'
+ *     responses:
+ *       200:
+ *         description: Job updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 job:
+ *                   $ref: '#/components/schemas/Job'
+ *       403:
+ *         description: Unauthorized to update this job
+ *       404:
+ *         description: Job not found
+ *       500:
+ *         description: Internal server error
  */
 
 /**

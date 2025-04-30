@@ -61,14 +61,14 @@ const AdminJobsTable = ({ jobs, onDeleteJob }) => {
                   Location: {job.location}
                 </p>
                 <p className="text-gray-700 font-medium">
-                  Salary: ${job.salary.toLocaleString()}
+                  Salary: ₹{job.salary.toLocaleString()}
                 </p>
                 <p className="text-gray-700 font-medium">
                   Experience Level: {job.experienceLevel} years
                 </p>
               </div>
 
-              <div className="mt-auto flex items-center justify-between mt-4">
+              <div className="flex items-center justify-between mt-4">
                 <Button
                   variant="outline"
                   className="bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
