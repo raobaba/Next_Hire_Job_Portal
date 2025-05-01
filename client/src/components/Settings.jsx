@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { FaUser, FaLock, FaBell, FaShieldAlt } from "react-icons/fa";
 import Navbar from "./shared/Navbar";
 import Footer from "./shared/Footer";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { changePassword, updateUserProfile } from "@/redux/slices/user.slice";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import Loader from "./shared/Loader";
 import { toast } from "react-toastify";
+import ReactHelmet from "./shared/ReactHelmet";
 
 const tabs = [
   { id: "settings", label: "Profile Info", icon: <FaUser /> },
@@ -30,10 +31,14 @@ export default function Settings() {
   return (
     <>
       <Navbar />
+      <ReactHelmet
+        title='Setting - Next_Hire'
+        description='Setting for NextHire'
+        canonicalUrl='http://mysite.com/settings'
+      />
       <div className='flex flex-col min-h-screen'>
         <div className='flex-1 mx-4 pt-20 flex gap-6 max-w-7xl'>
-          {/* Sidebar Tabs (Left-Aligned with Wider Width) */}
-          <div className='w-[300px] bg-white shadow-md rounded-lg p-8'>
+          <div className='w-[300px] bg-white shadow-md rounded-lg px-4'>
             <h2 className='text-xl font-semibold mb-4'>Settings</h2>
             <div className='flex flex-col gap-2'>
               {tabs.map((tab) => (
@@ -69,7 +74,6 @@ export default function Settings() {
   );
 }
 
-// ----- TAB COMPONENTS -----
 function ProfileTab() {
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -152,7 +156,7 @@ function ProfileTab() {
           </Avatar>
           <label className='cursor-pointer bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 inline-block'>
             Upload
-            <input type='file' accept='image/*' className='hidden' />
+            <input type='file' accept='image/png' className='hidden' />
           </label>
         </div>
         <div className='flex-1'>
@@ -272,10 +276,9 @@ function PasswordTab() {
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-      }else{
-        toast.error(response?.payload?.message)
+      } else {
+        toast.error(response?.payload?.message);
       }
-     
     } catch (err) {
       setError("An error occurred, please try again later");
     }

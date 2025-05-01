@@ -45,10 +45,7 @@ const ResetPassword = () => {
       } finally {
         setLoading(false);
       }
-    }
-
-    // Case 2: Reset password using token
-    else {
+    } else {
       if (!password || !confirmPassword) {
         toast.error("Both password fields are required!");
         setLoading(false);

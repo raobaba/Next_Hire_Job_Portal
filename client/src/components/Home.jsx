@@ -6,10 +6,12 @@ import CategoryCarousel from "./CategoryCarousel";
 
 const Home = () => {
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <HeroSection />
-      <CategoryCarousel />
+      <main className="flex-grow">
+        <HeroSection />
+        <CategoryCarousel />
+      </main>
       <Footer />
     </div>
   );

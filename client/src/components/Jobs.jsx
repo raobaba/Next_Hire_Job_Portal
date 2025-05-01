@@ -158,9 +158,11 @@ const Jobs = () => {
   useEffect(() => {
     currentPageRef.current = 1;
     setHasMore(true);
-    // if (currentCategory === "recommended") {
-    fetchRecommendedJobs();
-    fetchJobs();
+    if (currentCategory === "recommended") {
+      fetchRecommendedJobs();
+    } else {
+      fetchJobs();
+    }
   }, [searchParams]);
 
   useEffect(() => {
