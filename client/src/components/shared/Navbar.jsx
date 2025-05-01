@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 import ReactHelmet from "./ReactHelmet";
 import { toast } from "react-toastify";
@@ -13,6 +13,8 @@ import { useDispatch } from "react-redux";
 
 const Navbar = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const isActive = (path) => location.pathname === path;
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
@@ -95,16 +97,52 @@ const Navbar = () => {
           <div className='hidden md:flex items-center gap-12'>
             <ul className='flex items-center gap-8 font-medium text-gray-600'>
               <li>
-                <Link to='/'>Home</Link>
+                <Link
+                  to='/'
+                  className={`px-2 py-1 ${
+                    isActive("/")
+                      ? "border-b-2 border-[#F83002] text-[#F83002] font-semibold rounded-sm"
+                      : "text-gray-600"
+                  } hover:text-[#F83002] transition`}
+                >
+                  Home
+                </Link>
               </li>
               <li>
-                <Link to='/jobs'>Jobs</Link>
+                <Link
+                  to='/jobs'
+                  className={`px-2 py-1 ${
+                    isActive("/jobs")
+                      ? "border-b-2 border-[#F83002] text-[#F83002] font-semibold rounded-sm"
+                      : "text-gray-600"
+                  } hover:text-[#F83002] transition`}
+                >
+                  Jobs
+                </Link>
               </li>
               <li>
-                <Link to='/browse-jobs'>BrowseJobs</Link>
+                <Link
+                  to='/browse-jobs'
+                  className={`px-2 py-1 ${
+                    isActive("/browse-jobs")
+                      ? "border-b-2 border-[#F83002] text-[#F83002] font-semibold rounded-sm"
+                      : "text-gray-600"
+                  } hover:text-[#F83002] transition`}
+                >
+                  BrowseJobs
+                </Link>
               </li>
               <li>
-                <Link to='/other-jobs'>Other Jobs</Link>
+                <Link
+                  to='/other-jobs'
+                  className={`px-2 py-1 ${
+                    isActive("/other-jobs")
+                      ? "border-b-2 border-[#F83002] text-[#F83002] font-semibold rounded-sm"
+                      : "text-gray-600"
+                  } hover:text-[#F83002] transition`}
+                >
+                  Other Jobs
+                </Link>
               </li>
             </ul>
 

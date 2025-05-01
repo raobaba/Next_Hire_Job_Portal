@@ -17,12 +17,17 @@ import Applicants from "./components/admin/Applicants";
 import ResetPassword from "./components/auth/ResetPassword";
 import EmailVarification from "./components/EmailVarification";
 import OtherJobs from "./components/OtherJobs";
+import Settings from "./components/Settings";
 
 // Router setup
 const appRouter = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
   },
   {
     path: "/login",

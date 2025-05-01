@@ -17,43 +17,56 @@ const BrowseJobs = () => {
   const currentPageRef = useRef(1);
   const totalPagesRef = useRef(null);
 
-  // Fetch search results from the server
+  console.log("searchResult", searchResult);
+
   const fetchSearchResult = async () => {
     if (!hasMore || loading) return;
-
+  
     setLoading(true);
     setError(null);
-
+  
     try {
       const res = await dispatch(
         getSearchResult({ page: currentPageRef.current, limit: 10 })
       ).unwrap();
+  
       if (res?.status === 200) {
-        const newJobs = res?.payload?.jobs;
-
-        // Combine new jobs with existing jobs, ensuring uniqueness
+        const newJobs = res?.jobs || [];
+        console.log("Fetched new jobs:", newJobs);
+  
+        // Remove duplicates based on job ID
+        const combinedJobs = [...searchResult, ...newJobs];
         const uniqueJobs = [
-          ...new Set([...searchResult, ...newJobs].map((job) => job?._id)),
-        ].map((id) =>
-          [...searchResult, ...newJobs].find((job) => job?._id === id)
-        );
-
+          ...new Map(combinedJobs.map((job) => [job?._id, job])).values(),
+        ];
+  
         setSearchResult(uniqueJobs);
-
-        const { currentPage, totalPages } = res?.payload;
+  
+        const { currentPage, totalPages } = res;
         totalPagesRef.current = totalPages;
         setHasMore(currentPage < totalPages);
         currentPageRef.current += 1;
       } else {
-        setError("Failed to load jobs.");
+        console.warn("Unexpected response format:", res);
+        setError("Failed to load jobs. Please try again later.");
       }
     } catch (error) {
       console.error("Error fetching jobs:", error);
-      setError("An error occurred while fetching jobs.");
+  
+      if (error?.response?.data?.message) {
+        // Backend-provided error
+        setError(error.response.data.message);
+      } else if (error?.message) {
+        // Thunk/Network error
+        setError(error.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
+  
 
   // Fetch jobs initially
   useEffect(() => {
@@ -66,8 +79,9 @@ const BrowseJobs = () => {
 
     try {
       const res = await dispatch(clearSearchHistory()).unwrap();
+      console.log("response",res)
       if (res?.status === 200) {
-        toast.success(res.payload.message);
+        toast.success(res?.message);
         setSearchResult([]); // Clear search results after success
       } else {
         toast.error("Failed to delete search history.");

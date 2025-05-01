@@ -8,7 +8,6 @@ import { getAllJobs, getFitlerOptions } from "@/redux/slices/job.slice";
 import { getRecommendedJobs } from "@/redux/slices/user.slice";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "./shared/Loader";
-import { toast } from "react-toastify";
 
 const Jobs = () => {
   const dispatch = useDispatch();
@@ -159,11 +158,9 @@ const Jobs = () => {
   useEffect(() => {
     currentPageRef.current = 1;
     setHasMore(true);
-    if (currentCategory === "recommended") {
-      fetchRecommendedJobs();
-    } else {
-      fetchJobs();
-    }
+    // if (currentCategory === "recommended") {
+    fetchRecommendedJobs();
+    fetchJobs();
   }, [searchParams]);
 
   useEffect(() => {
@@ -191,16 +188,16 @@ const Jobs = () => {
 
   console.log("filterOptions", filterOptions);
   useEffect(() => {
-  
-      dispatch(getFitlerOptions())
-        .then((res) => {
-          setFilterOptions(res?.payload?.filterData);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-  
+    dispatch(getFitlerOptions())
+      .then((res) => {
+        setFilterOptions(res?.payload?.filterData);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }, []);
+
+  console.log("allJobs", allJobs);
 
   return (
     <div>
@@ -227,27 +224,30 @@ const Jobs = () => {
             ref={observerRef}
           >
             <div className='flex flex-col sm:flex-row items-center justify-between my-1 sm:space-x-4 space-y-3 sm:space-y-0'>
-              <h2
+              <button
                 onClick={() => handleCategoryChange("all")}
-                className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
-                  currentCategory === "all" ? "text-blue-600" : "text-gray-800"
-                }`}
+                className={`px-4 py-2 text-sm md:text-lg lg:text-xl font-bold rounded-md transition duration-300 border 
+      ${
+        currentCategory === "all"
+          ? "bg-blue-100 text-blue-600 border-blue-600"
+          : "text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-blue-500"
+      }`}
               >
                 All Jobs ({allJobs?.length || 0})
-              </h2>
+              </button>
+
               {user?.role !== "recruiter" && (
-                <>
-                  <h2
-                    onClick={() => handleCategoryChange("recommended")}
-                    className={`cursor-pointer text-sm md:text-lg lg:text-xl font-bold transition duration-300 hover:text-blue-500 ${
-                      currentCategory === "recommended"
-                        ? "text-blue-600"
-                        : "text-gray-800"
-                    }`}
-                  >
-                    Recommended ({recommendedJobs?.length || 0})
-                  </h2>
-                </>
+                <button
+                  onClick={() => handleCategoryChange("recommended")}
+                  className={`px-4 py-2 text-sm md:text-lg lg:text-xl font-bold rounded-md transition duration-300 border 
+        ${
+          currentCategory === "recommended"
+            ? "bg-blue-100 text-blue-600 border-blue-600"
+            : "text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-blue-500"
+        }`}
+                >
+                  Recommended ({recommendedJobs?.length || 0})
+                </button>
               )}
             </div>
 

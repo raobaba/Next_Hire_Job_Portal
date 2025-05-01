@@ -1,13 +1,15 @@
 const Job = require("../models/job.model");
 const User = require("../models/user.model");
+const jwt = require("jsonwebtoken");
 const asyncErrorHandler = require("./../middlewares/asyncErrorHandler");
 const ErrorHandler = require("../utils/errorHandler");
 const Company = require("../models/company.model");
-const Application = require("../models/application.model");
+
 const {
   processJobAndNotifyUsers,
   notifyJobDeletion,
 } = require("../services/openai.service");
+
 const postJob = asyncErrorHandler(async (req, res) => {
   const {
     title,
@@ -77,6 +79,7 @@ const postJob = asyncErrorHandler(async (req, res) => {
     status: 200,
   });
 });
+
 const getAllJobs = asyncErrorHandler(async (req, res) => {
   const {
     title,
@@ -90,9 +93,19 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     limit = 10,
   } = req.query;
 
-  const userId = req?.user?.id;
+  let userId = null;
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userId = decoded.id;
+    } catch (err) {
+      console.log("Invalid token, skipping user context");
+    }
+  }
   const keyword = title || "";
-  
+  console.log("Updating search history for user:", userId, "with:", keyword);
   // Update search history only if user is logged in and keyword exists
   if (userId && keyword) {
     await User.findByIdAndUpdate(

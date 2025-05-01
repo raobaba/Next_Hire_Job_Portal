@@ -10,6 +10,7 @@ const {
   updateJob,
   getJobFilters,
   getJobsForCarousel,
+
 } = require("../controllers/job.controller.js");
 
 const jobRouter = express.Router();
@@ -23,6 +24,7 @@ jobRouter.route("/delete/:id").delete(isAuthenticated, deleteAdminJobs);
 jobRouter.route("/:id/similar").get(getSimilarJobs);
 jobRouter.route("/filters").get(getJobFilters);
 jobRouter.route("/carousel").get(getJobsForCarousel);
+
 /**
  * @swagger
  * components:

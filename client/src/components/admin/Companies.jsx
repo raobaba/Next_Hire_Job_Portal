@@ -22,7 +22,7 @@ const Companies = () => {
     dispatch(getCompanies())
       .then((res) => {
         if (res?.payload?.status === 200) {
-          setCompanies(res?.payload || []);
+          setCompanies(res?.payload?.companies || []);
         } else {
           toast.error("Failed to fetch companies");
         }

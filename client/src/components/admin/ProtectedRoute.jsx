@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     if (!token) {
       navigate("/login");
-    } else if (user?.role !== "recruiter") {
+    } else if (user?.user?.role !== "recruiter") {
       navigate("/"); // Redirect to home if user is not a recruiter
     }
   }, [token, user, navigate]);

@@ -240,7 +240,7 @@ async function notifyStatusUpdate(applicant, jobTitle, status, companyName) {
 
     Best regards,
     The Hiring Team at ${companyName}`
-          : `
+      : `
     Dear ${applicant.fullname},
 
     Congratulations! We are pleased to inform you that your application for the ${jobTitle} position at ${companyName} has been ${statusFormatted}.
@@ -252,8 +252,8 @@ async function notifyStatusUpdate(applicant, jobTitle, status, companyName) {
     Best regards,
     The Hiring Team at ${companyName}`;
 
-        const emailContentHtml = isRejected
-          ? `
+    const emailContentHtml = isRejected
+      ? `
     <p>Dear ${applicant.fullname},</p>
     <p>Thank you for applying for the <strong>${jobTitle}</strong> position at <strong>${companyName}</strong>. After careful consideration, we regret to inform you that your application status has been updated to "<strong>${statusFormatted}</strong>".</p>
 
@@ -262,7 +262,7 @@ async function notifyStatusUpdate(applicant, jobTitle, status, companyName) {
     <p>Wishing you the best in your job search.</p>
 
     <p>Best regards,<br>The Hiring Team at ${companyName}</p>`
-          : `
+      : `
     <p>Dear ${applicant.fullname},</p>
     <p>Congratulations! We are pleased to inform you that your application for the <strong>${jobTitle}</strong> position at <strong>${companyName}</strong> has been <strong>${statusFormatted}</strong>.</p>
 
