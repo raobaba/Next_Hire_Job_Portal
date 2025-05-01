@@ -18,6 +18,21 @@ export const logoutUserApi = async () => {
   return await fetchFromApiServer("GET", url);
 };
 
+export const changeCurrentPassword = async (data) => {
+  const url = `api/v1/user/change-password`;
+  return await fetchFromApiServer("POST", url, data);
+};
+
+export const forgetPassword = async (data) => {
+  const url = `api/v1/user/forget-password`;
+  return await fetchFromApiServer("POST", url, data);
+};
+
+export const resetPassword = async ({ token, password }) => {
+  const url = `api/v1/user/reset-password/${token}`;
+  return await fetchFromApiServer("POST", url, { newPassword: password });
+};
+
 // Fetch search history API
 export const getUserSearchHistoryApi = async () => {
   const url = `api/v1/user/search-history`;
@@ -38,21 +53,21 @@ export const updateUserProfileApi = async (formData) => {
 
 export const fetchRecommendedJobs = async (params) => {
   const url = `api/v1/user/recommended-jobs`;
-  return await fetchFromApiServer('GET', url, {}, { params })
-}
+  return await fetchFromApiServer("GET", url, {}, { params });
+};
 
 export const fetchSearchResult = async (params) => {
   const url = `api/v1/user/search`;
-  return await fetchFromApiServer('GET', url, {}, { params })
-}
+  return await fetchFromApiServer("GET", url, {}, { params });
+};
 
 export const deleteSearchHistory = async () => {
   const url = `api/v1/user/search-history/clear`;
-  return await fetchFromApiServer('DELETE', url)
-}
+  return await fetchFromApiServer("DELETE", url);
+};
 
 export const emailVerification = async (params) => {
-  const {token} = params;
+  const { token } = params;
   const url = `api/v1/user/verify-email?token=${token}`;
-  return await fetchFromApiServer('POST', url);
+  return await fetchFromApiServer("POST", url);
 };

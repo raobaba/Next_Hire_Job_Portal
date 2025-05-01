@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FiMenu, FiX } from "react-icons/fi";
+import { FaBell } from "react-icons/fa";
 import ReactHelmet from "./ReactHelmet";
 import { toast } from "react-toastify";
 import { RiMenu2Fill } from "react-icons/ri";
@@ -177,7 +178,7 @@ const Navbar = () => {
                       </li>
                       <li className='flex items-center w-11/12 m-auto rounded-xl px-4 py-2 hover:bg-gray-100 cursor-pointer'>
                         <Link
-                          to='/settings'
+                          to='/settings?page=settings'
                           className='flex items-center w-full'
                         >
                           <FaCog className='mr-2' /> Settings
@@ -185,12 +186,21 @@ const Navbar = () => {
                       </li>
                       <li className='flex items-center w-11/12 m-auto rounded-xl px-4 py-2 hover:bg-gray-100 cursor-pointer'>
                         <Link
-                          to='/privacy'
+                          to='/settings?page=privacy'
                           className='flex items-center w-full'
                         >
                           <FaShieldAlt className='mr-2' /> Privacy
                         </Link>
                       </li>
+                      <li className='flex items-center w-11/12 m-auto rounded-xl px-4 py-2 hover:bg-gray-100 cursor-pointer'>
+                        <Link
+                          to='/settings?page=notifications'
+                          className='flex items-center w-full'
+                        >
+                          <FaBell className='mr-2' /> Notifications
+                        </Link>
+                      </li>
+
                       <li
                         onClick={handleLogOut}
                         className='flex items-center w-11/12 m-auto rounded-xl px-4 py-2 hover:bg-gray-100 cursor-pointer'

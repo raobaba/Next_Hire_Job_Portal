@@ -177,18 +177,12 @@ const Login = () => {
                 Signup
               </Link>
             </span>
-            <div className='mt-2'>
-              {errorMessage && (
-                <span className='font-semibold text-sm text-red-500'>
-                  {errorMessage}
-                </span>
-              )}
-            </div>
+
             {errorMessage === "Incorrect Password" && (
               <div className='mt-2'>
                 <span className='font-semibold text-sm'>
                   Forgot your password?{" "}
-                  <Link to='/forgot-password' className='text-blue-600'>
+                  <Link to='/forget-password' className='text-blue-600'>
                     Reset here
                   </Link>
                 </span>

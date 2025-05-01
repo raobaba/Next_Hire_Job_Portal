@@ -1,14 +1,21 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import RegisterNavbar from "../shared/RegiserNavbar";
 import ReactHelmet from "../shared/ReactHelmet";
+import {
+  forgetPassPassword,
+  resetPassPassword,
+} from "@/redux/slices/user.slice";
+import { useDispatch } from "react-redux";
 
 const ResetPassword = () => {
+  const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,35 +26,52 @@ const ResetPassword = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match!");
-      setLoading(false);
-      return;
-    }
-
-    // Check if fields are empty
-    if (!email || !password || !confirmPassword) {
-      toast.error("All fields are required!");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axios.post("/api/reset-password", {
-        email,
-        password,
-      });
-      if (response.data.success) {
-        toast.success(response.data.message);
-        navigate("/login"); // Redirect to login after successful reset
-      } else {
-        toast.error(response.data.message);
+    if (!token) {
+      if (!email) {
+        toast.error("Email is required!");
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "An error occurred");
-    } finally {
-      setLoading(false);
+
+      try {
+        const response = await dispatch(forgetPassPassword({ email }));
+        console.log("response", response);
+        if (response?.payload?.status == 200) {
+          toast.success(response?.payload?.message);
+          setEmail("");
+        }
+      } catch (error) {
+        toast.error(error?.data?.message || "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Case 2: Reset password using token
+    else {
+      if (!password || !confirmPassword) {
+        toast.error("Both password fields are required!");
+        setLoading(false);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        toast.error("Passwords do not match!");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await dispatch(resetPassPassword({ token, password })); // Dispatch reset password API call
+        if (response?.payload?.message) {
+          toast.success(response.payload.message); // Show success message from response
+          navigate("/login"); // Redirect to login after success
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || "An error occurred"); // Handle errors
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -62,58 +86,70 @@ const ResetPassword = () => {
       <div className='bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3'>
         <h1 className='text-2xl font-bold mb-6 text-center'>Reset Password</h1>
         <form onSubmit={handleSubmit}>
-          <div className='mb-4'>
-            <Label>Email</Label>
-            <Input
-              type='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder='example@gmail.com'
-              className='mt-1 w-full'
-              required
-            />
-          </div>
-          <div className='mb-4'>
-            <Label>New Password</Label>
-            <Input
-              type='password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder='Enter your new password'
-              className='mt-1 w-full'
-              required
-            />
-          </div>
-          <div className='mb-4'>
-            <Label>Confirm Password</Label>
-            <Input
-              type='password'
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder='Confirm your new password'
-              className='mt-1 w-full'
-              required
-            />
-          </div>
+          {/* For sending reset link */}
+          {!token && (
+            <div className='mb-4'>
+              <Label>Email</Label>
+              <Input
+                type='email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder='example@gmail.com'
+                className='mt-1 w-full'
+                required
+              />
+            </div>
+          )}
+
+          {/* For resetting password with token */}
+          {token && (
+            <>
+              <div className='mb-4'>
+                <Label>New Password</Label>
+                <Input
+                  type='password'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder='Enter your new password'
+                  className='mt-1 w-full'
+                  required
+                />
+              </div>
+              <div className='mb-4'>
+                <Label>Confirm Password</Label>
+                <Input
+                  type='password'
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder='Confirm your new password'
+                  className='mt-1 w-full'
+                  required
+                />
+              </div>
+            </>
+          )}
+
           <div className='mt-6'>
-            {loading ? (
-              <Button className='w-full' disabled>
-                Please wait...
-              </Button>
-            ) : (
-              <Button type='submit' className='w-full'>
-                Reset Password
-              </Button>
-            )}
+            <Button type='submit' className='w-full' disabled={loading}>
+              {loading
+                ? "Please wait..."
+                : token
+                ? "Reset Password"
+                : "Send Reset Link"}
+            </Button>
           </div>
-          <div className='text-center mt-4'>
-            <span>
-              Remembered your password?{" "}
-              <Link to='/login' className='text-blue-600'>
-                Login
-              </Link>
-            </span>
-          </div>
+
+          {/* Redirect to login page if token is not provided */}
+          {!token && (
+            <div className='text-center mt-4'>
+              <span>
+                Remembered your password?{" "}
+                <Link to='/login' className='text-blue-600'>
+                  Login
+                </Link>
+              </span>
+            </div>
+          )}
         </form>
       </div>
     </div>

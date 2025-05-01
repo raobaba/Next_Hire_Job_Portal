@@ -10,6 +10,9 @@ import {
   fetchSearchResult,
   deleteSearchHistory,
   emailVerification,
+  changeCurrentPassword,
+  resetPassword,
+  forgetPassword,
 } from "../actions/user.action";
 
 // Initial state for user
@@ -154,6 +157,48 @@ export const verifyEmail = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     try {
       const response = await emailVerification(params);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to email verification"
+      );
+    }
+  }
+);
+
+export const changePassword = createAsyncThunk(
+  "profile/changePassword",
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await changeCurrentPassword(params);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to email verification"
+      );
+    }
+  }
+);
+
+export const forgetPassPassword = createAsyncThunk(
+  "profile/forgetPassword",
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await forgetPassword(params);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to email verification"
+      );
+    }
+  }
+);
+
+export const resetPassPassword = createAsyncThunk(
+  "profile/resetPassword",
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await resetPassword(params);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -322,6 +367,42 @@ const userSlice = createSlice({
         state.message = action.message;
       })
       .addCase(verifyEmail.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.message;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(forgetPassPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(forgetPassPassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.message;
+      })
+      .addCase(forgetPassPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(resetPassPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPassPassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.message;
+      })
+      .addCase(resetPassPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

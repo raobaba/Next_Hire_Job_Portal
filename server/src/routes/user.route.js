@@ -9,7 +9,10 @@ const {
   getRecommendedJobs,
   getSearchResult,
   verifyEmail,
-  readDocumentContent
+  readDocumentContent,
+  changePassword,
+  forgetPassword,
+  resetPassword,
 } = require("../controllers/user.controller.js");
 const isAuthenticated = require("../middlewares/auth.js");
 
@@ -210,6 +213,120 @@ userRouter.route("/logout").get(logoutUser);
 
 /**
  * @swagger
+ * /api/v1/user/change-password:
+ *   post:
+ *     summary: Change user password
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 description: Current password of the user
+ *               newPassword:
+ *                 type: string
+ *                 description: New password for the user
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Bad request, current or new password not provided
+ *       401:
+ *         description: Unauthorized, current password is incorrect
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+userRouter.route("/change-password").post(isAuthenticated, changePassword);
+
+/**
+ * @swagger
+ * /api/v1/user/forget-password:
+ *   post:
+ *     summary: Send password reset email
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email address of the user
+ *             required:
+ *               - email
+ *     responses:
+ *       200:
+ *         description: Password reset email sent successfully
+ *       400:
+ *         description: Email is required
+ *       404:
+ *         description: User not found with this email
+ *       500:
+ *         description: Internal server error
+ */
+userRouter.route("/forget-password").post(forgetPassword);
+
+/**
+ * @swagger
+ * /api/v1/user/reset-password/{token}:
+ *   post:
+ *     summary: Reset user's password using token
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Password reset token sent via email
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: New password to be set
+ *             required:
+ *               - newPassword
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 status:
+ *                   type: number
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Invalid or expired token
+ *       500:
+ *         description: Internal server error
+ */
+userRouter.route("/reset-password/:token").post(resetPassword);
+
+/**
+ * @swagger
  * /api/v1/user/profile:
  *   put:
  *     summary: Update user profile
@@ -281,7 +398,9 @@ userRouter.route("/search-history").get(isAuthenticated, getUserSearchHistory);
  *       500:
  *         description: Internal server error
  */
-userRouter.route("/search-history/clear").delete(isAuthenticated, clearUserSearchHistory);
+userRouter
+  .route("/search-history/clear")
+  .delete(isAuthenticated, clearUserSearchHistory);
 
 /**
  * @swagger
@@ -445,6 +564,6 @@ userRouter.route("/verify-email").post(verifyEmail);
  *         description: Internal server error
  */
 
-userRouter.route("/read-content").post(isAuthenticated, readDocumentContent)
+userRouter.route("/read-content").post(isAuthenticated, readDocumentContent);
 
 module.exports = userRouter;

@@ -8,7 +8,6 @@ const Job = require("../models/job.model");
 const cron = require("node-cron");
 const crypto = require("crypto");
 const fs = require("fs");
-const path = require("path");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
@@ -176,6 +175,133 @@ const logoutUser = asyncErrorHandler(async (req, res, next) => {
     success: true,
     status: 200,
     message: "successfully Logged Out",
+  });
+});
+
+const changePassword = asyncErrorHandler(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    const error = new ErrorHandler(
+      "Both current and new password are required",
+      400
+    );
+    return error.sendError(res);
+  }
+
+  const user = await User.findById(req.user.id).select("+password");
+
+  if (!user) {
+    const error = new ErrorHandler("User not found", 404);
+    return error.sendError(res);
+  }
+
+  const isPasswordMatched = await user.comparePassword(currentPassword);
+  if (!isPasswordMatched) {
+    const error = new ErrorHandler("Current password is incorrect", 401);
+    return error.sendError(res);
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: "Password updated successfully",
+  });
+});
+
+const forgetPassword = asyncErrorHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+    const error = new ErrorHandler("Email is required", 400);
+    return error.sendError(res);
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    const error = new ErrorHandler("User not found with this email", 404);
+    return error.sendError(res);
+  }
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  user.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+  await user.save({ validateBeforeSave: false });
+
+  const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+
+  const emailBody = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Password Reset Request",
+    text: `You requested to reset your password. Click the link to reset: ${resetUrl}`,
+    html: `
+      <p>Hello,</p>
+      <p>You requested a password reset. Click the link below to reset your password:</p>
+      <a href="${resetUrl}" style="color:blue;">Reset Password</a>
+      <p>This link is valid for 15 minutes.</p>
+    `,
+  };
+
+  try {
+    await sendMail(emailBody);
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: `Reset password link sent to ${email}`,
+    });
+  } catch (err) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+    const error = new ErrorHandler(
+      "Failed to send email. Try again later.",
+      500
+    );
+    return error.sendError(res);
+  }
+});
+
+const resetPassword = asyncErrorHandler(async (req, res, next) => {
+  const { token } = req.params;
+  const { newPassword } = req.body;
+
+  console.log("token", token, newPassword);
+
+  if (!token || !newPassword) {
+    const error = new ErrorHandler("Token and new password are required", 400);
+    return error.sendError(res);
+  }
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });  
+
+  if (!user) {
+    const error = new ErrorHandler("Invalid or expired reset token", 400);
+    return error.sendError(res);
+  }
+
+  user.password = newPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: "Password reset successfully",
   });
 });
 
@@ -496,4 +622,7 @@ module.exports = {
   getSearchResult,
   verifyEmail,
   readDocumentContent,
+  changePassword,
+  forgetPassword,
+  resetPassword,
 };
