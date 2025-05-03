@@ -36,6 +36,7 @@ const Job = ({ job }) => {
         if (res?.payload?.status === 200) {
           toast.success(res?.payload?.message);
         } else {
+          setHasApplied(false);
           toast.info(res?.payload?.message);
         }
       })

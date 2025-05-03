@@ -95,7 +95,7 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
   user.verificationToken = verificationToken;
   await user.save();
 
-  const verificationUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
+  const verificationUrl = `https://nexthireportal.netlify.app/verify-email?token=${verificationToken}`;
 
   const emailBody = {
     from: process.env.EMAIL_USER,
@@ -235,7 +235,7 @@ const forgetPassword = asyncErrorHandler(async (req, res, next) => {
   user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
   await user.save({ validateBeforeSave: false });
 
-  const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+  const resetUrl = `https://nexthireportal.netlify.app/reset-password?token=${resetToken}`;
 
   const emailBody = {
     from: process.env.EMAIL_USER,
@@ -285,7 +285,7 @@ const resetPassword = asyncErrorHandler(async (req, res, next) => {
   const user = await User.findOne({
     resetPasswordToken: hashedToken,
     resetPasswordExpire: { $gt: Date.now() },
-  });  
+  });
 
   if (!user) {
     const error = new ErrorHandler("Invalid or expired reset token", 400);

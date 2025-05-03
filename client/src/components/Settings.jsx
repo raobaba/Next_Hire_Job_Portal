@@ -156,7 +156,13 @@ function ProfileTab() {
           </Avatar>
           <label className='cursor-pointer bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 inline-block'>
             Upload
-            <input type='file' accept='image/png' className='hidden' />
+            <input
+              id='file'
+              name='file'
+              type='file'
+              accept='image/png'
+              className='hidden'
+            />
           </label>
         </div>
         <div className='flex-1'>

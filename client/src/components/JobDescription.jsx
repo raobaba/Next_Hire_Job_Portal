@@ -64,9 +64,9 @@ const JobDescription = () => {
       });
   };
 
-  // New function to handle navigation to company details
+
   const viewCompanyDetails = () => {
-    navigate(`/company-dashboard/${singleJob?.company}`); // Adjust the URL based on your routing setup
+    navigate(`/company-dashboard/${singleJob?.company}`); 
   };
 
   if (!singleJob) return <Loader />;
@@ -87,7 +87,6 @@ const JobDescription = () => {
       </Button>
 
       <div className='flex flex-col md:flex-row gap-6'>
-        {/* Job Description Section */}
         <div className='flex-1'>
           <div className='flex flex-col mb-2'>
             <h1 className='font-bold text-2xl md:text-3xl'>
@@ -101,7 +100,7 @@ const JobDescription = () => {
                 {singleJob.jobType}
               </Badge>
               <Badge className={"text-[#7209b7] font-bold"} variant='ghost'>
-                {singleJob.salary} LPA
+                ₹{singleJob.salary} LPA
               </Badge>
             </div>
           </div>
@@ -139,7 +138,7 @@ const JobDescription = () => {
               label='Experience'
               value={`${singleJob.experienceLevel} yrs`}
             />
-            <JobDetail label='Salary' value={`$${singleJob.salary}`} />
+            <JobDetail label='Salary' value={`₹${singleJob.salary}`} />
             <JobDetail
               label='Total Applicants'
               value={singleJob.applications.length}

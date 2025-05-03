@@ -89,7 +89,7 @@ async function notifyUsersToCompleteProfile() {
     });
 
     for (const user of usersWithEmptySkills) {
-      const userProfileLink = `http://localhost:5173/profile`; // Replace with your actual profile URL
+      const userProfileLink = `https://nexthireportal.netlify.app/profile`; // Replace with your actual profile URL
       const emailContent = `
       Subject: Enhance Your Profile for Better Job Suggestions
 
