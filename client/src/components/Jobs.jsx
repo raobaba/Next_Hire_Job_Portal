@@ -55,8 +55,8 @@ const Jobs = () => {
             setFilterJobs(newJobs);
           } else {
             const uniqueJobs = [
-              ...new Set([...allJobs, ...newJobs].map((job) => job._id)),
-            ].map((id) =>
+              ...new Set([...allJobs, ...newJobs]?.map((job) => job._id)),
+            ]?.map((id) =>
               [...allJobs, ...newJobs].find((job) => job._id === id)
             );
 
@@ -103,9 +103,9 @@ const Jobs = () => {
           } else {
             const uniqueJobs = [
               ...new Set(
-                [...recommendedJobs, ...newJobs].map((job) => job._id)
+                [...recommendedJobs, ...newJobs]?.map((job) => job._id)
               ),
-            ].map((id) =>
+            ]?.map((id) =>
               [...recommendedJobs, ...newJobs].find((job) => job._id === id)
             );
 

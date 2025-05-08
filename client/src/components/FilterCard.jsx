@@ -21,7 +21,7 @@ const FilterCard = ({ setSearchParams, filterOptions }) => {
 
       if (existingFilter) {
         setSelectedFilters((prev) =>
-          prev.map((filter) =>
+          prev?.map((filter) =>
             filter.type === filterKey
               ? { ...filter, value: filterValue }
               : filter
@@ -108,10 +108,10 @@ const FilterCard = ({ setSearchParams, filterOptions }) => {
             className='border rounded w-full p-2'
           />
         </div>
-        {selectedFilters.length > 0 && (
+        {selectedFilters?.length > 0 && (
           <div>
             <div className='flex flex-wrap'>
-              {selectedFilters.map((filter, index) => (
+              {selectedFilters?.map((filter, index) => (
                 <div
                   key={index}
                   className='flex items-center bg-blue-100 text-blue-600 rounded-md m-[3px] px-1 py-1'
@@ -132,7 +132,7 @@ const FilterCard = ({ setSearchParams, filterOptions }) => {
             </button>
           </div>
         )}
-        {filterOptions.map((filter, index) => (
+        {filterOptions?.map((filter, index) => (
           <div key={filter.filterType}>
             <div
               className='flex items-center justify-between cursor-pointer'
@@ -143,7 +143,7 @@ const FilterCard = ({ setSearchParams, filterOptions }) => {
             </div>
             {expandedIndex === index && (
               <div className='mt-1 space-y-1'>
-                {filter.array.map((item) => (
+                {filter?.array?.map((item) => (
                   <div key={item} className='flex items-center'>
                     <input
                       type='checkbox'

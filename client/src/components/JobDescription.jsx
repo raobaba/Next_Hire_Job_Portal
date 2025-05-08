@@ -158,7 +158,7 @@ const JobDescription = () => {
           <div className='max-h-[400px] overflow-y-auto mt-1 scrollbar-hidden'>
             {similarJobs.length > 0 ? (
               <div className='space-y-4'>
-                {similarJobs.map((job) => (
+                {similarJobs?.map((job) => (
                   <div
                     key={job._id}
                     className='p-4 border rounded-md flex flex-col'

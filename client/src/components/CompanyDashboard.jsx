@@ -126,7 +126,7 @@ const CompanyDashboard = () => {
           </h2>
           {jobs.length > 0 ? (
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6'>
-              {jobs.map((job) => (
+              {jobs?.map((job) => (
                 <div
                   key={job._id}
                   className='flex flex-col border border-gray-300 bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow'

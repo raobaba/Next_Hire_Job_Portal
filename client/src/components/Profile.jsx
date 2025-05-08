@@ -63,7 +63,7 @@ const Profile = () => {
               <h1 className="text-lg font-semibold">Skills</h1>
               <div className="flex flex-wrap items-center gap-1 mt-2">
                 {user?.profile.skills?.length !== 0 ? (
-                  user?.profile.skills?.map((item, index) => (
+                  user?.profile?.skills?.map((item, index) => (
                     <Badge key={index}>{item}</Badge>
                   ))
                 ) : (

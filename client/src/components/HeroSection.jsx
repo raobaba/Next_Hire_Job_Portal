@@ -116,7 +116,7 @@ const HeroSection = () => {
               ref={dropdownRef}
               className='absolute top-full left-0 right-0 max-h-60 overflow-y-auto bg-white shadow-lg rounded-md z-20'
             >
-              {searchResults.map((job) => (
+              {searchResults?.map((job) => (
                 <div
                   key={job._id}
                   onClick={() => searchJobHandler(job._id)}

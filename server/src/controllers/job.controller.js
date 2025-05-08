@@ -58,8 +58,8 @@ const postJob = asyncErrorHandler(async (req, res) => {
     title,
     description,
     requirements: Array.isArray(requirements)
-      ? requirements.map((req) => req.trim())
-      : requirements.split(",").map((req) => req.trim()),
+      ? requirements?.map((req) => req.trim())
+      : requirements?.split(",").map((req) => req.trim()),
     salary: Number(salary),
     location,
     jobType,
@@ -270,7 +270,7 @@ const updateJob = asyncErrorHandler(async (req, res) => {
   if (description) job.description = description;
   if (requirements) {
     job.requirements = Array.isArray(requirements)
-      ? requirements.map((req) => req.trim())
+      ? requirements?.map((req) => req.trim())
       : requirements.split(",").map((req) => req.trim());
   }
   if (salary) job.salary = Number(salary);
@@ -304,8 +304,8 @@ const deleteAdminJobs = asyncErrorHandler(async (req, res) => {
     }
 
     const companyName = job.company.companyName;
-    const jobTitle = job.title;
-    const applicantIds = job.applications.map(
+    const jobTitle = job?.title;
+    const applicantIds = job?.applications?.map(
       (application) => application.applicant
     );
     const applicants = await User.find({ _id: { $in: applicantIds } });

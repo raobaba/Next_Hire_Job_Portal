@@ -47,7 +47,7 @@ const OtherJobs = () => {
         {loading && <Loader />}
         {error && <p className='text-red-500'>{error}</p>}
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          {jobs.map((job, index) => (
+          {jobs?.map((job, index) => (
             <div
               key={index}
               className='bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300'

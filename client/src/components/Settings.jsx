@@ -41,7 +41,7 @@ export default function Settings() {
           <div className='w-[300px] bg-white shadow-md rounded-lg px-4'>
             <h2 className='text-xl font-semibold mb-4'>Settings</h2>
             <div className='flex flex-col gap-2'>
-              {tabs.map((tab) => (
+              {tabs?.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}

@@ -49,7 +49,7 @@ const AppliedJobTable = () => {
   // Loading Skeleton Component
   const LoadingSkeleton = () => (
     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2'>
-      {Array.from({ length: 6 }).map((_, index) => (
+      {Array.from({ length: 6 })?.map((_, index) => (
         <div
           key={index}
           className='bg-white rounded-lg shadow-lg p-4 animate-pulse flex flex-col justify-between h-80 w-full'
@@ -144,7 +144,7 @@ const AppliedJobTable = () => {
 
       {!loading && appliedJobs.length > 0 && (
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2'>
-          {appliedJobs.map((appliedJob) => (
+          {appliedJobs?.map((appliedJob) => (
             <JobCard key={appliedJob?._id} appliedJob={appliedJob} />
           ))}
         </div>

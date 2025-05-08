@@ -48,7 +48,7 @@ const CategoryCarousel = () => {
     <div>
       <Carousel className='w-full max-w-xl mx-auto my-10'>
         <CarouselContent className='grow-0 shrink-0 min-w-0 flex'>
-          {carouselItems.map((cat, index) => (
+          {carouselItems?.map((cat, index) => (
             <CarouselItem
               key={index}
               className='grow-0 shrink-0 min-w-0 md:basis-1/2'

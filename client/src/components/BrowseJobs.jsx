@@ -37,7 +37,7 @@ const BrowseJobs = () => {
         // Remove duplicates based on job ID
         const combinedJobs = [...searchResult, ...newJobs];
         const uniqueJobs = [
-          ...new Map(combinedJobs.map((job) => [job?._id, job])).values(),
+          ...new Map(combinedJobs?.map((job) => [job?._id, job])).values(),
         ];
   
         setSearchResult(uniqueJobs);
@@ -119,7 +119,7 @@ const BrowseJobs = () => {
         {/* Job Listings */}
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
           {searchResult.length > 0 ? (
-            searchResult.map((job) => <Job key={job._id} job={job} />)
+            searchResult?.map((job) => <Job key={job._id} job={job} />)
           ) : (
             <div className='col-span-full text-center py-5'>
               <span>No jobs found.</span>
