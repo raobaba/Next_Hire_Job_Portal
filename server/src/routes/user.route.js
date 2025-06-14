@@ -564,6 +564,6 @@ userRouter.route("/verify-email").post(verifyEmail);
  *         description: Internal server error
  */
 
-userRouter.route("/read-content").post(isAuthenticated, readDocumentContent);
+userRouter.route("/read-content").post( readDocumentContent);
 
 module.exports = userRouter;

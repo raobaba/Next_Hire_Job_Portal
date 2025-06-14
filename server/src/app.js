@@ -1,74 +1,27 @@
-const express = require("express");
-require("dotenv").config();
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const fileUpload = require("express-fileupload");
-const Connection = require("./config/db");
+const app = require("./server");
+const cloudinary = require("cloudinary").v2;
+const PORT = process.env.PORT || 3000;
 
-const userRouter = require("./routes/user.route");
-const jobRouter = require("./routes/job.route");
-const companyRouter = require("./routes/company.route");
-const applicationRouter = require("./routes/application.route");
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-const options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Job Portal By NextHire',
-      version: '1.0.0',
-    },
-    servers: [
-      {
-        url: 'http://localhost:8000'
-      },
-      {
-        url: "https://nexthire.onrender.com"
-      }
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
-    },
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
-  },
-  apis: ['./src/routes/*.js'],
-};
-
-const openapiSpecification = swaggerJsdoc(options);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
-
-
-app.use(
-  fileUpload({
-    useTempFiles: true,
-  })
-);
-app.use(cors());
-
-Connection();
-
-app.use("/api/v1/user", userRouter);
-app.use("/api/v1/job", jobRouter);
-app.use("/api/v1/company", companyRouter);
-app.use("/api/v1/application", applicationRouter);
-
-console.log(app.listenerCount("connection"));
-app.get("/", (req, res) => {
-  res.send("Server is Running! 🚀");
+// UncaughtException Error
+process.on("uncaughtException", (err) => {
+  console.log(`Error: ${err.message}`);
+  process.exit(1);
 });
 
-module.exports = app;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET_KEY,
+});
+
+const server = app.listen(PORT, () => {
+  console.log(`Server running on PORT http://localhost:${PORT}`);
+});
+
+// Unhandled Promise Rejection
+process.on("unhandledRejection", (err) => {
+  console.log(`Error: ${err.message}`);
+  server.close(() => {
+    process.exit(1);
+  });
+});
