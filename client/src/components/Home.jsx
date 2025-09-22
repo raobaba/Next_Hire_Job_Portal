@@ -10,7 +10,7 @@ const Home = () => {
       <Navbar />
       <main className="flex-grow">
         <HeroSection />
-        <CategoryCarousel />
+        {/* <CategoryCarousel /> */}
       </main>
       <Footer />
     </div>
