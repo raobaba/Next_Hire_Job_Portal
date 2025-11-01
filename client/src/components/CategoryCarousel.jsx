@@ -19,6 +19,8 @@ const CategoryCarousel = () => {
   const [carousels, setCarousels] = useState(carousel?.jobs || []);
   const [loading, setLoading] = useState(false);
 
+  console.log("CategoryCarousel component mounted");
+
   // Search job handler
   const searchJobHandler = (query) => {
     navigate(`/description/${query?._id}`);
@@ -26,16 +28,22 @@ const CategoryCarousel = () => {
 
   // Fetch carousel data if not available
   useEffect(() => {
+    console.log("CategoryCarousel useEffect triggered", { carousels, loading });
+    
     if (!carousels || carousels.length === 0) {
       setLoading(true);
+      console.log("Fetching carousel data...");
+      
       dispatch(getCarouselData())
         .then((res) => {
+          console.log("Carousel data response:", res);
           if (res?.payload?.status === 200) {
             setCarousels(res?.payload?.jobs || []);
+            console.log("Set carousels from API:", res?.payload?.jobs);
           } else {
             console.error("Failed to fetch carousel data:", res?.payload?.message);
             // Set some default data if API fails
-            setCarousels([
+            const defaultData = [
               { _id: '1', title: 'Software Engineer' },
               { _id: '2', title: 'Data Scientist' },
               { _id: '3', title: 'Product Manager' },
@@ -44,13 +52,15 @@ const CategoryCarousel = () => {
               { _id: '6', title: 'Sales Executive' },
               { _id: '7', title: 'DevOps Engineer' },
               { _id: '8', title: 'Business Analyst' }
-            ]);
+            ];
+            setCarousels(defaultData);
+            console.log("Set default carousels:", defaultData);
           }
         })
         .catch((error) => {
           console.error("Error fetching carousel data:", error);
           // Set some default data if API fails
-          setCarousels([
+          const defaultData = [
             { _id: '1', title: 'Software Engineer' },
             { _id: '2', title: 'Data Scientist' },
             { _id: '3', title: 'Product Manager' },
@@ -59,22 +69,36 @@ const CategoryCarousel = () => {
             { _id: '6', title: 'Sales Executive' },
             { _id: '7', title: 'DevOps Engineer' },
             { _id: '8', title: 'Business Analyst' }
-          ]);
+          ];
+          setCarousels(defaultData);
+          console.log("Set default carousels on error:", defaultData);
         })
         .finally(() => {
           setLoading(false);
+          console.log("Loading finished");
         });
+    } else {
+      console.log("Carousels already available:", carousels);
     }
-  }, [dispatch]);
+  }, [dispatch, carousels]);
 
   // Memoized sliced carousels for performance
   const carouselItems = useMemo(() => carousels?.slice(0, 10), [carousels]);
 
+  console.log("CategoryCarousel render state:", { 
+    loading, 
+    carousels, 
+    carouselItems, 
+    carouselItemsLength: carouselItems?.length 
+  });
+
   if (loading) {
+    console.log("Rendering CarouselSkeleton");
     return <CarouselSkeleton />;
   }
 
   if (!carouselItems || carouselItems.length === 0) {
+    console.log("Rendering no categories message");
     return (
       <div className='relative'>
         <div className='text-center mb-8'>
@@ -90,13 +114,16 @@ const CategoryCarousel = () => {
     );
   }
 
+  console.log("Rendering CategoryCarousel with items:", carouselItems);
+
   return (
-    <div className='relative'>
+    <div className='relative py-8'>
       <div className='text-center mb-8'>
         <h2 className='text-3xl font-bold text-gray-800 mb-2'>
           Popular <span className='text-[#6A38C2]'>Job Categories</span>
         </h2>
         <p className='text-gray-600'>Explore trending job categories and find your perfect match</p>
+        {/* Debug button - remove this after testing */}
       </div>
       
       <Carousel className='w-full max-w-4xl mx-auto my-10'>
