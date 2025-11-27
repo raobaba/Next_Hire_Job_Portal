@@ -13,6 +13,18 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const app = express();
 
+// Configure file upload FIRST to handle multipart/form-data before other parsers
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp",
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    abortOnLimit: true,
+  })
+);
+
 // Optimize: Set body parser limits to prevent DoS attacks and improve performance
 app.use(express.json({ limit: "10mb" })); // Limit JSON payload size
 app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Limit URL-encoded payload size
@@ -26,11 +38,11 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:8000'
+        url: process.env.BACKEND_URL || process.env.SERVER_URL || 'http://localhost:8000'
       },
-      {
-        url: "https://nexthire.onrender.com"
-      }
+      ...(process.env.PRODUCTION_BACKEND_URL ? [{
+        url: process.env.PRODUCTION_BACKEND_URL
+      }] : [])
     ],
     components: {
       securitySchemes: {
@@ -52,19 +64,6 @@ const options = {
 
 const openapiSpecification = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
-
-
-// Optimize: Configure file upload with limits
-app.use(
-  fileUpload({
-    useTempFiles: true,
-    tempFileDir: "/tmp",
-    limits: {
-      fileSize: 10 * 1024 * 1024, // 10MB limit
-    },
-    abortOnLimit: true,
-  })
-);
 // Optimize: Configure CORS with specific options
 app.use(
   cors({

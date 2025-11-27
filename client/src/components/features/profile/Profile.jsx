@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Navbar from "../../layout/Navbar";
 import { Avatar, AvatarImage } from "../../ui/avatar";
 import { Button } from "../../ui/button";
-import { Contact, Mail, Pen } from "lucide-react";
+import { Mail, Pen } from "lucide-react";
 import { Badge } from "../../ui/badge";
 import { Label } from "../../ui/label";
 import AppliedJobTable from "../jobs/AppliedJobTable";
@@ -27,7 +27,7 @@ const Profile = () => {
       <ReactHelmet
         title="Profile - Next_Hire"
         description="View and edit your profile details, including your resume, job preferences, and application history. Manage your career journey with Next_Hire."
-        canonicalUrl="http://mysite.com/profile"
+        canonicalUrl="/profile"
       />
 
       <div className="max-w-7xl mx-auto mt-24 px-4 py-8 relative z-10">
@@ -66,12 +66,6 @@ const Profile = () => {
                 <Mail className="text-[#6A38C2] h-5 w-5" />
               </div>
               <span className="text-gray-800 font-medium">{user?.email}</span>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-200/60">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#6A38C2]/10 to-[#F83002]/10 rounded-lg flex items-center justify-center">
-                <Contact className="text-[#6A38C2] h-5 w-5" />
-              </div>
-              <span className="text-gray-800 font-medium">{user?.phoneNumber}</span>
             </div>
           </div>
 

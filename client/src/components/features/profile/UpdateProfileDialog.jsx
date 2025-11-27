@@ -21,7 +21,6 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
   const [input, setInput] = useState({
     fullname: "",
     email: "",
-    phoneNumber: "",
     bio: "",
     skills: "",
     file: null,
@@ -33,7 +32,6 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
       setInput({
         fullname: user.fullname || "",
         email: user.email || "",
-        phoneNumber: user.phoneNumber ? String(user.phoneNumber) : "", // Convert phone number to string
         bio: user.profile?.bio || "",
         skills: user.profile?.skills ? user.profile.skills.join(", ") : "",
         file: null,
@@ -58,7 +56,7 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     setLoading(true);
 
     // Simple validation
-    if (!input.fullname || !input.email || !input.phoneNumber) {
+    if (!input.fullname || !input.email) {
       toast.error("Please fill in all required fields.");
       setLoading(false);
       return;
@@ -67,7 +65,6 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
     const formData = new FormData();
     formData.append("fullname", input.fullname);
     formData.append("email", input.email);
-    formData.append("phoneNumber", input.phoneNumber);
     formData.append("bio", input.bio);
 
     const skillsArray = input.skills
@@ -138,20 +135,6 @@ const UpdateProfileDialog = ({ open, setOpen, user }) => {
                 name='email'
                 type='email'
                 value={input.email}
-                onChange={changeEventHandler}
-                className='col-span-3'
-              />
-            </div>
-
-            {/* Phone number input */}
-            <div className='grid grid-cols-4 items-center gap-4'>
-              <Label htmlFor='phoneNumber' className='text-right'>
-                Number
-              </Label>
-              <Input
-                id='phoneNumber'
-                name='phoneNumber'
-                value={input.phoneNumber}
                 onChange={changeEventHandler}
                 className='col-span-3'
               />

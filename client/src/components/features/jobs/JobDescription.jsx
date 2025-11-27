@@ -85,7 +85,7 @@ const JobDescription = () => {
         <ReactHelmet
           title='Job Details - Next_Hire'
           description='Discover detailed information about the job role, responsibilities, qualifications, and how to apply. Learn more to see if this is the right opportunity for you.'
-          canonicalUrl='http://mysite.com/job-details'
+          canonicalUrl='/job-details'
         />
 
         <Button

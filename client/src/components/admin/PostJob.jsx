@@ -105,7 +105,7 @@ const PostJob = () => {
       <ReactHelmet
         title='Post a Job - Next_Hire'
         description='Easily post job openings to attract qualified candidates. Fill out the job details, including role, responsibilities, and requirements, to find the perfect fit for your team.'
-        canonicalUrl='http://mysite.com/post-job'
+        canonicalUrl='/post-job'
       />
 
       <div className='flex items-center justify-center w-full my-5 px-4 pt-24 pb-8 md:px-0 relative z-10'>

@@ -20,10 +20,11 @@ const fetchFromApiServer = (
 const getHeaderConfig = (requestType, options, Authorization) => {
   const token = getToken();
   const headers = {
-    "Content-Type":
-      requestType === "MULTIPART" || requestType === "PUT"
-        ? "multipart/form-data"
-        : "application/json",
+    // Don't set Content-Type for multipart - let axios set it with boundary
+    ...(requestType !== "MULTIPART" &&
+      requestType !== "PUT" && {
+        "Content-Type": "application/json",
+      }),
     Accept: "*/*",
     ...(token && { Authorization: Authorization || `Bearer ${token}` }),
   };

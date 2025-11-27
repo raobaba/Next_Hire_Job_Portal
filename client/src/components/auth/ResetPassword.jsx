@@ -77,7 +77,7 @@ const ResetPassword = () => {
       <ReactHelmet
         title='Reset Password - Next_Hire'
         description='Reset your password for NextHire'
-        canonicalUrl='http://mysite.com/reset-password'
+        canonicalUrl='/reset-password'
       />
       <div className='bg-white rounded-lg shadow-custom mt-[50px] md:mt-[100px] p-6 md:p-8 w-full md:w-1/3'>
         <h1 className='text-2xl font-bold mb-6 text-center'>Reset Password</h1>

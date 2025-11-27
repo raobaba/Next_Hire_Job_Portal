@@ -57,7 +57,7 @@ const AdminJobs = () => {
       <ReactHelmet
         title="Admin Jobs - Next_Hire"
         description="Browse a variety of administrative job opportunities across different sectors. Find roles that match your skills in organization, communication, and management."
-        canonicalUrl="http://mysite.com/admin-jobs"
+        canonicalUrl="/admin-jobs"
       />
 
       <div className="max-w-6xl mx-auto my-10 mt-20 px-4">

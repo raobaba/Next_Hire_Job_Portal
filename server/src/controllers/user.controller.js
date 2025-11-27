@@ -58,8 +58,15 @@ const readDocumentContent = asyncErrorHandler(async (req, res, next) => {
 });
 
 const registerUser = asyncErrorHandler(async (req, res, next) => {
-  const { fullname, phoneNumber, email, password, role } = req.body;
-  if (!fullname || !phoneNumber || !email || !password || !role) {
+  // Debug: Log received data
+  console.log("Registration request body:", req.body);
+  console.log("Registration request files:", req.files);
+  
+  const { fullname, email, password, role } = req.body;
+  
+  // Check if fields are missing
+  if (!fullname || !email || !password || !role) {
+    console.error("Missing fields - fullname:", fullname, "email:", email, "password:", password ? "***" : "missing", "role:", role);
     const error = new ErrorHandler("All fields are required", 400);
     return error.sendError(res);
   }
@@ -70,24 +77,28 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
     return error.sendError(res);
   }
   let profilePhoto;
-  if (req.files && req.files.avatar && req.files.avatar.tempFilePath) {
-    const uploaded = await cloudinary.uploader.upload(
-      req.files.avatar.tempFilePath,
-      {
-        folder: "avatar",
-        width: 150,
-        crop: "scale",
-      }
-    );
-    profilePhoto = {
-      public_id: uploaded.public_id,
-      url: uploaded.secure_url,
-    };
+  try {
+    if (req.files && req.files.avatar && req.files.avatar.tempFilePath) {
+      const uploaded = await cloudinary.uploader.upload(
+        req.files.avatar.tempFilePath,
+        {
+          folder: "avatar",
+          width: 150,
+          crop: "scale",
+        }
+      );
+      profilePhoto = {
+        public_id: uploaded.public_id,
+        url: uploaded.secure_url,
+      };
+    }
+  } catch (avatarError) {
+    console.error("Error uploading avatar (continuing without avatar):", avatarError);
+    // Continue registration even if avatar upload fails
   }
 
   const user = await User.create({
     fullname,
-    phoneNumber,
     email,
     password,
     role,
@@ -98,7 +109,8 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
   user.verificationToken = verificationToken;
   await user.save();
 
-  const verificationUrl = `https://nexthire-portal.netlify.app/verify-email?token=${verificationToken}`;
+  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "https://nexthire-portal.netlify.app";
+  const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
   const emailBody = {
     from: process.env.EMAIL_USER,
@@ -120,14 +132,32 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
     `,
   };
 
-  try {
-    await sendMail(emailBody);
-    console.log("Registration verification email sent successfully to:", email);
-  } catch (error) {
-    console.error("Failed to send registration verification email:", error);
-    // Continue with registration even if email fails
-  }
-  sendToken(user, 200, res);
+  // Send email asynchronously (non-blocking) to avoid delays
+  sendMail(emailBody)
+    .then(() => {
+      console.log("✅ Registration verification email sent successfully to:", email);
+    })
+    .catch((error) => {
+      console.error("❌ Failed to send registration verification email:", error.message);
+      // Log error but don't block registration
+    });
+
+  // Send response immediately with success message
+  const token = user.getJWTToken();
+  const options = {
+    expires: new Date(
+      Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  res.status(200).cookie("token", token, options).json({
+    success: true,
+    status: 200,
+    message: "Registration successful! Please check your email to verify your account.",
+    user,
+    token,
+  });
 });
 
 const verifyEmail = asyncErrorHandler(async (req, res, next) => {
@@ -192,7 +222,8 @@ const loginUser = asyncErrorHandler(async (req, res, next) => {
     
     // Send verification email if email configuration is available
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS && email && user.fullname) {
-      const verificationUrl = `https://nexthire-portal.netlify.app/verify-email?token=${verificationToken}`;
+      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "https://nexthire-portal.netlify.app";
+      const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
       const emailBody = {
         from: process.env.EMAIL_USER,
@@ -305,7 +336,8 @@ const forgetPassword = asyncErrorHandler(async (req, res, next) => {
   user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
   await user.save({ validateBeforeSave: false });
 
-  const resetUrl = `https://nexthire-portal.netlify.app/reset-password?token=${resetToken}`;
+  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "https://nexthire-portal.netlify.app";
+  const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
   const emailBody = {
     from: process.env.EMAIL_USER,
@@ -376,7 +408,7 @@ const resetPassword = asyncErrorHandler(async (req, res, next) => {
 });
 
 const updateProfile = asyncErrorHandler(async (req, res, next) => {
-  const { fullname, email, phoneNumber, bio, skills } = req.body;
+  const { fullname, email, bio, skills } = req.body;
   console.log(req.body);
   const userId = req.user.id;
   let user = await User.findById(userId);
@@ -386,28 +418,32 @@ const updateProfile = asyncErrorHandler(async (req, res, next) => {
   }
   if (fullname) user.fullname = fullname;
   if (email) user.email = email;
-  if (phoneNumber) user.phoneNumber = phoneNumber;
   if (bio) user.profile.bio = bio;
   if (skills) {
     user.profile.skills = skills.split(",").map((skill) => skill.trim());
   }
 
-  if (req.files && req.files.avatar && req.files.avatar.tempFilePath) {
-    if (user.profile.profilePhoto && user.profile.profilePhoto.public_id) {
-      await cloudinary.uploader.destroy(user.profile.profilePhoto.public_id);
-    }
-    const result = await cloudinary.uploader.upload(
-      req.files.avatar.tempFilePath,
-      {
-        folder: "avatars",
-        width: 150,
-        crop: "scale",
+  try {
+    if (req.files && req.files.avatar && req.files.avatar.tempFilePath) {
+      if (user.profile.profilePhoto && user.profile.profilePhoto.public_id) {
+        await cloudinary.uploader.destroy(user.profile.profilePhoto.public_id);
       }
-    );
-    user.profile.profilePhoto = {
-      public_id: result.public_id,
-      url: result.secure_url,
-    };
+      const result = await cloudinary.uploader.upload(
+        req.files.avatar.tempFilePath,
+        {
+          folder: "avatars",
+          width: 150,
+          crop: "scale",
+        }
+      );
+      user.profile.profilePhoto = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    }
+  } catch (avatarError) {
+    console.error("Error uploading avatar (continuing without avatar update):", avatarError);
+    // Continue profile update even if avatar upload fails
   }
 
   if (req.files && req.files.resume && req.files.resume.tempFilePath) {

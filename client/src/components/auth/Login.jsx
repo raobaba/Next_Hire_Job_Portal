@@ -89,7 +89,7 @@ const Login = () => {
       <ReactHelmet
         title='Login - Next_Hire'
         description='Login to access job opportunities and recruitments'
-        canonicalUrl='http://mysite.com/login'
+        canonicalUrl='/login'
       />
 
       <div className='container mx-auto px-4 py-12 md:py-20 relative z-10'>

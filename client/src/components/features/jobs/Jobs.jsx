@@ -210,7 +210,7 @@ const Jobs = () => {
       <ReactHelmet
         title='Job Openings - Next_Hire'
         description='Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire.'
-        canonicalUrl='http://mysite.com/job'
+        canonicalUrl='/job'
       />
       <div className='max-w-7xl mt-24 mx-auto px-4 py-8 relative z-10'>
         <div className='flex flex-col md:flex-row gap-6'>

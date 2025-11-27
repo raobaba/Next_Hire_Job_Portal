@@ -52,7 +52,7 @@ const CompanyCreate = () => {
       <ReactHelmet
         title='Create Company - Next_Hire'
         description='Register your company and post job openings to attract top talent. Provide essential information about your organization and start building your team with Next_Hire.'
-        canonicalUrl='http://mysite.com/create-company'
+        canonicalUrl='/create-company'
       />
 
       <div className='max-w-4xl mx-auto mt-20'>

@@ -52,7 +52,7 @@ const Companies = () => {
       <ReactHelmet
         title='Companies - Next_Hire'
         description='Explore a list of companies hiring in your area. Learn about company cultures, available positions, and how to apply. Find your next workplace with Next_Hire.'
-        canonicalUrl='http://mysite.com/companies'
+        canonicalUrl='/companies'
       />
 
       <div className='max-w-4xl mx-auto pt-24 pb-8 px-4 relative z-10'>

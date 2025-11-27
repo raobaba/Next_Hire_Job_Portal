@@ -16,7 +16,6 @@ import { registerUser } from "@/redux/slices/user.slice";
 const Signup = () => {
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [avatar, setAvatar] = useState(null);
@@ -38,20 +37,14 @@ const Signup = () => {
   // Form validation function
   const validateForm = () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email pattern
-    const phonePattern = /^[0-9]{10}$/; // Simple phone validation for 10 digits
 
-    if (!fullname || !email || !phoneNumber || !password || !role) {
-      toast.error("Please fill in all fields.");
+    if (!fullname || !email || !password || !role) {
+      toast.error("Please fill in all required fields.");
       return false;
     }
 
     if (!emailPattern.test(email)) {
       toast.error("Please enter a valid email address.");
-      return false;
-    }
-
-    if (!phonePattern.test(phoneNumber)) {
-      toast.error("Please enter a valid 10-digit phone number.");
       return false;
     }
 
@@ -72,42 +65,55 @@ const Signup = () => {
     const formData = new FormData();
     formData.append("fullname", fullname);
     formData.append("email", email);
-    formData.append("phoneNumber", phoneNumber);
     formData.append("password", password);
     formData.append("role", role);
-    formData.append("avatar", avatar);
+    if (avatar) {
+      formData.append("avatar", avatar);
+    }
 
     setLoading(true);
 
     dispatch(registerUser(formData))
       .then((res) => {
         setLoading(false);
-        if (res?.payload?.status === 200) {
-          toast.success("Signup successful! Please verify your email.", {
-            onClose: () => {
-              toast.info(
-                "We've sent a verification link to your email. Please check your inbox and spam folder to verify your email to complete the registration.",
-                {
-                  autoClose: 30000,
-                  onClose: () => {
-                    setFullname("");
-                    setEmail("");
-                    setPhoneNumber("");
-                    setPassword("");
-                    setRole("");
-                    setAvatar(null);
-                  },
-                }
-              );
-            },
+        // Check for success response
+        if (res?.payload?.status === 200 || res?.payload?.success === true) {
+          // Show success message from backend or default message
+          const successMessage = res?.payload?.message || "Signup successful! Please verify your email.";
+          toast.success(successMessage, {
+            autoClose: 5000,
           });
+          
+          // Show additional info about email verification
+          setTimeout(() => {
+            toast.info(
+              "We've sent a verification link to your email. Please check your inbox and spam folder to verify your email to complete the registration.",
+              {
+                autoClose: 10000,
+              }
+            );
+          }, 1000);
+
+          // Clear form after successful registration
+          setFullname("");
+          setEmail("");
+          setPassword("");
+          setRole("");
+          setAvatar(null);
         } else {
-          toast.error(res?.payload?.message);
+          // Handle error response
+          const errorMessage = res?.payload?.message || "Registration failed. Please try again.";
+          toast.error(errorMessage);
         }
       })
       .catch((err) => {
         setLoading(false);
-        toast.error("Signup failed! Please try again.");
+        // Handle network errors or other exceptions
+        const errorMessage = err?.payload?.message || 
+                           err?.response?.data?.message || 
+                           err?.message || 
+                           "Signup failed! Please try again.";
+        toast.error(errorMessage);
       });
   };
 
@@ -124,7 +130,7 @@ const Signup = () => {
       <ReactHelmet
         title='Signup - Next_Hire'
         description='Signup to access job opportunities and recruitments'
-        canonicalUrl='http://mysite.com/signup'
+        canonicalUrl='/signup'
       />
 
       <div className='container mx-auto px-4 py-12 md:py-20 relative z-10'>
@@ -200,18 +206,6 @@ const Signup = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder='example@gmail.com'
-                  className='w-full rounded-xl border-2 border-gray-200/60 p-4 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 bg-white/80 backdrop-blur-sm text-base'
-                  required
-                />
-              </div>
-
-              <div>
-                <Label className='text-base font-bold text-gray-900 mb-2 block'>Phone Number</Label>
-                <Input
-                  type='text'
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder='8080808080'
                   className='w-full rounded-xl border-2 border-gray-200/60 p-4 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 bg-white/80 backdrop-blur-sm text-base'
                   required
                 />

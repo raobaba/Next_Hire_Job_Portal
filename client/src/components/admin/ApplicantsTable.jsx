@@ -91,8 +91,8 @@ const ApplicantsTable = ({ applicants }) => {
               {/* Applicant Details */}
               <div className='flex-grow mb-2'>
                 <div>
-                  <strong>Contact:</strong>{" "}
-                  {item?.applicant?.phoneNumber || "N/A"}
+                  <strong>Email:</strong>{" "}
+                  {item?.applicant?.email || "N/A"}
                 </div>
                 <div>
                   <strong>Bio:</strong> {item?.applicant?.profile?.bio || "N/A"}

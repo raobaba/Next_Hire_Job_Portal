@@ -23,7 +23,7 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               <a
-                href="https://facebook.com"
+                href={import.meta.env.VITE_SOCIAL_FACEBOOK_URL || "https://facebook.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-gray-700/50 hover:bg-[#6A38C2] flex items-center justify-center transition-all duration-300 transform hover:scale-110"
@@ -34,7 +34,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a
-                href="https://twitter.com"
+                href={import.meta.env.VITE_SOCIAL_TWITTER_URL || "https://twitter.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-gray-700/50 hover:bg-[#6A38C2] flex items-center justify-center transition-all duration-300 transform hover:scale-110"
@@ -45,7 +45,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a
-                href="https://linkedin.com"
+                href={import.meta.env.VITE_SOCIAL_LINKEDIN_URL || "https://linkedin.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-gray-700/50 hover:bg-[#6A38C2] flex items-center justify-center transition-all duration-300 transform hover:scale-110"

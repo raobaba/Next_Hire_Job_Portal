@@ -13,7 +13,7 @@ async function sendMail(emailBody) {
     });
 
     const mailOptions = {
-      from: emailBody.from || process.env.EMAIL_USER,
+      from: emailBody.from,
       to: emailBody.to,
       subject: emailBody.subject,
       text: emailBody.text || "",       // optional fallback plain text
@@ -21,31 +21,11 @@ async function sendMail(emailBody) {
       headers: emailBody.headers || {},
     };
 
-    // Verify SMTP connectivity and auth
-    try {
-      await transporter.verify();
-      console.log("SMTP verified and ready to send");
-    } catch (vErr) {
-      console.error("SMTP verify failed:", vErr);
-      throw vErr;
-    }
+    console.log("Sending email with options:", mailOptions); // Debugging
 
-    console.log("Sending email with options:", {
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-    });
+    await transporter.sendMail(mailOptions);
 
-    const info = await transporter.sendMail(mailOptions);
-
-    console.log("✅ Email sent");
-    console.log("📨 Message ID:", info?.messageId);
-    console.log("📧 Envelope:", info?.envelope);
-    console.log("📤 Accepted:", info?.accepted);
-    console.log("❌ Rejected:", info?.rejected);
-    console.log("🔁 Response:", info?.response);
-
-    return info;
+    console.log("✅ Email sent successfully");
   } catch (error) {
     console.error("❌ Error sending email:", error);
     throw error;

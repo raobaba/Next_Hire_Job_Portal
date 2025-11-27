@@ -97,7 +97,7 @@ const CompanySetup = () => {
       <ReactHelmet
         title='Setup Company - Next_Hire'
         description="Configure your company's profile, including details like location, industry, and values. Ensure your organization stands out to potential candidates on Next_Hire."
-        canonicalUrl='http://mysite.com/company-setup'
+        canonicalUrl='/company-setup'
       />
 
       <div className='max-w-xl mx-auto my-10 flex-1 p-4'>

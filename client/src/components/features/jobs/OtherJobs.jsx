@@ -14,8 +14,9 @@ const OtherJobs = () => {
       setLoading(true);
       setError(null);
       try {
+        const adzunaBaseUrl = import.meta.env.VITE_ADZUNA_API_URL || "https://api.adzuna.com/v1/api";
         const response = await axios.get(
-          `https://api.adzuna.com/v1/api/jobs/in/search/${page}?app_id=${
+          `${adzunaBaseUrl}/jobs/in/search/${page}?app_id=${
             import.meta.env.VITE_APPLICATION_ID
           }&app_key=${import.meta.env.VITE_APPLICATION_KEY}`
         );

@@ -14,10 +14,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       index: true, // Already unique, but explicit index for faster lookups
     },
-    phoneNumber: {
-      type: Number,
-      required: true,
-    },
     resetPasswordToken: {
       type: String,
     },

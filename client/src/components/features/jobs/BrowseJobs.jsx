@@ -123,7 +123,7 @@ const BrowseJobs = () => {
       <ReactHelmet
         title='Browse Jobs - Next_Hire'
         description='Browse a wide range of job openings across various industries and locations.'
-        canonicalUrl='http://mysite.com/browse'
+        canonicalUrl='/browse'
       />
 
       <div className='max-w-7xl mx-auto mt-24 px-4 py-8 relative z-10'>

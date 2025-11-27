@@ -317,9 +317,6 @@ const userSlice = createSlice({
         if (action.payload.data.user.email) {
           state.user.email = action.payload.data.user.email;
         }
-        if (action.payload.data.user.phoneNumber) {
-          state.user.phoneNumber = action.payload.data.user.phoneNumber;
-        }
         if (action.payload.data.user.profile.bio) {
           state.user.profile.bio = action.payload.data.user.profile.bio;
         }

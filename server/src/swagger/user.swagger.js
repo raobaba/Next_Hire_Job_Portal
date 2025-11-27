@@ -22,9 +22,6 @@
  *               fullname:
  *                 type: string
  *                 description: Full name of the user
- *               phoneNumber:
- *                 type: string
- *                 description: Phone number of the user
  *               email:
  *                 type: string
  *                 format: email
@@ -37,9 +34,12 @@
  *                 type: string
  *                 enum: [student, recruiter, admin]
  *                 description: Role of the user in the system
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: Profile avatar image file (optional)
  *             required:
  *               - fullname
- *               - phoneNumber
  *               - email
  *               - password
  *               - role
@@ -311,9 +311,6 @@
  *                 type: string
  *                 format: email
  *                 description: Email address of the user
- *               phoneNumber:
- *                 type: string
- *                 description: Phone number of the user
  *               bio:
  *                 type: string
  *                 description: Bio of the user
@@ -323,11 +320,11 @@
  *               avatar:
  *                 type: string
  *                 format: binary
- *                 description: Profile avatar image file
+ *                 description: Profile avatar image file (optional)
  *               resume:
  *                 type: string
  *                 format: binary
- *                 description: Resume PDF file
+ *                 description: Resume PDF file (optional)
  *     responses:
  *       200:
  *         description: Profile updated successfully

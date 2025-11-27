@@ -39,7 +39,7 @@ export default function Settings() {
       <ReactHelmet
         title='Setting - Next_Hire'
         description='Setting for NextHire'
-        canonicalUrl='http://mysite.com/settings'
+        canonicalUrl='/settings'
       />
       <div className='flex flex-col min-h-screen'>
         <div className='flex-1 mx-4 pt-24 flex gap-6 max-w-7xl relative z-10'>
@@ -88,10 +88,10 @@ function ProfileTab() {
   const [input, setInput] = useState({
     fullname: "",
     email: "",
-    phoneNumber: "",
     bio: "",
     skills: "",
     file: null,
+    avatar: null,
   });
 
   useEffect(() => {
@@ -99,7 +99,6 @@ function ProfileTab() {
       setInput({
         fullname: user.fullname || "",
         email: user.email || "",
-        phoneNumber: user.phoneNumber ? String(user.phoneNumber) : "",
         bio: user.profile?.bio || "",
         skills: user.profile?.skills?.join(", ") || "",
         file: null,
@@ -116,10 +115,19 @@ function ProfileTab() {
     setInput({ ...input, file });
   };
 
+  const avatarHandler = (e) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setInput({ ...input, avatar: file });
+    } else {
+      toast.error("Please select a valid image file.");
+    }
+  };
+
   const submitHandler = (e) => {
     e.preventDefault();
 
-    if (!input.fullname || !input.email || !input.phoneNumber) {
+    if (!input.fullname || !input.email) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -127,7 +135,6 @@ function ProfileTab() {
     const formData = new FormData();
     formData.append("fullname", input.fullname);
     formData.append("email", input.email);
-    formData.append("phoneNumber", input.phoneNumber);
     formData.append("bio", input.bio);
 
     const skillsArray = input.skills
@@ -137,6 +144,9 @@ function ProfileTab() {
 
     if (input.file) {
       formData.append("resume", input.file);
+    }
+    if (input.avatar) {
+      formData.append("avatar", input.avatar);
     }
     setLoading(true);
     dispatch(updateUserProfile(formData))
@@ -167,10 +177,11 @@ function ProfileTab() {
           <label className='cursor-pointer bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-6 py-2 rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 inline-block'>
             Upload Photo
             <input
-              id='file'
-              name='file'
+              id='avatar'
+              name='avatar'
               type='file'
-              accept='image/png'
+              accept='image/*'
+              onChange={avatarHandler}
               className='hidden'
             />
           </label>
@@ -187,7 +198,7 @@ function ProfileTab() {
         </div>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
         <div>
           <label className='block font-bold mb-2 text-gray-900'>Full Name</label>
           <input
@@ -207,16 +218,6 @@ function ProfileTab() {
             type='email'
             disabled
             className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-3 bg-gray-100/80 cursor-not-allowed'
-          />
-        </div>
-        <div>
-          <label className='block font-bold mb-2 text-gray-900'>Phone</label>
-          <input
-            name='phoneNumber'
-            value={input.phoneNumber}
-            onChange={changeHandler}
-            type='tel'
-            className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm'
           />
         </div>
       </div>

@@ -36,7 +36,7 @@ const Applicants = () => {
       <ReactHelmet
         title="Applicants - Next_Hire"
         description="Manage and review job applicants for your open positions. Access resumes, cover letters, and application statuses to streamline your hiring process."
-        canonicalUrl="http://mysite.com/applicants"
+        canonicalUrl="/applicants"
       />
 
       <div className="max-w-7xl mx-auto p-4">

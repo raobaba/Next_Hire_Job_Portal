@@ -73,9 +73,6 @@
  *         fullname:
  *           type: string
  *           description: Full name of the user
- *         phoneNumber:
- *           type: string
- *           description: Phone number of the user
  *         email:
  *           type: string
  *           format: email
@@ -139,7 +136,6 @@
  *           description: Timestamp of the last update to the user information
  *       required:
  *         - fullname
- *         - phoneNumber
  *         - email
  *         - password
  *         - role
