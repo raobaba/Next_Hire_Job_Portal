@@ -12,8 +12,10 @@ const applicationRouter = require("./routes/application.route");
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Optimize: Set body parser limits to prevent DoS attacks and improve performance
+app.use(express.json({ limit: "10mb" })); // Limit JSON payload size
+app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Limit URL-encoded payload size
 app.use(cookieParser());
 const options = {
   definition: {
@@ -52,12 +54,26 @@ const openapiSpecification = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
 
 
+// Optimize: Configure file upload with limits
 app.use(
   fileUpload({
     useTempFiles: true,
+    tempFileDir: "/tmp",
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    abortOnLimit: true,
   })
 );
-app.use(cors());
+// Optimize: Configure CORS with specific options
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || process.env.CLIENT_URL || "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 Connection();
 
@@ -66,9 +82,23 @@ app.use("/api/v1/job", jobRouter);
 app.use("/api/v1/company", companyRouter);
 app.use("/api/v1/application", applicationRouter);
 
-console.log(app.listenerCount("connection"));
+// Health check endpoint
 app.get("/", (req, res) => {
-  res.send("Server is Running! 🚀");
+  res.status(200).json({
+    success: true,
+    message: "Server is Running! 🚀",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Health check endpoint for monitoring
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
 
 module.exports = app;

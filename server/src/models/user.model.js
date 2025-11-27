@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      index: true, // Already unique, but explicit index for faster lookups
     },
     phoneNumber: {
       type: Number,
@@ -33,13 +34,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["student", "recruiter"],
       required: true,
+      index: true, // Index for role-based queries
     },
     isVerified: {
       type: Boolean,
       default: false,
+      index: true, // Index for verification status queries
     },
     verificationToken: {
       type: String,
+      index: true, // Index for email verification lookups
     },
     profile: {
       bio: { type: String },

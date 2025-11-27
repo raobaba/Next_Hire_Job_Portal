@@ -85,7 +85,7 @@ applicationRouter
 
 /**
  * @swagger
- * /api/v1/applications/apply/{jobId}:
+ * /api/v1/application/apply/{jobId}:
  *   post:
  *     summary: Apply for a job
  *     tags: [Application]
@@ -141,7 +141,7 @@ applicationRouter
 
 /**
  * @swagger
- * /api/v1/applications/get:
+ * /api/v1/application/get:
  *   get:
  *     summary: Get applied jobs
  *     tags: [Application]
@@ -163,7 +163,7 @@ applicationRouter
 
 /**
  * @swagger
- * /api/v1/applications/{jobId}/applicants:
+ * /api/v1/application/{jobId}/applicants:
  *   get:
  *     summary: Get applicants for a job
  *     tags: [Application]
@@ -192,7 +192,7 @@ applicationRouter
 
 /**
  * @swagger
- * /api/v1/applications/status/{applicationId}/update:
+ * /api/v1/application/status/{applicationId}/update:
  *   post:
  *     summary: Update application status
  *     tags: [Application]

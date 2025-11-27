@@ -200,7 +200,7 @@ userRouter.route("/login").post(loginUser);
 /**
  * @swagger
  * /api/v1/user/logout:
- *   post:
+ *   get:
  *     summary: Logout a user
  *     tags: [User]
  *     responses:
@@ -327,8 +327,8 @@ userRouter.route("/reset-password/:token").post(resetPassword);
 
 /**
  * @swagger
- * /api/v1/user/profile:
- *   put:
+ * /api/v1/user/profile/update:
+ *   post:
  *     summary: Update user profile
  *     tags: [User]
  *     requestBody:
@@ -354,10 +354,14 @@ userRouter.route("/reset-password/:token").post(resetPassword);
  *               skills:
  *                 type: string
  *                 description: Comma-separated list of skills
- *             required:
- *               - fullname
- *               - email
- *               - phoneNumber
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: Profile avatar image file
+ *               resume:
+ *                 type: string
+ *                 format: binary
+ *                 description: Resume PDF file
  *     responses:
  *       200:
  *         description: Profile updated successfully

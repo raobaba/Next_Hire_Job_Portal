@@ -230,9 +230,11 @@ const userSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        if (action?.payload?.user?.isVerified === true) {
-          if (action?.payload?.token) {
-            localStorage.setItem("token", action?.payload?.token);
+        // Store token regardless of verification status to allow login
+        // User will be prompted to verify email but can still access the app
+        if (action?.payload?.token) {
+          localStorage.setItem("token", action?.payload?.token);
+          if (action?.payload?.user?.profile?.profilePhoto?.url) {
             localStorage.setItem(
               "profile",
               action?.payload?.user?.profile?.profilePhoto?.url

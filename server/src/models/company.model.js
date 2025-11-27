@@ -6,6 +6,7 @@ const companySchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      index: true, // Already unique, but explicit index for faster lookups
     },
     description: {
       type: String,
@@ -28,6 +29,7 @@ const companySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true, // Index for user's companies queries
     },
   },
   { timestamps: true }

@@ -69,26 +69,29 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
     const error = new ErrorHandler("User with this email already exists", 400);
     return error.sendError(res);
   }
-  const myCloud = await cloudinary.uploader.upload(
-    req.files.avatar.tempFilePath,
-    {
-      folder: "avatar",
-      width: 150,
-      crop: "scale",
-    }
-  );
+  let profilePhoto;
+  if (req.files && req.files.avatar && req.files.avatar.tempFilePath) {
+    const uploaded = await cloudinary.uploader.upload(
+      req.files.avatar.tempFilePath,
+      {
+        folder: "avatar",
+        width: 150,
+        crop: "scale",
+      }
+    );
+    profilePhoto = {
+      public_id: uploaded.public_id,
+      url: uploaded.secure_url,
+    };
+  }
+
   const user = await User.create({
     fullname,
     phoneNumber,
     email,
     password,
     role,
-    profile: {
-      profilePhoto: {
-        public_id: myCloud.public_id,
-        url: myCloud.secure_url,
-      },
-    },
+    profile: profilePhoto ? { profilePhoto } : {},
   });
 
   const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -100,17 +103,30 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
   const emailBody = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: "Email Verification",
-    text: `Please verify your email by clicking on the following link: ${verificationUrl}`,
+    subject: "Welcome to NextHire - Verify Your Email",
+    text: `Hello ${fullname},\n\nWelcome to NextHire! Please verify your email by clicking on the following link: ${verificationUrl}\n\nIf you didn't request this, please ignore this email.`,
     html: `
-      <p>Hello,</p>
-      <p>Please verify your email by clicking the link below:</p>
-      <a href="${verificationUrl}" style="color:blue;">Verify Email</a>
-      <p>If you didn't request this, please ignore this email.</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+        <h2 style="color: #4a5568;">Welcome to NextHire!</h2>
+        <p>Hello <strong>${fullname}</strong>,</p>
+        <p>Thank you for registering with NextHire. To complete your registration, please verify your email address.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${verificationUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify My Email</a>
+        </div>
+        <p>Or copy and paste this link in your browser:</p>
+        <p style="word-break: break-all; color: #4f46e5;">${verificationUrl}</p>
+        <p style="color: #718096; font-size: 14px; margin-top: 30px;">If you didn't request this email, please ignore it.</p>
+      </div>
     `,
   };
 
-  await sendMail(emailBody);
+  try {
+    await sendMail(emailBody);
+    console.log("Registration verification email sent successfully to:", email);
+  } catch (error) {
+    console.error("Failed to send registration verification email:", error);
+    // Continue with registration even if email fails
+  }
   sendToken(user, 200, res);
 });
 
@@ -145,7 +161,9 @@ const loginUser = asyncErrorHandler(async (req, res, next) => {
     const error = new ErrorHandler("Please Enter Email And Password", 400);
     return error.sendError(res);
   }
-  const user = await User.findOne({ email }).select("+password");
+  // Optimize: Only select necessary fields for login
+  const user = await User.findOne({ email })
+    .select("+password fullname email role isVerified verificationToken profile.profilePhoto");
   if (!user) {
     const error = new ErrorHandler("User does not exist. Please sign up.", 404);
     return error.sendError(res);
@@ -162,6 +180,68 @@ const loginUser = asyncErrorHandler(async (req, res, next) => {
     const error = new ErrorHandler("Incorrect Password", 401);
     return error.sendError(res);
   }
+
+  // Check if email is verified, if not, send verification email
+  if (!user.isVerified) {
+    // Validate email and user data
+    if (!email || !user.fullname) {
+      // Still allow login even if we can't send email
+      sendToken(user, 200, res);
+      return;
+    }
+    
+    // Generate a new verification token (always generate fresh token on login)
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    user.verificationToken = verificationToken;
+    
+    // Optimize: Save user and send email in parallel (non-blocking)
+    const savePromise = user.save();
+    
+    // Validate email configuration
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      await savePromise; // Wait for save to complete
+      sendToken(user, 200, res);
+      return;
+    }
+
+    const verificationUrl = `https://nexthire-portal.netlify.app/verify-email?token=${verificationToken}`;
+
+    const emailBody = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Email Verification Required - NextHire",
+      text: `Hello ${user.fullname},\n\nPlease verify your email by clicking on the following link: ${verificationUrl}\n\nIf you didn't request this, please ignore this email.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+          <h2 style="color: #4a5568;">Email Verification Required</h2>
+          <p>Hello <strong>${user.fullname}</strong>,</p>
+          <p>Your account is pending verification. Please verify your email address to access all features of NextHire.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify My Email</a>
+          </div>
+          <p>Or copy and paste this link in your browser:</p>
+          <p style="word-break: break-all; color: #4f46e5;">${verificationUrl}</p>
+          <p style="color: #718096; font-size: 14px; margin-top: 30px;">If you didn't request this email, please ignore it.</p>
+        </div>
+      `
+    };
+
+    // Send email (non-blocking - don't wait for it)
+    sendMail(emailBody).catch((err) => {
+      // Log error but don't block login
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to send verification email:", err.message);
+      }
+    });
+    
+    await savePromise; // Wait for user save to complete
+    
+    // Still allow login by sending token
+    sendToken(user, 200, res);
+    return;
+  }
+  
+  // If email is verified, proceed with normal login
   sendToken(user, 200, res);
 });
 
@@ -371,14 +451,21 @@ const updateProfile = asyncErrorHandler(async (req, res, next) => {
 
 const getUserSearchHistory = asyncErrorHandler(async (req, res) => {
   const userId = req.user.id;
-  const user = await User.findById(userId).select("searchHistory");
+  const user = await User.findById(userId)
+    .select("searchHistory")
+    .lean(); // Use lean() for read-only query
 
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
   }
 
+  // Optimize: Use Set for O(1) lookup and filter empty strings
   const cleanedSearchHistory = [
-    ...new Set(user.searchHistory.map((term) => term.trim().toLowerCase())),
+    ...new Set(
+      (user.searchHistory || [])
+        .map((term) => term.trim().toLowerCase())
+        .filter((term) => term.length > 0)
+    ),
   ];
 
   return res.status(200).json({
@@ -402,13 +489,20 @@ const clearUserSearchHistory = asyncErrorHandler(async (req, res) => {
 
 const getSearchResult = asyncErrorHandler(async (req, res, next) => {
   const userId = req.user.id;
-  const user = await User.findById(userId).select("searchHistory");
+  const user = await User.findById(userId)
+    .select("searchHistory")
+    .lean(); // Use lean() for read-only query
 
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
   }
+  
   const searchKeywords = [
-    ...new Set(user.searchHistory.map((term) => term.trim().toLowerCase())),
+    ...new Set(
+      (user.searchHistory || [])
+        .map((term) => term.trim().toLowerCase())
+        .filter((term) => term.length > 0)
+    ),
   ];
 
   if (searchKeywords.length === 0) {
@@ -419,29 +513,41 @@ const getSearchResult = asyncErrorHandler(async (req, res, next) => {
       jobs: [],
     });
   }
+  
+  // Optimize: Build regex patterns once
+  const regexPatterns = searchKeywords.map((keyword) => new RegExp(keyword, "i"));
+  
   const jobQuery = {
     $or: [
-      {
-        title: {
-          $in: searchKeywords.map((keyword) => new RegExp(keyword, "i")),
-        },
-      },
-      {
-        companyName: {
-          $in: searchKeywords.map((keyword) => new RegExp(keyword, "i")),
-        },
-      },
-      {
-        requirements: {
-          $in: searchKeywords.map((keyword) => new RegExp(keyword, "i")),
-        },
-      },
+      { title: { $in: regexPatterns } },
+      { requirements: { $in: regexPatterns } },
     ],
   };
 
-  const jobs = await Job.find(jobQuery)
-    .populate("company")
-    .populate("applications");
+  // Optimize: Use aggregation with lookup for better performance
+  const jobs = await Job.aggregate([
+    { $match: jobQuery },
+    {
+      $lookup: {
+        from: "companies",
+        localField: "company",
+        foreignField: "_id",
+        as: "company",
+        pipeline: [
+          {
+            $project: {
+              companyName: 1,
+              location: 1,
+              logo: 1,
+            },
+          },
+        ],
+      },
+    },
+    { $unwind: "$company" },
+    { $limit: 50 }, // Limit results
+    { $sort: { createdAt: -1 } },
+  ]);
 
   if (!jobs.length) {
     return res.status(200).json({
@@ -452,57 +558,74 @@ const getSearchResult = asyncErrorHandler(async (req, res, next) => {
     });
   }
 
-  const uniqueJobs = jobs.reduce(
-    (acc, job) => {
-      if (!acc.jobIds.has(job._id.toString())) {
-        acc.jobIds.add(job._id.toString());
-        acc.jobs.push(job);
-      }
-      return acc;
-    },
-    { jobIds: new Set(), jobs: [] }
-  );
   return res.status(200).json({
     success: true,
     status: 200,
-    jobs: uniqueJobs.jobs,
+    jobs,
   });
 });
 
 const recommendJobsToUsers = async () => {
-  const users = await User.find().populate("jobRecommendations");
+  // Optimize: Only fetch users with skills or bio, and use lean()
+  const users = await User.find({
+    $or: [
+      { "profile.skills": { $exists: true, $ne: [] } },
+      { "profile.bio": { $exists: true, $ne: "" } },
+    ],
+  })
+    .select("profile.skills profile.bio")
+    .lean();
 
-  for (const user of users) {
-    const skills = user.profile.skills || [];
-    const bio = user.profile.bio || "";
-    user.jobRecommendations = [];
-    if (skills.length > 0 || bio) {
-      const jobQuery = {
-        $or: [
-          ...skills.map((skill) => ({
-            requirements: { $regex: skill, $options: "i" },
-          })),
-          { title: { $regex: bio, $options: "i" } },
-        ],
-      };
+  // Optimize: Process users in batches to avoid memory issues
+  const batchSize = 10;
+  for (let i = 0; i < users.length; i += batchSize) {
+    const batch = users.slice(i, i + batchSize);
+    
+    await Promise.all(
+      batch.map(async (user) => {
+        const skills = user.profile?.skills || [];
+        const bio = user.profile?.bio || "";
+        
+        if (skills.length === 0 && !bio) return;
 
-      const jobs = await Job.find(jobQuery);
-      const jobIds = jobs.map((job) => job._id);
+        // Optimize: Build query more efficiently
+        const jobQuery = {
+          $or: [
+            ...(skills.length > 0
+              ? skills.map((skill) => ({
+                  requirements: { $regex: skill.trim(), $options: "i" },
+                }))
+              : []),
+            ...(bio ? [{ title: { $regex: bio.trim(), $options: "i" } }] : []),
+          ],
+        };
 
-      user.jobRecommendations = Array.from(
-        new Set([...user.jobRecommendations, ...jobIds])
-      );
+        const jobs = await Job.find(jobQuery)
+          .select("_id")
+          .lean()
+          .limit(20); // Limit recommendations
 
-      await user.save();
-    }
+        const jobIds = jobs.map((job) => job._id.toString());
+
+        // Update user with recommendations (non-blocking)
+        if (jobIds.length > 0) {
+          await User.findByIdAndUpdate(user._id, {
+            jobRecommendations: jobIds,
+          });
+        }
+      })
+    );
   }
 };
-cron.schedule("* * * * *", async () => {
-  console.log("Running job recommendation task every minute...");
+// Optimize: Run recommendation job every 5 minutes instead of every minute
+cron.schedule("*/5 * * * *", async () => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("Running job recommendation task...");
+  }
   try {
     await recommendJobsToUsers();
   } catch (error) {
-    console.error("Error in cron job:", error);
+    console.error("Error in cron job:", error.message);
   }
 });
 
@@ -521,7 +644,10 @@ const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
 
   const userId = req.user.id;
 
-  const user = await User.findById(userId).populate("jobRecommendations");
+  // Optimize: Only select jobRecommendations field
+  const user = await User.findById(userId)
+    .select("jobRecommendations")
+    .lean(); // Use lean() for better performance
 
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
@@ -536,7 +662,7 @@ const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
     });
   }
 
-  const jobIds = user.jobRecommendations.map((job) => job._id);
+  const jobIds = user.jobRecommendations;
 
   const query = {
     _id: { $in: jobIds },
@@ -580,14 +706,25 @@ const getRecommendedJobs = asyncErrorHandler(async (req, res, next) => {
     sortOptions.createdAt = -1;
   }
 
-  const recommendedJobs = await Job.find(query)
-    .populate({ path: "company" })
-    .populate({ path: "applications" })
-    .skip(skip)
-    .limit(limitNumber)
-    .sort(sortOptions);
-
-  const totalJobs = await Job.countDocuments(query);
+  // Optimize: Use parallel queries and lean()
+  const [recommendedJobs, totalJobs] = await Promise.all([
+    Job.find(query)
+      .populate({
+        path: "company",
+        select: "companyName location logo", // Only needed fields
+      })
+      .populate({
+        path: "applications",
+        select: "status createdAt", // Only needed fields
+        options: { limit: 3 }, // Limit applications
+      })
+      .select("-__v") // Exclude version key
+      .lean() // Use lean() for better performance
+      .skip(skip)
+      .limit(limitNumber)
+      .sort(sortOptions),
+    Job.countDocuments(query), // Parallel count query
+  ]);
 
   if (recommendedJobs.length === 0) {
     return res.status(200).json({

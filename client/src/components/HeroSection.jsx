@@ -19,6 +19,7 @@ const HeroSection = () => {
     const fetchJobs = async () => {
       if (!query.trim()) {
         setSearchResults([]); // Clear search results when query is empty
+        setDropdownVisible(false);
         return;
       }
 
@@ -28,14 +29,26 @@ const HeroSection = () => {
       try {
         const res = await dispatch(getAllJobs(currentSearchParams));
 
-        if (res?.payload?.status === 200) {
-          setSearchResults(res.payload.jobs);
-        } else {
+        if (res?.type === "job/getAllJobs/fulfilled") {
+          // Handle fulfilled response
+          if (res?.payload?.status === 200 && res?.payload?.jobs) {
+            const jobs = Array.isArray(res.payload.jobs) ? res.payload.jobs : [];
+            setSearchResults(jobs);
+            setDropdownVisible(jobs.length > 0);
+          } else {
+            setSearchResults([]);
+            setDropdownVisible(false);
+          }
+        } else if (res?.type === "job/getAllJobs/rejected") {
+          // Handle rejected response
+          console.error("Error fetching jobs:", res?.payload);
           setSearchResults([]);
+          setDropdownVisible(false);
         }
       } catch (error) {
         console.error("Error fetching jobs:", error);
         setSearchResults([]);
+        setDropdownVisible(false);
       } finally {
         setLoading(false); // Stop loading after API call finishes
       }
@@ -46,7 +59,15 @@ const HeroSection = () => {
   }, [query, dispatch]);
 
   const searchJobHandler = (jobId) => {
+    setDropdownVisible(false);
+    setQuery("");
     navigate(`/description/${jobId}`);
+  };
+
+  const handleSearchButtonClick = () => {
+    if (query.trim()) {
+      navigate(`/jobs?title=${encodeURIComponent(query.trim())}`);
+    }
   };
 
   useEffect(() => {
@@ -98,48 +119,50 @@ const HeroSection = () => {
           Explore thousands of job listings across various industries. Take the
           next step towards your career success with our intelligent job matching platform!
         </p>
-        <div className='relative flex w-full max-w-2xl shadow-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm pl-6 pr-2 rounded-full items-center gap-4 mx-auto hover:shadow-3xl transition-all duration-300'>
-          <Search className='h-5 w-5 text-gray-400' />
-          <input
-            type='text'
-            placeholder='Search for jobs, companies, or skills...'
-            value={query}
-            onChange={handleInputChange}
-            onClick={handleDropdownClick}
-            className='outline-none border-none w-full bg-transparent text-gray-700 placeholder-gray-400 text-lg py-4'
-            aria-label='Job search input'
-          />
-          <Button
-            onClick={() => searchJobHandler(query)}
-            className='rounded-full bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-8 py-3 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200'
-            aria-label='Search button'
-          >
-            <Search className='h-5 w-5 mr-2' />
-            Search
-          </Button>
-          {loading && <SearchSkeleton />}
-        </div>
-        
-        {/* Search Dropdown - Positioned outside the search container */}
-        {dropdownVisible && searchResults.length > 0 && !loading && (
-          <div
-            ref={dropdownRef}
-            className='absolute top-full left-1/2 transform -translate-x-1/2 w-full max-w-2xl max-h-60 overflow-y-auto bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl z-[9999] border border-gray-200/50 mt-4'
-          >
-            {searchResults?.map((job, index) => (
-              <div
-                key={job._id}
-                onClick={() => searchJobHandler(job._id)}
-                className='cursor-pointer hover:bg-gradient-to-r hover:from-[#6A38C2]/10 hover:to-[#F83002]/10 hover:text-[#6A38C2] transition-all duration-200 p-4 border-b border-gray-100 last:border-b-0 group'
-              >
-                <div className='flex items-center gap-3'>
-                  <div className='w-2 h-2 bg-[#6A38C2] rounded-full group-hover:bg-[#F83002] transition-colors duration-200'></div>
-                  <span className='font-medium'>{job.title}</span>
-                </div>
-              </div>
-            ))}
+        <div className='relative w-full max-w-2xl mx-auto'>
+          <div className='relative flex w-full shadow-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm pl-6 pr-2 rounded-full items-center gap-4 hover:shadow-3xl transition-all duration-300'>
+            <Search className='h-5 w-5 text-gray-400' />
+            <input
+              type='text'
+              placeholder='Search for jobs, companies, or skills...'
+              value={query}
+              onChange={handleInputChange}
+              onClick={handleDropdownClick}
+              className='outline-none border-none w-full bg-transparent text-gray-700 placeholder-gray-400 text-lg py-4'
+              aria-label='Job search input'
+            />
+            <Button
+              onClick={handleSearchButtonClick}
+              className='rounded-full bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-8 py-3 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200'
+              aria-label='Search button'
+            >
+              <Search className='h-5 w-5 mr-2' />
+              Search
+            </Button>
+            {loading && <SearchSkeleton />}
           </div>
-        )}
+          
+          {/* Search Dropdown - Positioned relative to search container */}
+          {dropdownVisible && searchResults.length > 0 && !loading && (
+            <div
+              ref={dropdownRef}
+              className='absolute top-full left-0 w-full max-h-60 overflow-y-auto bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl z-[9999] border border-gray-200/50 mt-4'
+            >
+              {searchResults?.map((job, index) => (
+                <div
+                  key={job._id}
+                  onClick={() => searchJobHandler(job._id)}
+                  className='cursor-pointer hover:bg-gradient-to-r hover:from-[#6A38C2]/10 hover:to-[#F83002]/10 hover:text-[#6A38C2] transition-all duration-200 p-4 border-b border-gray-100 last:border-b-0 group'
+                >
+                  <div className='flex items-center gap-3'>
+                    <div className='w-2 h-2 bg-[#6A38C2] rounded-full group-hover:bg-[#F83002] transition-colors duration-200'></div>
+                    <span className='font-medium'>{job.title}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -39,7 +39,8 @@ const postJob = asyncErrorHandler(async (req, res) => {
     return error.sendError(res);
   }
 
-  const company = await Company.findById(companyId);
+  // Optimize: Only select needed fields
+  const company = await Company.findById(companyId).select("userId companyName");
   if (!company) {
     const error = new ErrorHandler("Company not found", 404);
     return error.sendError(res);
@@ -69,7 +70,12 @@ const postJob = asyncErrorHandler(async (req, res) => {
     created_by: userId,
   });
 
-  await processJobAndNotifyUsers(job, companyName);
+  // Optimize: Don't await - let notification run in background
+  processJobAndNotifyUsers(job, companyName).catch((err) => {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error processing job notifications:", err.message);
+    }
+  });
 
   // Return response
   return res.status(201).json({
@@ -105,32 +111,42 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     }
   }
   const keyword = title || "";
-  console.log("Updating search history for user:", userId, "with:", keyword);
-  // Update search history only if user is logged in and keyword exists
+  // Update search history only if user is logged in and keyword exists (non-blocking)
   if (userId && keyword) {
-    await User.findByIdAndUpdate(
+    // Don't await - let it run in background to not block the main query
+    User.findByIdAndUpdate(
       userId,
       { $addToSet: { searchHistory: keyword } },
       { new: true }
-    );
+    ).catch((err) => console.error("Error updating search history:", err));
   }
 
   const query = {};
 
   // Handle title search with company names or requirements
   if (keyword) {
+    // Optimize: Only fetch company IDs if keyword exists
     const companies = await Company.find({
       companyName: { $regex: keyword, $options: "i" },
-    }).select("_id");
+    })
+      .select("_id")
+      .lean(); // Use lean() for read-only query
+
+    const companyIds = companies.map((company) => company._id);
+    const keywordTerms = keyword.trim().split(/\s+/).filter((term) => term.length > 0);
 
     query.$or = [
       { title: { $regex: keyword, $options: "i" } },
-      { company: { $in: companies.map((company) => company._id) } },
-      {
-        requirements: {
-          $in: keyword.split(" ").map((term) => new RegExp(term.trim(), "i")),
-        },
-      },
+      ...(companyIds.length > 0 ? [{ company: { $in: companyIds } }] : []),
+      ...(keywordTerms.length > 0
+        ? [
+            {
+              requirements: {
+                $in: keywordTerms.map((term) => new RegExp(term, "i")),
+              },
+            },
+          ]
+        : []),
     ];
   }
 
@@ -173,19 +189,26 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
     sortOptions.createdAt = -1;
   }
 
-  // Retrieve jobs based on the constructed query
-  const jobs = await Job.find(query)
-    .populate({
-      path: "company",
-    })
-    .populate({
-      path: "applications",
-    })
-    .skip(skip)
-    .limit(limitNumber)
-    .sort(sortOptions);
+  // Optimize: Use parallel queries and lean() for better performance
+  const [jobs, totalJobs] = await Promise.all([
+    Job.find(query)
+      .populate({
+        path: "company",
+        select: "companyName location website logo", // Only select needed fields
+      })
+      .populate({
+        path: "applications",
+        select: "status createdAt", // Only select needed fields
+        options: { limit: 5 }, // Limit applications to reduce payload
+      })
+      .select("-__v") // Exclude version key
+      .lean() // Use lean() for read-only query (faster)
+      .skip(skip)
+      .limit(limitNumber)
+      .sort(sortOptions),
+    Job.countDocuments(query), // Parallel count query
+  ]);
 
-  const totalJobs = await Job.countDocuments(query);
   const totalPages = Math.ceil(totalJobs / limitNumber);
 
   // Return a response even if no jobs are found
@@ -206,7 +229,24 @@ const getAllJobs = asyncErrorHandler(async (req, res) => {
 
 const getJobById = asyncErrorHandler(async (req, res) => {
   const jobId = req.params.id;
-  const job = await Job.findById(jobId).populate("applications");
+  const job = await Job.findById(jobId)
+    .populate({
+      path: "company",
+      select: "companyName location website logo description", // Only needed fields
+    })
+    .populate({
+      path: "applications",
+      select: "status createdAt applicant", // Only needed fields
+      populate: {
+        path: "applicant",
+        select: "fullname email profile.profilePhoto", // Only needed fields
+      },
+    })
+    .populate({
+      path: "created_by",
+      select: "fullname email", // Only needed fields
+    })
+    .lean(); // Use lean() for better performance
 
   if (!job) {
     const error = new ErrorHandler("Job Not Found", 404);
@@ -217,8 +257,15 @@ const getJobById = asyncErrorHandler(async (req, res) => {
 });
 
 const getAdminJobs = asyncErrorHandler(async (req, res) => {
-  const adminId = req.user.id; // Use req.user.id
-  const jobs = await Job.find({ created_by: adminId }).populate("company");
+  const adminId = req.user.id;
+  const jobs = await Job.find({ created_by: adminId })
+    .populate({
+      path: "company",
+      select: "companyName location logo", // Only needed fields
+    })
+    .select("-__v") // Exclude version key
+    .lean() // Use lean() for better performance
+    .sort({ createdAt: -1 }); // Sort by newest first
 
   if (jobs.length === 0) {
     const error = new ErrorHandler("Jobs Not Found", 404);
@@ -296,22 +343,41 @@ const deleteAdminJobs = asyncErrorHandler(async (req, res) => {
   const jobId = req.params.id;
   try {
     const job = await Job.findById(jobId)
-      .populate("applications")
-      .populate("company");
+      .populate({
+        path: "applications",
+        select: "applicant", // Only needed field
+      })
+      .populate({
+        path: "company",
+        select: "companyName", // Only needed field
+      })
+      .lean(); // Use lean() for read-only query
 
     if (!job) {
       return res.status(404).json({ message: "Job not found." });
     }
 
-    const companyName = job.company.companyName;
+    const companyName = job.company?.companyName;
     const jobTitle = job?.title;
-    const applicantIds = job?.applications?.map(
-      (application) => application.applicant
-    );
-    const applicants = await User.find({ _id: { $in: applicantIds } });
+    const applicantIds = job?.applications
+      ?.map((application) => application.applicant)
+      .filter(Boolean); // Filter out undefined values
 
+    // Optimize: Delete job first, then notify (non-blocking)
     await Job.findByIdAndDelete(jobId);
-    await notifyJobDeletion(jobTitle, companyName, applicants);
+    
+    if (applicantIds && applicantIds.length > 0) {
+      const applicants = await User.find({ _id: { $in: applicantIds } })
+        .select("email fullname")
+        .lean();
+      
+      // Don't await - let notification run in background
+      notifyJobDeletion(jobTitle, companyName, applicants).catch((err) => {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Error notifying job deletion:", err.message);
+        }
+      });
+    }
 
     return res.status(200).json({
       status: 200,
@@ -349,9 +415,12 @@ const getSimilarJobs = asyncErrorHandler(async (req, res) => {
     const similarJobs = await Job.find(query)
       .populate({
         path: "company",
-        select: "companyName",
+        select: "companyName location logo", // Only needed fields
       })
-      .limit(limit);
+      .select("title location salary jobType experienceLevel company") // Only needed fields
+      .lean() // Use lean() for better performance
+      .limit(limit)
+      .sort({ createdAt: -1 }); // Sort by newest first
 
     if (similarJobs.length === 0) {
       const error = new ErrorHandler("No similar jobs found", 404);
@@ -365,25 +434,27 @@ const getSimilarJobs = asyncErrorHandler(async (req, res) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Error fetching similar jobs:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error fetching similar jobs:", error.message);
+    }
     return res.status(500).json({ message: "Internal server error" });
   }
 });
 
 const getJobFilters = asyncErrorHandler(async (req, res, next) => {
-  // Get distinct values from Job collection
-  const locations = await Job.distinct("location");
-  const jobTypes = await Job.distinct("jobType");
-
-  // Get min and max salary for calculating ranges
-  const salaryStats = await Job.aggregate([
-    {
-      $group: {
-        _id: null,
-        minSalary: { $min: "$salary" },
-        maxSalary: { $max: "$salary" },
+  // Optimize: Use parallel queries for better performance
+  const [locations, jobTypes, salaryStats] = await Promise.all([
+    Job.distinct("location"),
+    Job.distinct("jobType"),
+    Job.aggregate([
+      {
+        $group: {
+          _id: null,
+          minSalary: { $min: "$salary" },
+          maxSalary: { $max: "$salary" },
+        },
       },
-    },
+    ]),
   ]);
 
   let salaryRanges = [];
@@ -434,6 +505,29 @@ const getJobsForCarousel = asyncErrorHandler(async (req, res) => {
       {
         $replaceRoot: { newRoot: "$job" }, // Flatten the job object to top level
       },
+      {
+        $lookup: {
+          from: "companies",
+          localField: "company",
+          foreignField: "_id",
+          as: "company",
+          pipeline: [
+            {
+              $project: {
+                companyName: 1,
+                location: 1,
+                logo: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: "$company",
+      },
+      {
+        $limit: 20, // Limit results for carousel
+      },
     ]);
 
     return res.status(200).json({
@@ -445,7 +539,9 @@ const getJobsForCarousel = asyncErrorHandler(async (req, res) => {
         : "No jobs found.",
     });
   } catch (error) {
-    console.error("Error fetching unique jobs:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error fetching unique jobs:", error.message);
+    }
     return res.status(500).json({
       success: false,
       status: 500,

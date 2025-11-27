@@ -46,8 +46,11 @@ const registerCompany = asyncErrorHandler(async (req, res, next) => {
 
 // Get Companies by User ID
 const getCompany = asyncErrorHandler(async (req, res, next) => {
-  const userId = req.user.id; // Logged-in user ID
-  const companies = await Company.find({ userId });
+  const userId = req.user.id;
+  const companies = await Company.find({ userId })
+    .select("-__v") // Exclude version key
+    .lean() // Use lean() for better performance
+    .sort({ createdAt: -1 }); // Sort by newest first
 
   if (!companies.length) {
     const error = new ErrorHandler("No companies found for this user", 404);
@@ -79,17 +82,30 @@ const getCompanyById = asyncErrorHandler(async (req, res, next) => {
 
 // Get Jobs by Company ID
 const getJobsByCompanyId = asyncErrorHandler(async (req, res, next) => {
-  const companyId = req.params.id; // Get the company ID from the request parameters
-  const company = await Company.findById(companyId);
+  const companyId = req.params.id;
+  
+  // Optimize: Check company and fetch jobs in parallel
+  const [company, jobs] = await Promise.all([
+    Company.findById(companyId).select("companyName").lean(),
+    Job.find({ company: companyId })
+      .populate({
+        path: "applications",
+        select: "status createdAt", // Only needed fields
+        options: { limit: 5 }, // Limit applications
+      })
+      .populate({
+        path: "company",
+        select: "companyName location logo", // Only needed fields
+      })
+      .select("-__v") // Exclude version key
+      .lean() // Use lean() for better performance
+      .sort({ createdAt: -1 }),
+  ]);
 
   if (!company) {
     const error = new ErrorHandler("Company not found", 404);
     return error.sendError(res);
   }
-  const jobs = await Job.find({ company: companyId })
-    .populate("applications")
-    .populate("company")
-    .sort({ createdAt: -1 });
 
   if (!jobs.length) {
     const error = new ErrorHandler("No jobs found for this company", 404);
