@@ -19,8 +19,6 @@ const CategoryCarousel = () => {
   const [carousels, setCarousels] = useState(carousel?.jobs || []);
   const [loading, setLoading] = useState(false);
 
-  console.log("CategoryCarousel component mounted");
-
   // Search job handler
   const searchJobHandler = (query) => {
     navigate(`/description/${query?._id}`);
@@ -28,18 +26,13 @@ const CategoryCarousel = () => {
 
   // Fetch carousel data if not available
   useEffect(() => {
-    console.log("CategoryCarousel useEffect triggered", { carousels, loading });
-    
     if (!carousels || carousels.length === 0) {
       setLoading(true);
-      console.log("Fetching carousel data...");
       
       dispatch(getCarouselData())
         .then((res) => {
-          console.log("Carousel data response:", res);
           if (res?.payload?.status === 200) {
             setCarousels(res?.payload?.jobs || []);
-            console.log("Set carousels from API:", res?.payload?.jobs);
           } else {
             console.error("Failed to fetch carousel data:", res?.payload?.message);
             // Set some default data if API fails
@@ -54,7 +47,6 @@ const CategoryCarousel = () => {
               { _id: '8', title: 'Business Analyst' }
             ];
             setCarousels(defaultData);
-            console.log("Set default carousels:", defaultData);
           }
         })
         .catch((error) => {
@@ -71,34 +63,21 @@ const CategoryCarousel = () => {
             { _id: '8', title: 'Business Analyst' }
           ];
           setCarousels(defaultData);
-          console.log("Set default carousels on error:", defaultData);
         })
         .finally(() => {
           setLoading(false);
-          console.log("Loading finished");
         });
-    } else {
-      console.log("Carousels already available:", carousels);
     }
   }, [dispatch, carousels]);
 
   // Memoized sliced carousels for performance
   const carouselItems = useMemo(() => carousels?.slice(0, 10), [carousels]);
 
-  console.log("CategoryCarousel render state:", { 
-    loading, 
-    carousels, 
-    carouselItems, 
-    carouselItemsLength: carouselItems?.length 
-  });
-
   if (loading) {
-    console.log("Rendering CarouselSkeleton");
     return <CarouselSkeleton />;
   }
 
   if (!carouselItems || carouselItems.length === 0) {
-    console.log("Rendering no categories message");
     return (
       <div className='relative'>
         <div className='text-center mb-8'>
@@ -114,41 +93,57 @@ const CategoryCarousel = () => {
     );
   }
 
-  console.log("Rendering CategoryCarousel with items:", carouselItems);
-
   return (
-    <div className='relative py-8'>
-      <div className='text-center mb-8'>
-        <h2 className='text-3xl font-bold text-gray-800 mb-2'>
-          Popular <span className='text-[#6A38C2]'>Job Categories</span>
-        </h2>
-        <p className='text-gray-600'>Explore trending job categories and find your perfect match</p>
-        {/* Debug button - remove this after testing */}
+    <div className='relative py-20 md:py-24 px-4 md:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50/30 overflow-visible'>
+      {/* Background decoration */}
+      <div className='absolute inset-0 -z-10 overflow-hidden'>
+        <div className='absolute top-1/4 right-1/4 w-96 h-96 bg-[#6A38C2]/5 rounded-full blur-3xl'></div>
+        <div className='absolute bottom-1/4 left-1/4 w-96 h-96 bg-[#F83002]/5 rounded-full blur-3xl'></div>
       </div>
-      
-      <Carousel className='w-full max-w-4xl mx-auto my-10'>
-        <CarouselContent className='grow-0 shrink-0 min-w-0 flex gap-4'>
-          {carouselItems?.map((cat, index) => (
-            <CarouselItem
-              key={index}
-              className='grow-0 shrink-0 min-w-0 md:basis-1/3 lg:basis-1/4'
-            >
-              <Button
-                onClick={() => searchJobHandler(cat)}
-                variant='outline'
-                className='rounded-2xl w-full max-w-full truncate px-6 py-4 text-sm font-medium text-start whitespace-nowrap overflow-hidden border-2 border-gray-200 hover:border-[#6A38C2] hover:bg-gradient-to-r hover:from-[#6A38C2]/5 hover:to-[#F83002]/5 hover:text-[#6A38C2] transition-all duration-300 shadow-sm hover:shadow-lg transform hover:scale-105 group'
-              >
-                <div className='flex items-center gap-2 w-full'>
-                  <div className='w-2 h-2 bg-[#6A38C2] rounded-full group-hover:bg-[#F83002] transition-colors duration-300'></div>
-                  <span className='truncate'>{cat?.title}</span>
-                </div>
-              </Button>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className='left-4 bg-white/90 backdrop-blur-sm border-2 border-gray-200 hover:border-[#6A38C2] hover:bg-[#6A38C2] hover:text-white shadow-lg hover:shadow-xl transition-all duration-300' />
-        <CarouselNext className='right-4 bg-white/90 backdrop-blur-sm border-2 border-gray-200 hover:border-[#6A38C2] hover:bg-[#6A38C2] hover:text-white shadow-lg hover:shadow-xl transition-all duration-300' />
-      </Carousel>
+
+      <div className='max-w-7xl mx-auto'>
+        <div className='text-center mb-12 md:mb-16'>
+          <h2 className='text-4xl md:text-5xl font-extrabold mb-4'>
+            <span className='bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'>
+              Popular{" "}
+            </span>
+            <span className='bg-gradient-to-r from-[#6A38C2] to-[#F83002] bg-clip-text text-transparent'>
+              Job Categories
+            </span>
+          </h2>
+          <p className='text-lg text-gray-600 max-w-2xl mx-auto'>
+            Explore trending job categories and find your perfect match across various industries
+          </p>
+        </div>
+        
+        <div className='relative w-full overflow-visible py-4'>
+          <div className='px-12 md:px-16 lg:px-20'>
+            <Carousel className='w-full'>
+              <CarouselContent className='grow-0 shrink-0 min-w-0 flex gap-4'>
+                {carouselItems?.map((cat, index) => (
+                  <CarouselItem
+                    key={index}
+                    className='grow-0 shrink-0 min-w-0 basis-auto md:basis-1/3 lg:basis-1/4'
+                  >
+                    <Button
+                      onClick={() => searchJobHandler(cat)}
+                      variant='outline'
+                      className='rounded-2xl w-full max-w-full truncate px-6 py-5 text-base font-semibold text-start whitespace-nowrap overflow-hidden border-2 border-gray-200/60 hover:border-[#6A38C2] hover:bg-gradient-to-r hover:from-[#6A38C2]/10 hover:to-[#F83002]/10 hover:text-[#6A38C2] transition-all duration-300 shadow-md hover:shadow-xl transform hover:scale-110 group bg-white/95 backdrop-blur-sm'
+                    >
+                      <div className='flex items-center gap-3 w-full'>
+                        <div className='w-3 h-3 bg-gradient-to-r from-[#6A38C2] to-[#F83002] rounded-full group-hover:scale-125 transition-transform duration-300 flex-shrink-0'></div>
+                        <span className='truncate'>{cat?.title}</span>
+                      </div>
+                    </Button>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className='left-0 md:left-4 bg-white/95 backdrop-blur-md border-2 border-gray-200/60 hover:border-[#6A38C2] hover:bg-gradient-to-r hover:from-[#6A38C2] hover:to-[#5b30a6] hover:text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 z-10 h-10 w-10' />
+              <CarouselNext className='right-0 md:right-4 bg-white/95 backdrop-blur-md border-2 border-gray-200/60 hover:border-[#6A38C2] hover:bg-gradient-to-r hover:from-[#6A38C2] hover:to-[#5b30a6] hover:text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-110 z-10 h-10 w-10' />
+            </Carousel>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

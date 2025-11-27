@@ -59,6 +59,8 @@ const CompanyDashboard = () => {
     return <Loader />;
   }
 
+  console.log("company",company)
+
   return (
     <div className='min-h-screen mt-7 bg-gray-50'>
       <Navbar />

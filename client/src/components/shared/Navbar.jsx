@@ -2,24 +2,25 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FiMenu, FiX } from "react-icons/fi";
-import { FaBell } from "react-icons/fa";
-import ReactHelmet from "./ReactHelmet";
+import { FaBell, FaBriefcase } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { RiMenu2Fill } from "react-icons/ri";
 import NextHireLogo from "@/assets/nexthire.png";
 import { getProfilePic, getToken } from "@/utils/constant";
 import { FaUser, FaCog, FaShieldAlt, FaSignOutAlt } from "react-icons/fa";
 import { logoutUser } from "@/redux/slices/user.slice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const { user } = useSelector((state) => state.user);
   const isActive = (path) => location.pathname === path;
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const mobileMenuRef = useRef(null);
   const token = getToken();
   const profilePic = getProfilePic();
   const navigate = useNavigate();
@@ -37,12 +38,23 @@ const Navbar = () => {
     }
   };
 
+  // Close mobile menu if click is outside
+  const closeMobileMenu = (e) => {
+    if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target)) {
+      setIsOpen(false);
+    }
+  };
+
   useEffect(() => {
     document.addEventListener("mousedown", closeDropdown);
+    if (isOpen) {
+      document.addEventListener("mousedown", closeMobileMenu);
+    }
     return () => {
       document.removeEventListener("mousedown", closeDropdown);
+      document.removeEventListener("mousedown", closeMobileMenu);
     };
-  }, []);
+  }, [isOpen]);
 
   // Logout logic
   const handleLogOut = async () => {
@@ -65,13 +77,14 @@ const Navbar = () => {
     }
   };
 
+  // Close dropdown when navigating
+  const handleLinkClick = () => {
+    setIsDropDownOpen(false);
+    setIsOpen(false);
+  };
+
   return (
     <div className='bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100 w-full fixed top-0 left-0 z-50 transition-all duration-300'>
-      <ReactHelmet
-        title='Home - Next_Hire'
-        description='Welcome to Next_Hire – your one-stop platform to discover new job opportunities and connect with top employers.'
-        canonicalUrl='http://mysite.com/home'
-      />
       <div className='bg-transparent w-11/12 m-auto'>
         <div className='flex items-center justify-between mx-auto max-w-7xl h-16 px-4 lg:px-0'>
           <h1 className='text-2xl font-bold text-gray-800 flex items-center group'>
@@ -133,7 +146,7 @@ const Navbar = () => {
                       : "text-gray-600 hover:text-[#F83002] hover:bg-gray-50"
                   }`}
                 >
-                  BrowseJobs
+                  Browse Jobs
                 </Link>
               </li>
               <li>
@@ -149,6 +162,16 @@ const Navbar = () => {
                 </Link>
               </li>
             </ul>
+
+            {/* Post Job Button for Recruiters */}
+            {token && user?.role === "recruiter" && (
+              <Link to="/profile/admin/jobs/create">
+                <Button className='bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105'>
+                  <FaBriefcase className='mr-2' />
+                  Post Job
+                </Button>
+              </Link>
+            )}
 
             {/* User Profile Dropdown */}
             {token ? (
@@ -169,11 +192,19 @@ const Navbar = () => {
 
                 {/* Dropdown Menu */}
                 {isDropDownOpen && (
-                  <div className='absolute right-0 mt-3 w-48 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-xl z-10 animate-in slide-in-from-top-2 duration-200'>
+                  <div className='absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-xl z-10 animate-in slide-in-from-top-2 duration-200'>
+                    {/* User Info */}
+                    {user && (
+                      <div className='px-4 py-3 border-b border-gray-100'>
+                        <p className='font-semibold text-gray-900 truncate'>{user.fullname}</p>
+                        <p className='text-xs text-gray-500 truncate'>{user.email}</p>
+                      </div>
+                    )}
                     <ul className='py-2'>
                       <li className='flex items-center w-11/12 m-auto rounded-lg px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150'>
                         <Link
                           to='/profile'
+                          onClick={handleLinkClick}
                           className='flex items-center w-full text-gray-700 hover:text-[#F83002]'
                         >
                           <FaUser className='mr-3 text-sm' /> Profile
@@ -182,6 +213,7 @@ const Navbar = () => {
                       <li className='flex items-center w-11/12 m-auto rounded-lg px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150'>
                         <Link
                           to='/settings?page=settings'
+                          onClick={handleLinkClick}
                           className='flex items-center w-full text-gray-700 hover:text-[#F83002]'
                         >
                           <FaCog className='mr-3 text-sm' /> Settings
@@ -190,6 +222,7 @@ const Navbar = () => {
                       <li className='flex items-center w-11/12 m-auto rounded-lg px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150'>
                         <Link
                           to='/settings?page=privacy'
+                          onClick={handleLinkClick}
                           className='flex items-center w-full text-gray-700 hover:text-[#F83002]'
                         >
                           <FaShieldAlt className='mr-3 text-sm' /> Privacy
@@ -198,6 +231,7 @@ const Navbar = () => {
                       <li className='flex items-center w-11/12 m-auto rounded-lg px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150'>
                         <Link
                           to='/settings?page=notifications'
+                          onClick={handleLinkClick}
                           className='flex items-center w-full text-gray-700 hover:text-[#F83002]'
                         >
                           <FaBell className='mr-3 text-sm' /> Notifications
@@ -238,13 +272,17 @@ const Navbar = () => {
 
         {/* Mobile Menu (Slide out) */}
         {isOpen && (
-          <div className='md:hidden bg-white/95 backdrop-blur-md shadow-lg border-t border-gray-200 animate-in slide-in-from-top-2 duration-300'>
-            <ul className='flex flex-col items-center gap-2 p-6'>
+          <div ref={mobileMenuRef} className='md:hidden bg-white/95 backdrop-blur-md shadow-lg border-t border-gray-200 animate-in slide-in-from-top-2 duration-300'>
+            <ul className='flex flex-col gap-2 p-6'>
               <li>
                 <Link
                   to='/'
-                  onClick={toggleMenu}
-                  className='text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
+                  onClick={handleLinkClick}
+                  className={`block px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
+                    isActive("/")
+                      ? "bg-[#F83002]/10 text-[#F83002]"
+                      : "text-gray-800 hover:text-[#F83002] hover:bg-gray-50"
+                  }`}
                 >
                   Home
                 </Link>
@@ -252,8 +290,12 @@ const Navbar = () => {
               <li>
                 <Link
                   to='/jobs'
-                  onClick={toggleMenu}
-                  className='text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
+                  onClick={handleLinkClick}
+                  className={`block px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
+                    isActive("/jobs")
+                      ? "bg-[#F83002]/10 text-[#F83002]"
+                      : "text-gray-800 hover:text-[#F83002] hover:bg-gray-50"
+                  }`}
                 >
                   Jobs
                 </Link>
@@ -261,40 +303,112 @@ const Navbar = () => {
               <li>
                 <Link
                   to='/browse-jobs'
-                  onClick={toggleMenu}
-                  className='text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
+                  onClick={handleLinkClick}
+                  className={`block px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
+                    isActive("/browse-jobs")
+                      ? "bg-[#F83002]/10 text-[#F83002]"
+                      : "text-gray-800 hover:text-[#F83002] hover:bg-gray-50"
+                  }`}
                 >
-                  BrowseJobs
+                  Browse Jobs
                 </Link>
               </li>
               <li>
                 <Link
                   to='/other-jobs'
-                  onClick={toggleMenu}
-                  className='text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
+                  onClick={handleLinkClick}
+                  className={`block px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
+                    isActive("/other-jobs")
+                      ? "bg-[#F83002]/10 text-[#F83002]"
+                      : "text-gray-800 hover:text-[#F83002] hover:bg-gray-50"
+                  }`}
                 >
                   Other Jobs
                 </Link>
               </li>
-              <div className='border-t border-gray-200 w-full my-2'></div>
-              <li>
-                <Link
-                  to='/login'
-                  onClick={toggleMenu}
-                  className='text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
-                >
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to='/signup'
-                  onClick={toggleMenu}
-                  className='text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
-                >
-                  Signup
-                </Link>
-              </li>
+
+              {/* User Section for Mobile */}
+              {token ? (
+                <>
+                  <div className='border-t border-gray-200 w-full my-2'></div>
+                  {user && (
+                    <li className='px-4 py-2'>
+                      <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full overflow-hidden ring-2 ring-white shadow-sm'>
+                          <img
+                            src={profilePic}
+                            alt='Profile'
+                            className='w-full h-full object-cover'
+                          />
+                        </div>
+                        <div className='flex-1 min-w-0'>
+                          <p className='font-semibold text-gray-900 truncate text-sm'>{user.fullname}</p>
+                          <p className='text-xs text-gray-500 truncate'>{user.email}</p>
+                        </div>
+                      </div>
+                    </li>
+                  )}
+                  {user?.role === "recruiter" && (
+                    <li>
+                      <Link
+                        to="/profile/admin/jobs/create"
+                        onClick={handleLinkClick}
+                        className='block px-4 py-2 rounded-lg bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] text-white font-medium hover:from-[#5b30a6] hover:to-[#4a2580] transition-all duration-200 text-center'
+                      >
+                        <FaBriefcase className='inline mr-2' />
+                        Post Job
+                      </Link>
+                    </li>
+                  )}
+                  <li>
+                    <Link
+                      to='/profile'
+                      onClick={handleLinkClick}
+                      className='flex items-center text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
+                    >
+                      <FaUser className='mr-3 text-sm' /> Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to='/settings?page=settings'
+                      onClick={handleLinkClick}
+                      className='flex items-center text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
+                    >
+                      <FaCog className='mr-3 text-sm' /> Settings
+                    </Link>
+                  </li>
+                  <div className='border-t border-gray-200 w-full my-2'></div>
+                  <li
+                    onClick={handleLogOut}
+                    className='flex items-center text-gray-800 hover:text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition-all duration-200 font-medium cursor-pointer'
+                  >
+                    <FaSignOutAlt className='mr-3 text-sm' /> Logout
+                  </li>
+                </>
+              ) : (
+                <>
+                  <div className='border-t border-gray-200 w-full my-2'></div>
+                  <li>
+                    <Link
+                      to='/login'
+                      onClick={handleLinkClick}
+                      className='block text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium text-center'
+                    >
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to='/signup'
+                      onClick={handleLinkClick}
+                      className='block bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] text-white font-medium hover:from-[#5b30a6] hover:to-[#4a2580] px-4 py-2 rounded-lg transition-all duration-200 text-center'
+                    >
+                      Signup
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
         )}

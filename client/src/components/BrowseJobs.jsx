@@ -20,8 +20,6 @@ const BrowseJobs = () => {
   const currentPageRef = useRef(1);
   const totalPagesRef = useRef(null);
 
-  console.log("searchResult", searchResult);
-
   // Check authentication status
   useEffect(() => {
     const token = getToken();
@@ -43,7 +41,6 @@ const BrowseJobs = () => {
     
         if (res?.status === 200) {
           const newJobs = res?.jobs || [];
-          console.log("Fetched new jobs:", newJobs);
     
           // Remove duplicates based on job ID
           const combinedJobs = [...searchResult, ...newJobs];
@@ -100,7 +97,6 @@ const BrowseJobs = () => {
 
     try {
       const res = await dispatch(clearSearchHistory()).unwrap();
-      console.log("response",res)
       if (res?.status === 200) {
         toast.success(res?.message);
         setSearchResult([]); // Clear search results after success

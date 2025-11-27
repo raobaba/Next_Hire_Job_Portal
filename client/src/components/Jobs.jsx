@@ -188,18 +188,15 @@ const Jobs = () => {
     }
   };
 
-  console.log("filterOptions", filterOptions);
   useEffect(() => {
     dispatch(getFitlerOptions())
       .then((res) => {
         setFilterOptions(res?.payload?.filterData);
       })
       .catch((error) => {
-        console.log(error);
+        console.error("Error fetching filter options:", error);
       });
   }, []);
-
-  console.log("allJobs", allJobs);
 
   return (
     <div>

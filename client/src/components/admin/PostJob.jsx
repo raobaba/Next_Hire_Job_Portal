@@ -62,7 +62,7 @@ const PostJob = () => {
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.error("Error fetching companies:", error);
         setLoading(false);
       });
   }, [dispatch]);

@@ -35,7 +35,6 @@ const ResetPassword = () => {
 
       try {
         const response = await dispatch(forgetPassPassword({ email }));
-        console.log("response", response);
         if (response?.payload?.status == 200) {
           toast.success(response?.payload?.message);
           setEmail("");

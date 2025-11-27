@@ -19,7 +19,6 @@ const tabs = [
 
 export default function Settings() {
   const { user } = useSelector((state) => state.user);
-  console.log("first", user);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const page = queryParams.get("page");
@@ -278,7 +277,6 @@ function PasswordTab() {
       const response = await dispatch(changePassword(data));
       if (response?.payload?.status == 200) {
         toast.success(response?.payload?.message);
-        console.log(response);
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");

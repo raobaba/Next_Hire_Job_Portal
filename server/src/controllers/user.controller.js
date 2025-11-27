@@ -181,64 +181,54 @@ const loginUser = asyncErrorHandler(async (req, res, next) => {
     return error.sendError(res);
   }
 
-  // Check if email is verified, if not, send verification email
+  // Check if email is verified, if not, send verification email and reject login
   if (!user.isVerified) {
-    // Validate email and user data
-    if (!email || !user.fullname) {
-      // Still allow login even if we can't send email
-      sendToken(user, 200, res);
-      return;
-    }
-    
-    // Generate a new verification token (always generate fresh token on login)
+    // Generate a new verification token (always generate fresh token on login attempt)
     const verificationToken = crypto.randomBytes(32).toString("hex");
     user.verificationToken = verificationToken;
     
-    // Optimize: Save user and send email in parallel (non-blocking)
-    const savePromise = user.save();
+    // Save user with new verification token
+    await user.save();
     
-    // Validate email configuration
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      await savePromise; // Wait for save to complete
-      sendToken(user, 200, res);
-      return;
-    }
+    // Send verification email if email configuration is available
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS && email && user.fullname) {
+      const verificationUrl = `https://nexthire-portal.netlify.app/verify-email?token=${verificationToken}`;
 
-    const verificationUrl = `https://nexthire-portal.netlify.app/verify-email?token=${verificationToken}`;
-
-    const emailBody = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Email Verification Required - NextHire",
-      text: `Hello ${user.fullname},\n\nPlease verify your email by clicking on the following link: ${verificationUrl}\n\nIf you didn't request this, please ignore this email.`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-          <h2 style="color: #4a5568;">Email Verification Required</h2>
-          <p>Hello <strong>${user.fullname}</strong>,</p>
-          <p>Your account is pending verification. Please verify your email address to access all features of NextHire.</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${verificationUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify My Email</a>
+      const emailBody = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Email Verification Required - NextHire",
+        text: `Hello ${user.fullname},\n\nPlease verify your email by clicking on the following link: ${verificationUrl}\n\nIf you didn't request this, please ignore this email.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+            <h2 style="color: #4a5568;">Email Verification Required</h2>
+            <p>Hello <strong>${user.fullname}</strong>,</p>
+            <p>Your account is pending verification. Please verify your email address to access all features of NextHire.</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${verificationUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify My Email</a>
+            </div>
+            <p>Or copy and paste this link in your browser:</p>
+            <p style="word-break: break-all; color: #4f46e5;">${verificationUrl}</p>
+            <p style="color: #718096; font-size: 14px; margin-top: 30px;">If you didn't request this email, please ignore it.</p>
           </div>
-          <p>Or copy and paste this link in your browser:</p>
-          <p style="word-break: break-all; color: #4f46e5;">${verificationUrl}</p>
-          <p style="color: #718096; font-size: 14px; margin-top: 30px;">If you didn't request this email, please ignore it.</p>
-        </div>
-      `
-    };
+        `
+      };
 
-    // Send email (non-blocking - don't wait for it)
-    sendMail(emailBody).catch((err) => {
-      // Log error but don't block login
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to send verification email:", err.message);
-      }
-    });
+      // Send email (non-blocking - don't wait for it)
+      sendMail(emailBody).catch((err) => {
+        // Log error but don't block the error response
+        if (process.env.NODE_ENV === "development") {
+          console.error("Failed to send verification email:", err.message);
+        }
+      });
+    }
     
-    await savePromise; // Wait for user save to complete
-    
-    // Still allow login by sending token
-    sendToken(user, 200, res);
-    return;
+    // Reject login - email must be verified first
+    const error = new ErrorHandler(
+      "Please verify your email address before logging in. A verification email has been sent to your email address.",
+      403
+    );
+    return error.sendError(res);
   }
   
   // If email is verified, proceed with normal login

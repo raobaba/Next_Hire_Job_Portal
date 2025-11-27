@@ -52,22 +52,27 @@ const Login = () => {
       .then((res) => {
         setLoading(false);
         const status = res?.payload?.status;
-        const user = res?.payload?.user;
         if (status === 200) {
-          if (user?.isVerified === false) {
-            toast.info("Email is not verified, Please verify your email!");
-          } else {
-            toast.success("Login successful!");
-            navigate("/");
-          }
+          toast.success("Login successful!");
+          navigate("/");
         } else {
           setErrorMessage(res?.payload?.message || "Something went wrong");
           toast.error(res?.payload?.message || "Something went wrong");
         }
       })
-      .catch(() => {
+      .catch((error) => {
         setLoading(false);
-        toast.error("Login failed! Please try again.");
+        const errorMessage = error?.response?.data?.message || error?.message || "Login failed! Please try again.";
+        setErrorMessage(errorMessage);
+        
+        // Check if it's an email verification error
+        if (error?.response?.status === 403 || errorMessage.includes("verify your email")) {
+          toast.error(errorMessage, {
+            autoClose: 5000,
+          });
+        } else {
+          toast.error(errorMessage);
+        }
       });
   };
 
@@ -186,6 +191,17 @@ const Login = () => {
                     Reset here
                   </Link>
                 </span>
+              </div>
+            )}
+            {errorMessage && errorMessage.includes("verify your email") && (
+              <div className='mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md'>
+                <p className='text-sm text-yellow-800 font-semibold mb-1'>
+                  Email Verification Required
+                </p>
+                <p className='text-xs text-yellow-700'>
+                  Please check your email inbox and click the verification link to activate your account. 
+                  If you didn't receive the email, check your spam folder or try logging in again.
+                </p>
               </div>
             )}
           </div>
