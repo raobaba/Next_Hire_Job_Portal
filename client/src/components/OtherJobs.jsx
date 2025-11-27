@@ -42,18 +42,30 @@ const OtherJobs = () => {
   return (
     <>
       <Navbar />
-      <div className='min-h-screen bg-gradient-to-br from-gray-50 to-gray-100'>
-        <div className='container mx-auto px-6 py-8'>
+      <div className='min-h-screen bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden'>
+        {/* Background decorations */}
+        <div className='absolute inset-0 -z-10 overflow-hidden'>
+          <div className='absolute top-0 left-1/4 w-96 h-96 bg-[#6A38C2]/5 rounded-full blur-3xl'></div>
+          <div className='absolute bottom-0 right-1/4 w-96 h-96 bg-[#F83002]/5 rounded-full blur-3xl'></div>
+          <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#6A38C2]/3 rounded-full blur-3xl'></div>
+        </div>
+        
+        <div className='container mx-auto px-6 py-8 relative z-10'>
           {/* Header Section */}
-          <div className='text-center mb-12'>
-            <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#6A38C2]/10 to-[#F83002]/10 text-[#6A38C2] font-semibold text-sm border border-[#6A38C2]/20 shadow-sm mb-4'>
-              <span className='w-2 h-2 bg-[#6A38C2] rounded-full'></span>
+          <div className='text-center mb-16 mt-8'>
+            <div className='inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#6A38C2]/10 via-[#F83002]/10 to-[#6A38C2]/10 text-[#6A38C2] font-semibold text-sm border-2 border-[#6A38C2]/30 shadow-lg backdrop-blur-sm mb-6 hover:scale-105 transition-transform duration-300'>
+              <span className='w-2.5 h-2.5 bg-gradient-to-r from-[#6A38C2] to-[#F83002] rounded-full animate-pulse'></span>
               External Job Listings
             </div>
-            <h1 className='text-4xl md:text-5xl font-bold text-gray-800 mb-4'>
-              Discover <span className='bg-gradient-to-r from-[#6A38C2] to-[#F83002] bg-clip-text text-transparent'>Amazing Jobs</span>
+            <h1 className='text-5xl md:text-6xl font-extrabold mb-4'>
+              <span className='bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'>
+                Discover{" "}
+              </span>
+              <span className='bg-gradient-to-r from-[#6A38C2] via-[#8B5CF6] to-[#F83002] bg-clip-text text-transparent'>
+                Amazing Jobs
+              </span>
             </h1>
-            <p className='text-xl text-gray-600 max-w-2xl mx-auto'>
+            <p className='text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-medium'>
               Explore thousands of job opportunities from top companies worldwide
             </p>
           </div>
@@ -84,84 +96,88 @@ const OtherJobs = () => {
 
           {/* Job Cards Grid */}
           {!loading && !error && (
-            <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8'>
+            <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'>
               {jobs?.map((job, index) => (
                 <div
                   key={index}
-                  className='group bg-white/80 backdrop-blur-sm p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200/50 hover:border-[#6A38C2]/30 hover:-translate-y-2'
+                  className='group relative bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-200/60 hover:border-[#6A38C2]/30 hover:-translate-y-2 overflow-hidden'
                 >
-                  {/* Job Header */}
-                  <div className='flex items-start justify-between mb-4'>
-                    <div className='flex-1'>
-                      <h3 className='text-xl font-bold text-gray-800 group-hover:text-[#6A38C2] transition-colors duration-200 line-clamp-2'>
-                        {job.title}
-                      </h3>
-                      <div className='flex items-center gap-2 mt-2'>
-                        <div className='w-2 h-2 bg-[#6A38C2] rounded-full'></div>
-                        <p className='text-gray-600 font-medium'>
-                          {job.company?.display_name || 'Company Not Specified'}
-                        </p>
+                  {/* Gradient overlay on hover */}
+                  <div className='absolute inset-0 bg-gradient-to-br from-[#6A38C2]/5 to-[#F83002]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                  <div className='relative z-10'>
+                    {/* Job Header */}
+                    <div className='flex items-start justify-between mb-4'>
+                      <div className='flex-1'>
+                        <h3 className='text-xl font-extrabold text-gray-900 group-hover:text-[#6A38C2] transition-colors duration-200 line-clamp-2 mb-2'>
+                          {job.title}
+                        </h3>
+                        <div className='flex items-center gap-2'>
+                          <div className='w-2.5 h-2.5 bg-gradient-to-r from-[#6A38C2] to-[#F83002] rounded-full'></div>
+                          <p className='text-gray-600 font-semibold'>
+                            {job.company?.display_name || 'Company Not Specified'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className='w-12 h-12 bg-gradient-to-br from-[#6A38C2]/10 to-[#F83002]/10 rounded-xl flex items-center justify-center ml-4 border-2 border-[#6A38C2]/20 group-hover:border-[#6A38C2]/40 transition-colors duration-300'>
+                        <svg className='w-6 h-6 text-[#6A38C2]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6' />
+                        </svg>
                       </div>
                     </div>
-                    <div className='w-12 h-12 bg-gradient-to-br from-[#6A38C2]/10 to-[#F83002]/10 rounded-xl flex items-center justify-center ml-4'>
-                      <svg className='w-6 h-6 text-[#6A38C2]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6' />
+
+                    {/* Job Details */}
+                    <div className='space-y-3 mb-6 bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
+                      <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center border border-blue-200'>
+                          <svg className='w-5 h-5 text-blue-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className='text-xs text-gray-500 font-medium'>Contract Type</p>
+                          <p className='font-semibold text-gray-800'>
+                            {job.contract_type || "N/A"} / {job.contract_time || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 bg-gradient-to-br from-green-50 to-green-100 rounded-lg flex items-center justify-center border border-green-200'>
+                          <svg className='w-5 h-5 text-green-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className='text-xs text-gray-500 font-medium'>Salary Range</p>
+                          <p className='font-semibold text-[#6A38C2]'>
+                            {job.salary_min
+                              ? `₹${Math.round(job.salary_min).toLocaleString()} - ₹${Math.round(job.salary_max).toLocaleString()}`
+                              : "Not specified"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Job Description */}
+                    <div className='mb-6'>
+                      <p className='text-gray-600 text-sm line-clamp-3 leading-relaxed'>
+                        {job.description}
+                      </p>
+                    </div>
+
+                    {/* Action Button */}
+                    <a
+                      href={job.redirect_url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='group/btn w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
+                    >
+                      <span>View Job Details</span>
+                      <svg className='w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14' />
                       </svg>
-                    </div>
+                    </a>
                   </div>
-
-                  {/* Job Details */}
-                  <div className='space-y-3 mb-6'>
-                    <div className='flex items-center gap-3'>
-                      <div className='w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center'>
-                        <svg className='w-4 h-4 text-blue-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className='text-sm text-gray-500'>Contract Type</p>
-                        <p className='font-medium text-gray-700'>
-                          {job.contract_type || "N/A"} / {job.contract_time || "N/A"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className='flex items-center gap-3'>
-                      <div className='w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center'>
-                        <svg className='w-4 h-4 text-green-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className='text-sm text-gray-500'>Salary Range</p>
-                        <p className='font-medium text-gray-700'>
-                          {job.salary_min
-                            ? `₹${Math.round(job.salary_min).toLocaleString()} - ₹${Math.round(job.salary_max).toLocaleString()}`
-                            : "Not specified"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Job Description */}
-                  <div className='mb-6'>
-                    <p className='text-gray-600 line-clamp-3 leading-relaxed'>
-                      {job.description}
-                    </p>
-                  </div>
-
-                  {/* Action Button */}
-                  <a
-                    href={job.redirect_url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='group/btn w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105'
-                  >
-                    <span>View Job Details</span>
-                    <svg className='w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14' />
-                    </svg>
-                  </a>
                 </div>
               ))}
             </div>
@@ -173,10 +189,10 @@ const OtherJobs = () => {
               <button
                 onClick={handlePrevious}
                 disabled={page === 1}
-                className={`group flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                className={`group flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   page === 1
                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-[#6A38C2] hover:text-white shadow-lg hover:shadow-xl transform hover:scale-105 border border-gray-200 hover:border-[#6A38C2]"
+                    : "bg-white/95 backdrop-blur-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#6A38C2] hover:to-[#5b30a6] hover:text-white shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-gray-200/60 hover:border-[#6A38C2]"
                 }`}
               >
                 <svg className={`w-4 h-4 transition-transform duration-200 ${page !== 1 ? 'group-hover:-translate-x-1' : ''}`} fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -185,15 +201,15 @@ const OtherJobs = () => {
                 Previous
               </button>
               
-              <div className='flex items-center gap-2 bg-white rounded-xl px-6 py-3 shadow-lg border border-gray-200'>
-                <div className='w-2 h-2 bg-[#6A38C2] rounded-full'></div>
+              <div className='flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-xl px-6 py-3 shadow-lg border-2 border-gray-200/60'>
+                <div className='w-2.5 h-2.5 bg-gradient-to-r from-[#6A38C2] to-[#F83002] rounded-full animate-pulse'></div>
                 <span className='font-bold text-lg text-gray-800'>Page {page}</span>
-                <div className='w-2 h-2 bg-[#F83002] rounded-full'></div>
+                <div className='w-2.5 h-2.5 bg-gradient-to-r from-[#F83002] to-[#6A38C2] rounded-full animate-pulse'></div>
               </div>
               
               <button
                 onClick={handleNext}
-                className='group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105'
+                className='group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
               >
                 Next
                 <svg className='w-4 h-4 transition-transform duration-200 group-hover:translate-x-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>

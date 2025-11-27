@@ -96,8 +96,10 @@ const FilterCard = ({ setSearchParams, filterOptions }) => {
   }, [selectedFilters, debouncedSearchTerm, setSearchParams]);
 
   return (
-    <div className='border rounded-lg p-4'>
-      <h2 className='font-bold mb-2'>Filters</h2>
+    <div className='bg-white/95 backdrop-blur-sm border-2 border-gray-200/60 rounded-2xl p-6 shadow-lg sticky top-24'>
+      <h2 className='font-extrabold text-xl mb-4 bg-gradient-to-r from-[#6A38C2] to-[#F83002] bg-clip-text text-transparent'>
+        Filters
+      </h2>
       <div className='space-y-4'>
         <div className='mb-4'>
           <input
@@ -105,20 +107,20 @@ const FilterCard = ({ setSearchParams, filterOptions }) => {
             placeholder='Search by title, skills, company name...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className='border rounded w-full p-2'
+            className='border-2 border-gray-200/60 rounded-xl w-full p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm'
           />
         </div>
         {selectedFilters?.length > 0 && (
-          <div>
-            <div className='flex flex-wrap'>
+          <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
+            <div className='flex flex-wrap gap-2 mb-3'>
               {selectedFilters?.map((filter, index) => (
                 <div
                   key={index}
-                  className='flex items-center bg-blue-100 text-blue-600 rounded-md m-[3px] px-1 py-1'
+                  className='flex items-center gap-2 bg-gradient-to-r from-[#6A38C2]/10 to-[#F83002]/10 text-[#6A38C2] rounded-lg px-3 py-1.5 border border-[#6A38C2]/20'
                 >
-                  <span className='text-[10px]'>{filter.value}</span>
+                  <span className='text-xs font-semibold'>{filter.value}</span>
                   <FiX
-                    className='ml-1 text-[12px] cursor-pointer'
+                    className='text-sm cursor-pointer hover:text-[#F83002] transition-colors duration-200'
                     onClick={() => removeFilter(filter.type, filter.value)}
                   />
                 </div>
@@ -126,25 +128,31 @@ const FilterCard = ({ setSearchParams, filterOptions }) => {
             </div>
             <button
               onClick={clearAllFilters}
-              className='text-red-500 text-sm mt-2'
+              className='text-sm font-semibold text-[#F83002] hover:text-red-700 transition-colors duration-200'
             >
               Clear All Filters
             </button>
           </div>
         )}
         {filterOptions?.map((filter, index) => (
-          <div key={filter.filterType}>
+          <div key={filter.filterType} className='border-b border-gray-200/60 last:border-b-0 pb-3 last:pb-0'>
             <div
-              className='flex items-center justify-between cursor-pointer'
+              className='flex items-center justify-between cursor-pointer py-2 hover:bg-gray-50/50 rounded-lg px-2 transition-colors duration-200'
               onClick={() => toggleExpand(index)}
             >
-              <h3 className='font-semibold'>{filter.filterType}</h3>
-              {expandedIndex === index ? <FiMinus /> : <FiPlus />}
+              <h3 className='font-bold text-gray-800'>{filter.filterType}</h3>
+              <div className={`transition-transform duration-200 ${expandedIndex === index ? 'rotate-180' : ''}`}>
+                {expandedIndex === index ? (
+                  <FiMinus className='text-[#6A38C2]' />
+                ) : (
+                  <FiPlus className='text-gray-600' />
+                )}
+              </div>
             </div>
             {expandedIndex === index && (
-              <div className='mt-1 space-y-1'>
+              <div className='mt-2 space-y-2 pl-2'>
                 {filter?.array?.map((item) => (
-                  <div key={item} className='flex items-center'>
+                  <div key={item} className='flex items-center gap-2 hover:bg-gray-50/50 rounded-lg px-2 py-1.5 transition-colors duration-200'>
                     <input
                       type='checkbox'
                       id={item}
@@ -154,9 +162,9 @@ const FilterCard = ({ setSearchParams, filterOptions }) => {
                       onChange={() =>
                         handleFilterSelection(filter.filterType, item)
                       }
-                      className='mr-1'
+                      className='w-4 h-4 text-[#6A38C2] border-gray-300 rounded focus:ring-[#6A38C2] focus:ring-2 cursor-pointer'
                     />
-                    <label htmlFor={item}>{item}</label>
+                    <label htmlFor={item} className='text-sm text-gray-700 cursor-pointer font-medium'>{item}</label>
                   </div>
                 ))}
               </div>

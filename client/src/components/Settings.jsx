@@ -28,7 +28,13 @@ export default function Settings() {
   }, [page]);
 
   return (
-    <>
+    <div className='min-h-screen bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden'>
+      {/* Background decorations */}
+      <div className='absolute inset-0 -z-10 overflow-hidden'>
+        <div className='absolute top-0 left-1/4 w-96 h-96 bg-[#6A38C2]/5 rounded-full blur-3xl'></div>
+        <div className='absolute bottom-0 right-1/4 w-96 h-96 bg-[#F83002]/5 rounded-full blur-3xl'></div>
+      </div>
+
       <Navbar />
       <ReactHelmet
         title='Setting - Next_Hire'
@@ -36,18 +42,20 @@ export default function Settings() {
         canonicalUrl='http://mysite.com/settings'
       />
       <div className='flex flex-col min-h-screen'>
-        <div className='flex-1 mx-4 pt-20 flex gap-6 max-w-7xl'>
-          <div className='w-[300px] bg-white shadow-md rounded-lg px-4'>
-            <h2 className='text-xl font-semibold mb-4'>Settings</h2>
+        <div className='flex-1 mx-4 pt-24 flex gap-6 max-w-7xl relative z-10'>
+          <div className='w-[300px] bg-white/95 backdrop-blur-sm border-2 border-gray-200/60 shadow-lg rounded-2xl px-4 py-6 sticky top-24 h-fit'>
+            <h2 className='text-2xl font-extrabold mb-6 bg-gradient-to-r from-[#6A38C2] to-[#F83002] bg-clip-text text-transparent'>
+              Settings
+            </h2>
             <div className='flex flex-col gap-2'>
               {tabs?.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition text-left ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 text-left ${
                     activeTab === tab.id
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] text-white shadow-lg transform scale-105"
+                      : "bg-gray-100/80 text-gray-700 hover:bg-gradient-to-r hover:from-[#6A38C2]/10 hover:to-[#F83002]/10 hover:text-[#6A38C2] hover:border hover:border-[#6A38C2]/20"
                   }`}
                 >
                   {tab.icon}
@@ -58,7 +66,7 @@ export default function Settings() {
           </div>
 
           {/* Main Content Area */}
-          <div className='flex-1 bg-white shadow px-6 rounded-lg'>
+          <div className='flex-1 bg-white/95 backdrop-blur-sm border-2 border-gray-200/60 shadow-lg px-6 py-8 rounded-2xl'>
             {activeTab === "settings" && <ProfileTab />}
             {activeTab === "password" && <PasswordTab />}
             {activeTab === "notifications" && <NotificationsTab />}
@@ -69,7 +77,7 @@ export default function Settings() {
         {/* Footer */}
         <Footer />
       </div>
-    </>
+    </div>
   );
 }
 
@@ -150,11 +158,14 @@ function ProfileTab() {
       {loading && <Loader />}
       <div className='flex items-start gap-6'>
         <div className='flex flex-col items-center'>
-          <Avatar className='h-24 w-24'>
-            <AvatarImage src={user?.profile?.profilePhoto?.url} alt='profile' />
-          </Avatar>
-          <label className='cursor-pointer bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 inline-block'>
-            Upload
+          <div className='relative mb-4'>
+            <Avatar className='h-24 w-24 ring-4 ring-[#6A38C2]/20'>
+              <AvatarImage src={user?.profile?.profilePhoto?.url} alt='profile' />
+            </Avatar>
+            <div className='absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-[#6A38C2] to-[#F83002] rounded-full border-2 border-white'></div>
+          </div>
+          <label className='cursor-pointer bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-6 py-2 rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 inline-block'>
+            Upload Photo
             <input
               id='file'
               name='file'
@@ -165,47 +176,47 @@ function ProfileTab() {
           </label>
         </div>
         <div className='flex-1'>
-          <label className='block font-medium mb-1'>Bio</label>
+          <label className='block font-bold mb-2 text-gray-900'>Bio</label>
           <textarea
             name='bio'
             value={input.bio}
             onChange={changeHandler}
             rows='4'
-            className='block w-full rounded border border-gray-300 p-2 resize-none focus:ring focus:ring-blue-500'
+            className='block w-full rounded-xl border-2 border-gray-200/60 p-3 resize-none focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm'
           ></textarea>
         </div>
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         <div>
-          <label className='block font-medium'>Full Name</label>
+          <label className='block font-bold mb-2 text-gray-900'>Full Name</label>
           <input
             name='fullname'
             value={input.fullname}
             onChange={changeHandler}
             type='text'
-            className='mt-1 block w-full rounded border border-gray-300 p-2 focus:ring focus:ring-blue-500'
+            className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm'
           />
         </div>
         <div>
-          <label className='block font-medium'>Email</label>
+          <label className='block font-bold mb-2 text-gray-900'>Email</label>
           <input
             name='email'
             value={input.email}
             onChange={changeHandler}
             type='email'
             disabled
-            className='mt-1 block w-full rounded border border-gray-300 p-2'
+            className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-3 bg-gray-100/80 cursor-not-allowed'
           />
         </div>
         <div>
-          <label className='block font-medium'>Phone</label>
+          <label className='block font-bold mb-2 text-gray-900'>Phone</label>
           <input
             name='phoneNumber'
             value={input.phoneNumber}
             onChange={changeHandler}
             type='tel'
-            className='mt-1 block w-full rounded border border-gray-300 p-2'
+            className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm'
           />
         </div>
       </div>
@@ -213,23 +224,24 @@ function ProfileTab() {
       {user?.role === "student" && (
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           <div>
-            <label className='block font-medium'>Skills</label>
+            <label className='block font-bold mb-2 text-gray-900'>Skills</label>
             <input
               name='skills'
               value={input.skills}
               onChange={changeHandler}
               type='text'
-              className='mt-1 block w-full rounded border border-gray-300 p-2'
+              className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm'
+              placeholder='e.g., React, Node.js, Python'
             />
           </div>
           <div>
-            <label className='block font-medium'>Upload Resume</label>
+            <label className='block font-bold mb-2 text-gray-900'>Upload Resume</label>
             <input
               name='file'
               onChange={fileHandler}
               type='file'
               accept='.pdf,.doc,.docx'
-              className='mt-1 block w-full rounded border border-gray-300 p-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
+              className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-2 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-[#6A38C2] file:to-[#5b30a6] file:text-white hover:file:from-[#5b30a6] hover:file:to-[#4a2580] file:cursor-pointer transition-all duration-300 bg-white/80 backdrop-blur-sm'
             />
           </div>
         </div>
@@ -238,7 +250,7 @@ function ProfileTab() {
       <div>
         <button
           type='submit'
-          className='mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700'
+          className='mt-4 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300'
           disabled={loading}
         >
           {loading ? "Please wait..." : "Save Changes"}
@@ -289,43 +301,47 @@ function PasswordTab() {
   };
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-6'>
       <div>
-        <label className='block font-medium'>Current Password</label>
+        <label className='block font-bold mb-2 text-gray-900'>Current Password</label>
         <input
           type='password'
-          className='mt-1 block w-full rounded border border-gray-300 p-2'
+          className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm'
           value={currentPassword}
           onChange={(e) => {
             setCurrentPassword(e.target.value);
-            if (error) setError(""); // Clear error when user types
+            if (error) setError("");
           }}
         />
       </div>
       <div>
-        <label className='block font-medium'>New Password</label>
+        <label className='block font-bold mb-2 text-gray-900'>New Password</label>
         <input
           type='password'
-          className='mt-1 block w-full rounded border border-gray-300 p-2'
+          className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm'
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
         />
       </div>
       <div>
-        <label className='block font-medium'>Confirm New Password</label>
+        <label className='block font-bold mb-2 text-gray-900'>Confirm New Password</label>
         <input
           type='password'
-          className='mt-1 block w-full rounded border border-gray-300 p-2'
+          className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm'
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
       </div>
 
-      {error && <div className='text-red-500'>{error}</div>}
+      {error && (
+        <div className='bg-red-50/80 backdrop-blur-sm border-2 border-red-200 rounded-xl p-4'>
+          <p className='text-red-700 font-semibold'>{error}</p>
+        </div>
+      )}
 
       <button
         onClick={handlePasswordChange}
-        className='mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700'
+        className='mt-4 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300'
       >
         Update Password
       </button>
@@ -335,20 +351,26 @@ function PasswordTab() {
 
 function NotificationsTab() {
   return (
-    <div className='space-y-4'>
-      <label className='flex items-center gap-2'>
-        <input type='checkbox' className='accent-blue-600' />
-        Email me about new applicants
-      </label>
-      <label className='flex items-center gap-2'>
-        <input type='checkbox' className='accent-blue-600' />
-        Notify me of interview reminders
-      </label>
-      <label className='flex items-center gap-2'>
-        <input type='checkbox' className='accent-blue-600' />
-        Job recommendations
-      </label>
-      <button className='mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700'>
+    <div className='space-y-6'>
+      <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
+        <label className='flex items-center gap-3 cursor-pointer hover:bg-gray-100/50 rounded-lg p-3 transition-colors duration-200'>
+          <input type='checkbox' className='w-5 h-5 text-[#6A38C2] border-gray-300 rounded focus:ring-[#6A38C2] focus:ring-2 cursor-pointer' />
+          <span className='font-semibold text-gray-900'>Email me about new applicants</span>
+        </label>
+      </div>
+      <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
+        <label className='flex items-center gap-3 cursor-pointer hover:bg-gray-100/50 rounded-lg p-3 transition-colors duration-200'>
+          <input type='checkbox' className='w-5 h-5 text-[#6A38C2] border-gray-300 rounded focus:ring-[#6A38C2] focus:ring-2 cursor-pointer' />
+          <span className='font-semibold text-gray-900'>Notify me of interview reminders</span>
+        </label>
+      </div>
+      <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
+        <label className='flex items-center gap-3 cursor-pointer hover:bg-gray-100/50 rounded-lg p-3 transition-colors duration-200'>
+          <input type='checkbox' className='w-5 h-5 text-[#6A38C2] border-gray-300 rounded focus:ring-[#6A38C2] focus:ring-2 cursor-pointer' />
+          <span className='font-semibold text-gray-900'>Job recommendations</span>
+        </label>
+      </div>
+      <button className='mt-4 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300'>
         Save Preferences
       </button>
     </div>
@@ -357,21 +379,25 @@ function NotificationsTab() {
 
 function PrivacyTab() {
   return (
-    <div className='space-y-4'>
-      <label className='flex items-center gap-2'>
-        <input type='checkbox' className='accent-blue-600' />
-        Make my profile public
-      </label>
-      <label className='flex items-center gap-2'>
-        <input type='checkbox' className='accent-blue-600' />
-        Allow resume downloads
-      </label>
-      <div className='mt-6 border-t pt-4'>
-        <button className='text-red-600 hover:underline'>
+    <div className='space-y-6'>
+      <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
+        <label className='flex items-center gap-3 cursor-pointer hover:bg-gray-100/50 rounded-lg p-3 transition-colors duration-200'>
+          <input type='checkbox' className='w-5 h-5 text-[#6A38C2] border-gray-300 rounded focus:ring-[#6A38C2] focus:ring-2 cursor-pointer' />
+          <span className='font-semibold text-gray-900'>Make my profile public</span>
+        </label>
+      </div>
+      <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
+        <label className='flex items-center gap-3 cursor-pointer hover:bg-gray-100/50 rounded-lg p-3 transition-colors duration-200'>
+          <input type='checkbox' className='w-5 h-5 text-[#6A38C2] border-gray-300 rounded focus:ring-[#6A38C2] focus:ring-2 cursor-pointer' />
+          <span className='font-semibold text-gray-900'>Allow resume downloads</span>
+        </label>
+      </div>
+      <div className='mt-8 border-t-2 border-gray-200 pt-6 space-y-3'>
+        <button className='text-red-600 hover:text-red-700 font-semibold px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200'>
           Deactivate Account
         </button>
         <br />
-        <button className='text-red-600 hover:underline mt-2'>
+        <button className='text-red-600 hover:text-red-700 font-semibold px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200'>
           Delete My Account
         </button>
       </div>

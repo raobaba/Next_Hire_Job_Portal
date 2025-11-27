@@ -2,7 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const LatestJobCards = ({ job }) => {
-  console.log("job",job)
   const navigate = useNavigate();
   return (
     <div

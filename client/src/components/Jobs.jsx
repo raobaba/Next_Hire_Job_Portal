@@ -199,15 +199,21 @@ const Jobs = () => {
   }, []);
 
   return (
-    <div>
+    <div className='min-h-screen bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden'>
+      {/* Background decorations */}
+      <div className='absolute inset-0 -z-10 overflow-hidden'>
+        <div className='absolute top-0 left-1/4 w-96 h-96 bg-[#6A38C2]/5 rounded-full blur-3xl'></div>
+        <div className='absolute bottom-0 right-1/4 w-96 h-96 bg-[#F83002]/5 rounded-full blur-3xl'></div>
+      </div>
+
       <Navbar />
       <ReactHelmet
         title='Job Openings - Next_Hire'
         description='Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire.'
         canonicalUrl='http://mysite.com/job'
       />
-      <div className='max-w-7xl mt-20 mx-auto px-4'>
-        <div className='flex flex-col md:flex-row gap-5'>
+      <div className='max-w-7xl mt-24 mx-auto px-4 py-8 relative z-10'>
+        <div className='flex flex-col md:flex-row gap-6'>
           {currentCategory !== "searchedBased" ? (
             <div className='w-full md:w-1/4 lg:w-1/5'>
               <FilterCard
@@ -222,15 +228,14 @@ const Jobs = () => {
             className='flex-1 h-[85vh] overflow-y-auto pb-5'
             ref={observerRef}
           >
-            <div className='flex flex-col sm:flex-row items-center justify-between my-1 sm:space-x-4 space-y-3 sm:space-y-0'>
+            <div className='flex flex-col sm:flex-row items-center justify-between mb-6 gap-4'>
               <button
                 onClick={() => handleCategoryChange("all")}
-                className={`px-4 py-2 text-sm md:text-lg lg:text-xl font-bold rounded-md transition duration-300 border 
-      ${
-        currentCategory === "all"
-          ? "bg-blue-100 text-blue-600 border-blue-600"
-          : "text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-blue-500"
-      }`}
+                className={`px-6 py-3 text-sm md:text-base font-bold rounded-xl transition-all duration-300 border-2 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                  currentCategory === "all"
+                    ? "bg-gradient-to-r from-[#6A38C2]/10 to-[#F83002]/10 text-[#6A38C2] border-[#6A38C2]"
+                    : "text-gray-800 border-gray-300 hover:border-[#6A38C2] hover:bg-gray-50"
+                }`}
               >
                 All Jobs ({allJobs?.length || 0})
               </button>
@@ -238,37 +243,37 @@ const Jobs = () => {
               {user?.role !== "recruiter" && (
                 <button
                   onClick={() => handleCategoryChange("recommended")}
-                  className={`px-4 py-2 text-sm md:text-lg lg:text-xl font-bold rounded-md transition duration-300 border 
-        ${
-          currentCategory === "recommended"
-            ? "bg-blue-100 text-blue-600 border-blue-600"
-            : "text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-blue-500"
-        }`}
+                  className={`px-6 py-3 text-sm md:text-base font-bold rounded-xl transition-all duration-300 border-2 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                    currentCategory === "recommended"
+                      ? "bg-gradient-to-r from-[#6A38C2]/10 to-[#F83002]/10 text-[#6A38C2] border-[#6A38C2]"
+                      : "text-gray-800 border-gray-300 hover:border-[#6A38C2] hover:bg-gray-50"
+                  }`}
                 >
                   Recommended ({recommendedJobs?.length || 0})
                 </button>
               )}
             </div>
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
               {filterJobs?.length > 0 ? (
                 filterJobs?.map((job) => (
                   <motion.div
                     key={job._id}
-                    initial={{ opacity: 0, x: 100 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -100 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
                     <Job job={job} />
                   </motion.div>
                 ))
               ) : (
-                <div className='col-span-full text-center py-5'>
-                  <span>
-                    No jobs found matching the criteria or update the profile to
-                    get recommendation.
-                  </span>
+                <div className='col-span-full text-center py-12'>
+                  <div className='bg-white/80 backdrop-blur-sm rounded-2xl p-8 border-2 border-gray-200/60 shadow-lg max-w-md mx-auto'>
+                    <p className='text-gray-600 text-lg'>
+                      No jobs found matching the criteria or update the profile to get recommendation.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
