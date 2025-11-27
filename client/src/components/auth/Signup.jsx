@@ -7,10 +7,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaCircleUser, FaGoogle } from "react-icons/fa6";
-import ReactHelmet from "@/components/shared/ReactHelmet";
+import ReactHelmet from "@/components/common/ReactHelmet";
 import JobSearch from "@/assets/job_search.png";
-import RegisterNavbar from "../shared/RegiserNavbar";
-import Loader from "../shared/Loader";
+import RegisterNavbar from "../layout/RegiserNavbar";
+import Loader from "../common/Loader";
 import { registerUser } from "@/redux/slices/user.slice";
 
 const Signup = () => {

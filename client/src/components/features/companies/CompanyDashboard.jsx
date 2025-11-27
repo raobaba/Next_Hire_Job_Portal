@@ -2,9 +2,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
 import { useDispatch } from "react-redux";
 import { getCompanyById, getJobsByCompany } from "@/redux/slices/company.slice";
-import Navbar from "./shared/Navbar";
-import Loader from "./shared/Loader";
-import { Button } from "./ui/button";
+import Navbar from "../../layout/Navbar";
+import Loader from "../../common/Loader";
+import { Button } from "../../ui/button";
 import { toast } from "react-toastify";
 
 const CompanyDashboard = () => {

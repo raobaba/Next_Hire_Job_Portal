@@ -5,12 +5,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+} from "../../ui/dialog";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
+import { Button } from "../../ui/button";
 import { X } from "lucide-react";
-import Loader from "./shared/Loader";
+import Loader from "../../common/Loader";
 import { useDispatch } from "react-redux";
 import { updateUserProfile } from "@/redux/slices/user.slice";
 import { toast } from "react-toastify";

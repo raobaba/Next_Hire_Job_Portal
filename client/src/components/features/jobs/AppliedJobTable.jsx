@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getAppliedJobs } from "@/redux/slices/application.slice";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Badge } from "./ui/badge";
+import { Badge } from "../../ui/badge";
 
 const AppliedJobTable = () => {
   const dispatch = useDispatch();

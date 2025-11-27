@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../shared/Navbar";
+import Navbar from "../layout/Navbar";
 import ApplicantsTable from "./ApplicantsTable";
 import { useParams } from "react-router-dom";
-import ReactHelmet from "../shared/ReactHelmet";
+import ReactHelmet from "../common/ReactHelmet";
 import { getApplicants } from "@/redux/slices/application.slice";
 import { useDispatch } from "react-redux";
-import Loader from "../shared/Loader";
+import Loader from "../common/Loader";
 
 const Applicants = () => {
   const { id } = useParams();

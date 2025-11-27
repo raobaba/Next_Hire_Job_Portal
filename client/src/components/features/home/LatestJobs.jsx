@@ -3,8 +3,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import LatestJobCards from "./LatestJobCards";
 import { getAllJobs } from "@/redux/slices/job.slice";
-import Loader from "./shared/Loader";
-import { Button } from "./ui/button";
+import Loader from "../../common/Loader";
+import { Button } from "../../ui/button";
 
 const LatestJobs = () => {
   const [jobs, setJobs] = useState([]);

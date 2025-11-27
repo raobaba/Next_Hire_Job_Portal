@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import Navbar from "../shared/Navbar";
+import Navbar from "../layout/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import ReactHelmet from "../shared/ReactHelmet";
+import ReactHelmet from "../common/ReactHelmet";
 import { useDispatch } from "react-redux";
-import Loader from "../shared/Loader";
+import Loader from "../common/Loader";
 import { registerCompany } from "@/redux/slices/company.slice";
 
 const CompanyCreate = () => {

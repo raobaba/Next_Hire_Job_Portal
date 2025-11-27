@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import Navbar from "./shared/Navbar";
+import Navbar from "../../layout/Navbar";
 import FilterCard from "./FilterCard";
 import Job from "./Job";
 import { motion } from "framer-motion";
-import ReactHelmet from "./shared/ReactHelmet";
+import ReactHelmet from "../../common/ReactHelmet";
 import { getAllJobs, getFitlerOptions } from "@/redux/slices/job.slice";
 import { getRecommendedJobs } from "@/redux/slices/user.slice";
 import { useDispatch, useSelector } from "react-redux";
-import Loader from "./shared/Loader";
+import Loader from "../../common/Loader";
 
 const Jobs = () => {
   const dispatch = useDispatch();

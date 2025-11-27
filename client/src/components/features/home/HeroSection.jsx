@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button } from "./ui/button";
-import { SearchSkeleton } from "./ui/skeleton";
+import { Button } from "../../ui/button";
+import { SearchSkeleton } from "../../ui/skeleton";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";

@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { Badge } from "../../ui/badge";
+import { Button } from "../../ui/button";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import ReactHelmet from "./shared/ReactHelmet";
+import ReactHelmet from "../../common/ReactHelmet";
 import { useNavigate } from "react-router-dom";
 import { getJobById, getSimilarJobs } from "@/redux/slices/job.slice";
 import { applyJob } from "@/redux/slices/application.slice";
 import { useDispatch, useSelector } from "react-redux";
-import Loader from "./shared/Loader";
+import Loader from "../../common/Loader";
 import { getToken } from "@/utils/constant";
-import Navbar from "./shared/Navbar";
+import Navbar from "../../layout/Navbar";
 
 const JobDescription = () => {
   const dispatch = useDispatch();

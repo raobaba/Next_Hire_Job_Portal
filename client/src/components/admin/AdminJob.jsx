@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../shared/Navbar";
+import Navbar from "../layout/Navbar";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminJobsTable from "./AdminJobsTable";
-import ReactHelmet from "../shared/ReactHelmet";
-import Loader from "../shared/Loader";
+import ReactHelmet from "../common/ReactHelmet";
+import Loader from "../common/Loader";
 import { useDispatch } from "react-redux";
 import { getJobsByCompany } from "@/redux/slices/company.slice";
 import { deleteJob } from "@/redux/slices/job.slice";

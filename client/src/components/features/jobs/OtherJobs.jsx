@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Loader from "./shared/Loader";
-import Navbar from "./shared/Navbar";
+import Loader from "../../common/Loader";
+import Navbar from "../../layout/Navbar";
 
 const OtherJobs = () => {
   const [jobs, setJobs] = useState([]);

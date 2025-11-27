@@ -5,9 +5,9 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "./ui/carousel";
-import { Button } from "./ui/button";
-import { CarouselSkeleton } from "./ui/skeleton";
+} from "../../ui/carousel";
+import { Button } from "../../ui/button";
+import { CarouselSkeleton } from "../../ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { getCarouselData } from "@/redux/slices/job.slice";

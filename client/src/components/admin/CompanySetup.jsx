@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../shared/Navbar";
+import Navbar from "../layout/Navbar";
 import { Button } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Label } from "../ui/label";
@@ -7,8 +7,8 @@ import { Input } from "../ui/input";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import Loader from "../shared/Loader";
-import ReactHelmet from "../shared/ReactHelmet";
+import Loader from "../common/Loader";
+import ReactHelmet from "../common/ReactHelmet";
 import { getCompanyById, updateCompany } from "@/redux/slices/company.slice";
 
 const CompanySetup = () => {

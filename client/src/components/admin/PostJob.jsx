@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../shared/Navbar";
+import Navbar from "../layout/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -13,13 +13,13 @@ import {
 } from "../ui/select";
 
 import { Loader2 } from "lucide-react";
-import ReactHelmet from "../shared/ReactHelmet";
+import ReactHelmet from "../common/ReactHelmet";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { getCompanies } from "@/redux/slices/company.slice";
 import { postJob } from "@/redux/slices/job.slice";
-import Loader from "../shared/Loader";
+import Loader from "../common/Loader";
 
 const PostJob = () => {
   const dispatch = useDispatch();

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { FaUser, FaLock, FaBell, FaShieldAlt } from "react-icons/fa";
-import Navbar from "./shared/Navbar";
-import Footer from "./shared/Footer";
+import Navbar from "../../layout/Navbar";
+import Footer from "../../layout/Footer";
 import { useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { changePassword, updateUserProfile } from "@/redux/slices/user.slice";
-import { Avatar, AvatarImage } from "./ui/avatar";
-import Loader from "./shared/Loader";
+import { Avatar, AvatarImage } from "../../ui/avatar";
+import Loader from "../../common/Loader";
 import { toast } from "react-toastify";
-import ReactHelmet from "./shared/ReactHelmet";
+import ReactHelmet from "../../common/ReactHelmet";
 
 const tabs = [
   { id: "settings", label: "Profile Info", icon: <FaUser /> },

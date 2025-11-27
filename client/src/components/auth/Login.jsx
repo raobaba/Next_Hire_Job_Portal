@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import Navbar from "../shared/Navbar";
+import Navbar from "../layout/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import ReactHelmet from "@/components/shared/ReactHelmet";
-import Loader from "../shared/Loader";
+import ReactHelmet from "@/components/common/ReactHelmet";
+import Loader from "../common/Loader";
 import { loginUser } from "@/redux/slices/user.slice";
 
 // Email validation regex pattern

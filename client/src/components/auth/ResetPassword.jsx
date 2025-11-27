@@ -4,8 +4,8 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { toast } from "react-toastify";
-import RegisterNavbar from "../shared/RegiserNavbar";
-import ReactHelmet from "../shared/ReactHelmet";
+import RegisterNavbar from "../layout/RegiserNavbar";
+import ReactHelmet from "../common/ReactHelmet";
 import {
   forgetPassPassword,
   resetPassPassword,

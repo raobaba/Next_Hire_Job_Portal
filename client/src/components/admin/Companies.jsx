@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../shared/Navbar";
+import Navbar from "../layout/Navbar";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import CompaniesTable from "./CompaniesTable";
 import { useNavigate } from "react-router-dom";
-import ReactHelmet from "../shared/ReactHelmet";
+import ReactHelmet from "../common/ReactHelmet";
 import { getCompanies } from "@/redux/slices/company.slice";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
-import Loader from "../shared/Loader";
+import Loader from "../common/Loader";
 
 const Companies = () => {
   const navigate = useNavigate();

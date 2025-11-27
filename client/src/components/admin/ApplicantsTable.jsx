@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { updateApplicationStatus } from "@/redux/slices/application.slice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import Loader from "../shared/Loader";
+import Loader from "../common/Loader";
 
 const ApplicantsTable = ({ applicants }) => {
   const [isLoading, setIsLoading] = useState(false);
