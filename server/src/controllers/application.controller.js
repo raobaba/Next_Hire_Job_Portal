@@ -13,6 +13,7 @@ const applyJob = asyncErrorHandler(async (req, res) => {
   try {
     const userId = req.user.id;
     const jobId = req.params.jobId;
+    const { templateId, coverLetter } = req.body || {};
     if (req.user.role !== "student") {
       const error = new ErrorHandler(
         "Only students are allowed to apply. Please update your account role to Student to proceed.",
@@ -39,9 +40,30 @@ const applyJob = asyncErrorHandler(async (req, res) => {
     if (!job) {
       return new ErrorHandler("Job not found", 404).sendError(res);
     }
+    let templateData = {};
+    if (templateId) {
+      const user = req.user;
+      if (Array.isArray(user.quickTemplates)) {
+        const template = user.quickTemplates.id(templateId);
+        if (template) {
+          templateData.coverLetter = template.coverLetter;
+          templateData.resumeId = template.resumeId;
+        }
+      }
+    }
+
     const newApplication = await Application.create({
       job: jobId,
       applicant: userId,
+      coverLetter: templateData.coverLetter || coverLetter || "",
+      resumeId: templateData.resumeId || undefined,
+      statusHistory: [
+        {
+          status: "pending",
+          note: "Application submitted",
+          changedBy: userId,
+        },
+      ],
     });
 
     job.applications.push(newApplication._id);
@@ -151,7 +173,7 @@ const getApplicants = asyncErrorHandler(async (req, res) => {
 
 const updateStatus = asyncErrorHandler(async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, note } = req.body;
     const applicationId = req.params.applicationId;
     if (!status) {
       return new ErrorHandler("Status is required", 400).sendError(res);
@@ -167,7 +189,18 @@ const updateStatus = asyncErrorHandler(async (req, res) => {
     }
 
     const previousStatus = application.status;
-    application.status = status.toLowerCase();
+    const nextStatus = status.toLowerCase();
+    if (previousStatus === nextStatus) {
+      return new ErrorHandler("Application is already in this status", 400).sendError(res);
+    }
+
+    application.status = nextStatus;
+    application.statusHistory.push({
+      status: nextStatus,
+      note,
+      changedBy: req.user.id,
+      changedAt: new Date(),
+    });
     await application.save();
 
     // Optimize: Fetch job first, then company
@@ -212,4 +245,53 @@ const updateStatus = asyncErrorHandler(async (req, res) => {
   }
 });
 
-module.exports = { applyJob, getAppliedJobs, getApplicants, updateStatus };
+const getApplicationTimeline = asyncErrorHandler(async (req, res) => {
+  const { applicationId } = req.params;
+
+  if (!applicationId) {
+    return new ErrorHandler("Application ID is required", 400).sendError(res);
+  }
+
+  const application = await Application.findById(applicationId)
+    .select("job applicant status statusHistory createdAt updatedAt")
+    .populate({
+      path: "job",
+      select: "title company",
+      populate: {
+        path: "company",
+        select: "companyName",
+      },
+    })
+    .populate({
+      path: "statusHistory.changedBy",
+      select: "fullname role",
+    });
+
+  if (!application) {
+    return new ErrorHandler("Application not found", 404).sendError(res);
+  }
+
+  // Only applicant or recruiter who owns the company’s jobs should see timeline
+  const userId = req.user.id.toString();
+  const isApplicant = application.applicant.toString() === userId;
+
+  if (!isApplicant && req.user.role !== "recruiter") {
+    return new ErrorHandler("Not authorized to view this timeline", 403).sendError(res);
+  }
+
+  return res.status(200).json({
+    success: true,
+    status: 200,
+    application: {
+      id: application._id,
+      jobTitle: application.job?.title,
+      companyName: application.job?.company?.companyName,
+      currentStatus: application.status,
+      createdAt: application.createdAt,
+      updatedAt: application.updatedAt,
+    },
+    timeline: application.statusHistory,
+  });
+});
+
+module.exports = { applyJob, getAppliedJobs, getApplicants, updateStatus, getApplicationTimeline };

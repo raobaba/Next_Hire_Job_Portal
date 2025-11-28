@@ -13,6 +13,17 @@ const {
   changePassword,
   forgetPassword,
   resetPassword,
+  getJobAlerts,
+  updateJobAlerts,
+  getSavedSearches,
+  saveSavedSearch,
+  deleteSavedSearch,
+  getSkillGapInsights,
+  getProfileCompletion,
+  getQuickTemplates,
+  createQuickTemplate,
+  updateQuickTemplate,
+  deleteQuickTemplate,
 } = require("../controllers/user.controller.js");
 const isAuthenticated = require("../middlewares/auth.js");
 
@@ -25,6 +36,27 @@ userRouter.route("/change-password").post(isAuthenticated, changePassword);
 userRouter.route("/forget-password").post(forgetPassword);
 userRouter.route("/reset-password/:token").post(resetPassword);
 userRouter.route("/profile/update").post(isAuthenticated, updateProfile);
+userRouter
+  .route("/job-alerts")
+  .get(isAuthenticated, getJobAlerts)
+  .post(isAuthenticated, updateJobAlerts);
+userRouter
+  .route("/saved-searches")
+  .get(isAuthenticated, getSavedSearches)
+  .post(isAuthenticated, saveSavedSearch);
+userRouter
+  .route("/saved-searches/:searchId")
+  .delete(isAuthenticated, deleteSavedSearch);
+userRouter.route("/profile/skill-gap").get(isAuthenticated, getSkillGapInsights);
+userRouter.route("/profile/completion").get(isAuthenticated, getProfileCompletion);
+userRouter
+  .route("/templates")
+  .get(isAuthenticated, getQuickTemplates)
+  .post(isAuthenticated, createQuickTemplate);
+userRouter
+  .route("/templates/:templateId")
+  .put(isAuthenticated, updateQuickTemplate)
+  .delete(isAuthenticated, deleteQuickTemplate);
 userRouter.route("/search-history").get(isAuthenticated, getUserSearchHistory);
 userRouter
   .route("/search-history/clear")

@@ -69,9 +69,110 @@ const userSchema = new mongoose.Schema(
         ref: "Job",
       },
     ],
+    jobAlerts: {
+      enabled: {
+        type: Boolean,
+        default: false,
+      },
+      frequency: {
+        type: String,
+        enum: ["daily", "weekly"],
+        default: "daily",
+      },
+      lastSentAt: {
+        type: Date,
+      },
+      savedFilters: [
+        {
+          name: { type: String, trim: true },
+          keywords: [{ type: String, trim: true }],
+          location: { type: String, trim: true },
+          jobType: { type: String, trim: true },
+          minSalary: { type: Number },
+          maxSalary: { type: Number },
+          experienceLevel: { type: Number },
+          companyIds: [
+            {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "Company",
+            },
+          ],
+          limit: {
+            type: Number,
+            default: 5,
+            min: 1,
+            max: 20,
+          },
+        },
+      ],
+    },
     searchHistory: [
       {
         type: String,
+      },
+    ],
+    savedSearches: [
+      {
+        name: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        keywords: [{ type: String, trim: true }],
+        location: { type: String, trim: true },
+        jobType: { type: String, trim: true },
+        minSalary: { type: Number },
+        maxSalary: { type: Number },
+        experienceLevel: { type: Number },
+        companyIds: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Company",
+          },
+        ],
+        limit: {
+          type: Number,
+          default: 10,
+          min: 1,
+          max: 50,
+        },
+        alertEnabled: {
+          type: Boolean,
+          default: false,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+        updatedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    quickTemplates: [
+      {
+        title: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        coverLetter: {
+          type: String,
+          trim: true,
+        },
+        resumeId: {
+          type: String,
+          trim: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+        updatedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
     createdAt: {

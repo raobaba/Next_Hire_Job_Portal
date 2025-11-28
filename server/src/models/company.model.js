@@ -31,6 +31,20 @@ const companySchema = new mongoose.Schema(
       required: true,
       index: true, // Index for user's companies queries
     },
+    stats: {
+      averageResponseDays: { type: Number, default: null },
+      decisionsCount: { type: Number, default: 0 },
+      applicationsCount: { type: Number, default: 0 },
+      hiresCount: { type: Number, default: 0 },
+      hiresLast90Days: { type: Number, default: 0 },
+      lastCalculatedAt: { type: Date },
+    },
+    badges: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
   },
   { timestamps: true }
 );

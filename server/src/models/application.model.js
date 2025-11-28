@@ -20,6 +20,35 @@ const applicationSchema = new mongoose.Schema(
       default: "pending",
       index: true, // Index for status filtering
     },
+    statusHistory: [
+      {
+        status: {
+          type: String,
+          enum: ["pending", "accepted", "rejected"],
+          required: true,
+        },
+        note: {
+          type: String,
+          trim: true,
+        },
+        changedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        changedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    coverLetter: {
+      type: String,
+      trim: true,
+    },
+    resumeId: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 );
