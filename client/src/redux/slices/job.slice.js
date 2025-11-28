@@ -8,6 +8,8 @@ import {
   fetchSimilarJobApi,
   filterOptionData,
   carouselData,
+  getHighlightsApi,
+  getPrepResourcesApi,
 } from "../actions/job.action";
 
 export const postJob = createAsyncThunk(
@@ -122,6 +124,30 @@ export const getCarouselData = createAsyncThunk(
   }
 );
 
+export const getHighlights = createAsyncThunk(
+  "job/getHighlights",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getHighlightsApi();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to fetch highlights");
+    }
+  }
+);
+
+export const getPrepResources = createAsyncThunk(
+  "job/getPrepResources",
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await getPrepResourcesApi(params);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to fetch prep resources");
+    }
+  }
+);
+
 // Initial state
 const initialState = {
   jobs: [],
@@ -133,6 +159,7 @@ const initialState = {
   success: false,
   filterOption: [],
   carousel: [],
+  highlights: [],
 };
 
 // Job slice
@@ -205,6 +232,19 @@ const jobSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      // Get highlights
+      .addCase(getHighlights.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getHighlights.fulfilled, (state, action) => {
+        state.loading = false;
+        state.highlights = action.payload.highlights || [];
+      })
+      .addCase(getHighlights.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       // Get admin jobs cases
       .addCase(getAdminJobs.pending, (state) => {
         state.loading = true;
@@ -242,6 +282,19 @@ const jobSlice = createSlice({
         state.similarJobs = action.payload.similarJobs; // Set similar jobs data
       })
       .addCase(getSimilarJobs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Get prep resources
+      .addCase(getPrepResources.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPrepResources.fulfilled, (state, action) => {
+        state.loading = false;
+        state.prepResources = action.payload.resources || [];
+      })
+      .addCase(getPrepResources.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

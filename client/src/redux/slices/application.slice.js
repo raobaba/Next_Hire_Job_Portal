@@ -4,14 +4,15 @@ import {
   getAppliedJobsApi,
   getApplicantsApi,
   updateApplicationStatusApi,
+  getApplicationTimelineApi,
 } from "../actions/application.action";
 
 // Thunk to apply for a job
 export const applyJob = createAsyncThunk(
   "application/apply",
-  async (jobId, { rejectWithValue }) => {
+  async ({ jobId, data = {} }, { rejectWithValue }) => {
     try {
-      const response = await applyJobApi(jobId);
+      const response = await applyJobApi(jobId, data);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -66,10 +67,26 @@ export const updateApplicationStatus = createAsyncThunk(
   }
 );
 
+// Thunk to get application timeline
+export const getApplicationTimeline = createAsyncThunk(
+  "application/getTimeline",
+  async (applicationId, { rejectWithValue }) => {
+    try {
+      const response = await getApplicationTimelineApi(applicationId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data || "Failed to fetch application timeline"
+      );
+    }
+  }
+);
+
 // Initial state for application
 const initialState = {
   applications: [],
   applicants: [],
+  timeline: null,
   loading: false,
   error: null,
   success: null,
@@ -141,6 +158,19 @@ const applicationSlice = createSlice({
         state.message = action.payload.message;
       })
       .addCase(updateApplicationStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Get application timeline
+      .addCase(getApplicationTimeline.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getApplicationTimeline.fulfilled, (state, action) => {
+        state.loading = false;
+        state.timeline = action.payload;
+      })
+      .addCase(getApplicationTimeline.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

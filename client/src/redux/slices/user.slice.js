@@ -13,6 +13,17 @@ import {
   changeCurrentPassword,
   resetPassword,
   forgetPassword,
+  getJobAlertsApi,
+  updateJobAlertsApi,
+  getProfileCompletionApi,
+  getQuickTemplatesApi,
+  createQuickTemplateApi,
+  updateQuickTemplateApi,
+  deleteQuickTemplateApi,
+  getSavedSearchesApi,
+  saveSavedSearchApi,
+  deleteSavedSearchApi,
+  getSkillGapInsightsApi,
 } from "../actions/user.action";
 
 // Initial state for user
@@ -22,6 +33,11 @@ const initialState = {
   searchHistory: [],
   recommended: [],
   searchResult: [],
+  jobAlerts: null,
+  profileCompletion: null,
+  quickTemplates: [],
+  savedSearches: [],
+  skillGapInsights: null,
   loading: false,
   error: null,
   message: null,
@@ -204,6 +220,138 @@ export const resetPassPassword = createAsyncThunk(
       return rejectWithValue(
         error?.response?.data || "Failed to email verification"
       );
+    }
+  }
+);
+
+export const getJobAlerts = createAsyncThunk(
+  "user/getJobAlerts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getJobAlertsApi();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to fetch job alerts");
+    }
+  }
+);
+
+export const updateJobAlerts = createAsyncThunk(
+  "user/updateJobAlerts",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await updateJobAlertsApi(data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to update job alerts");
+    }
+  }
+);
+
+export const getProfileCompletion = createAsyncThunk(
+  "user/getProfileCompletion",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getProfileCompletionApi();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to fetch profile completion");
+    }
+  }
+);
+
+export const getQuickTemplates = createAsyncThunk(
+  "user/getQuickTemplates",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getQuickTemplatesApi();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to fetch templates");
+    }
+  }
+);
+
+export const createQuickTemplate = createAsyncThunk(
+  "user/createQuickTemplate",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await createQuickTemplateApi(data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to create template");
+    }
+  }
+);
+
+export const updateQuickTemplate = createAsyncThunk(
+  "user/updateQuickTemplate",
+  async ({ templateId, data }, { rejectWithValue }) => {
+    try {
+      const response = await updateQuickTemplateApi(templateId, data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to update template");
+    }
+  }
+);
+
+export const deleteQuickTemplate = createAsyncThunk(
+  "user/deleteQuickTemplate",
+  async (templateId, { rejectWithValue }) => {
+    try {
+      const response = await deleteQuickTemplateApi(templateId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to delete template");
+    }
+  }
+);
+
+export const getSavedSearches = createAsyncThunk(
+  "user/getSavedSearches",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getSavedSearchesApi();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to fetch saved searches");
+    }
+  }
+);
+
+export const saveSavedSearch = createAsyncThunk(
+  "user/saveSavedSearch",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await saveSavedSearchApi(data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to save search");
+    }
+  }
+);
+
+export const deleteSavedSearch = createAsyncThunk(
+  "user/deleteSavedSearch",
+  async (searchId, { rejectWithValue }) => {
+    try {
+      const response = await deleteSavedSearchApi(searchId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to delete saved search");
+    }
+  }
+);
+
+export const getSkillGapInsights = createAsyncThunk(
+  "user/getSkillGapInsights",
+  async (jobId, { rejectWithValue }) => {
+    try {
+      const response = await getSkillGapInsightsApi(jobId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to fetch skill gap insights");
     }
   }
 );
@@ -404,6 +552,74 @@ const userSlice = createSlice({
       .addCase(resetPassPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // Job alerts
+      .addCase(getJobAlerts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getJobAlerts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.jobAlerts = action.payload.jobAlerts;
+      })
+      .addCase(getJobAlerts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateJobAlerts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateJobAlerts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.jobAlerts = action.payload.jobAlerts;
+      })
+      .addCase(updateJobAlerts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Profile completion
+      .addCase(getProfileCompletion.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getProfileCompletion.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profileCompletion = action.payload;
+      })
+      .addCase(getProfileCompletion.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Quick templates
+      .addCase(getQuickTemplates.fulfilled, (state, action) => {
+        state.quickTemplates = action.payload.templates || [];
+      })
+      .addCase(createQuickTemplate.fulfilled, (state, action) => {
+        state.quickTemplates = action.payload.templates || [];
+      })
+      .addCase(updateQuickTemplate.fulfilled, (state, action) => {
+        state.quickTemplates = action.payload.templates || [];
+      })
+      .addCase(deleteQuickTemplate.fulfilled, (state, action) => {
+        state.quickTemplates = action.payload.templates || [];
+      })
+      // Saved searches
+      .addCase(getSavedSearches.fulfilled, (state, action) => {
+        state.savedSearches = action.payload.savedSearches || [];
+      })
+      .addCase(saveSavedSearch.fulfilled, (state, action) => {
+        state.savedSearches = action.payload.savedSearches || [];
+      })
+      .addCase(deleteSavedSearch.fulfilled, (state, action) => {
+        state.savedSearches = action.payload.savedSearches || [];
+      })
+      // Skill gap insights
+      .addCase(getSkillGapInsights.fulfilled, (state, action) => {
+        state.skillGapInsights = action.payload;
+      })
+      .addCase(getSkillGapInsights.rejected, (state) => {
+        state.skillGapInsights = null;
       });
   },
 });

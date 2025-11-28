@@ -43,3 +43,15 @@ export const carouselData = async () => {
   const url = `api/v1/job/carousel`;
   return await fetchFromApiServer("GET", url);
 };
+
+// Prep resources
+export const getPrepResourcesApi = async (params = {}) => {
+  const url = `api/v1/prep-resources`;
+  return await fetchFromApiServer("GET", url, {}, { params });
+};
+
+// Highlights for landing page
+export const getHighlightsApi = async () => {
+  const url = `api/v1/highlights`;
+  return await fetchFromApiServer("GET", url);
+};

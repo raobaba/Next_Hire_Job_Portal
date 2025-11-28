@@ -30,8 +30,12 @@ const Job = ({ job }) => {
   const applyJobHandler = () => {
     const token = getToken();
     if (!token) return navigate("/login");
+    if (!job?._id) {
+      toast.error("Job ID is missing");
+      return;
+    }
     setHasApplied(true);
-    dispatch(applyJob(job?._id))
+    dispatch(applyJob({ jobId: job._id }))
       .then((res) => {
         if (res?.payload?.status === 200) {
           toast.success(res?.payload?.message);

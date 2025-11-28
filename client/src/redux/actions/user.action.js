@@ -71,3 +71,63 @@ export const emailVerification = async (params) => {
   const url = `api/v1/user/verify-email?token=${token}`;
   return await fetchFromApiServer("POST", url);
 };
+
+// Job alerts
+export const getJobAlertsApi = async () => {
+  const url = `api/v1/user/job-alerts`;
+  return await fetchFromApiServer("GET", url);
+};
+
+export const updateJobAlertsApi = async (data) => {
+  const url = `api/v1/user/job-alerts`;
+  return await fetchFromApiServer("POST", url, data);
+};
+
+// Profile completion
+export const getProfileCompletionApi = async () => {
+  const url = `api/v1/user/profile/completion`;
+  return await fetchFromApiServer("GET", url);
+};
+
+// Quick apply templates
+export const getQuickTemplatesApi = async () => {
+  const url = `api/v1/user/templates`;
+  return await fetchFromApiServer("GET", url);
+};
+
+export const createQuickTemplateApi = async (data) => {
+  const url = `api/v1/user/templates`;
+  return await fetchFromApiServer("POST", url, data);
+};
+
+export const updateQuickTemplateApi = async (templateId, data) => {
+  const url = `api/v1/user/templates/${templateId}`;
+  return await fetchFromApiServer("PUT", url, data);
+};
+
+export const deleteQuickTemplateApi = async (templateId) => {
+  const url = `api/v1/user/templates/${templateId}`;
+  return await fetchFromApiServer("DELETE", url);
+};
+
+// Saved searches
+export const getSavedSearchesApi = async () => {
+  const url = `api/v1/user/saved-searches`;
+  return await fetchFromApiServer("GET", url);
+};
+
+export const saveSavedSearchApi = async (data) => {
+  const url = `api/v1/user/saved-searches`;
+  return await fetchFromApiServer("POST", url, data);
+};
+
+export const deleteSavedSearchApi = async (searchId) => {
+  const url = `api/v1/user/saved-searches/${searchId}`;
+  return await fetchFromApiServer("DELETE", url);
+};
+
+// Skill gap insights
+export const getSkillGapInsightsApi = async (jobId) => {
+  const url = `api/v1/user/profile/skill-gap?jobId=${jobId}`;
+  return await fetchFromApiServer("GET", url);
+};

@@ -1,10 +1,23 @@
 import { useEffect, useState } from "react";
-import { FaUser, FaLock, FaBell, FaShieldAlt } from "react-icons/fa";
+import { FaUser, FaLock, FaBell, FaShieldAlt, FaSearch, FaFileAlt, FaTrash, FaEdit } from "react-icons/fa";
 import Navbar from "../../layout/Navbar";
 import Footer from "../../layout/Footer";
 import { useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { changePassword, updateUserProfile } from "@/redux/slices/user.slice";
+import {
+  changePassword,
+  updateUserProfile,
+  getProfileCompletion,
+  getJobAlerts,
+  updateJobAlerts,
+  getSavedSearches,
+  saveSavedSearch,
+  deleteSavedSearch,
+  getQuickTemplates,
+  createQuickTemplate,
+  updateQuickTemplate,
+  deleteQuickTemplate,
+} from "@/redux/slices/user.slice";
 import { Avatar, AvatarImage } from "../../ui/avatar";
 import Loader from "../../common/Loader";
 import { toast } from "react-toastify";
@@ -14,6 +27,8 @@ const tabs = [
   { id: "settings", label: "Profile Info", icon: <FaUser /> },
   { id: "password", label: "Change Password", icon: <FaLock /> },
   { id: "notifications", label: "Notifications", icon: <FaBell /> },
+  { id: "saved-searches", label: "Saved Searches", icon: <FaSearch /> },
+  { id: "templates", label: "Quick Templates", icon: <FaFileAlt /> },
   { id: "privacy", label: "Privacy", icon: <FaShieldAlt /> },
 ];
 
@@ -70,6 +85,8 @@ export default function Settings() {
             {activeTab === "settings" && <ProfileTab />}
             {activeTab === "password" && <PasswordTab />}
             {activeTab === "notifications" && <NotificationsTab />}
+            {activeTab === "saved-searches" && <SavedSearchesTab />}
+            {activeTab === "templates" && <QuickTemplatesTab />}
             {activeTab === "privacy" && <PrivacyTab />}
           </div>
         </div>
@@ -82,7 +99,7 @@ export default function Settings() {
 }
 
 function ProfileTab() {
-  const { user } = useSelector((state) => state.user);
+  const { user, profileCompletion } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState({
@@ -105,6 +122,12 @@ function ProfileTab() {
       });
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!profileCompletion) {
+      dispatch(getProfileCompletion());
+    }
+  }, [dispatch, profileCompletion]);
 
   const changeHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -166,6 +189,31 @@ function ProfileTab() {
   return (
     <form onSubmit={submitHandler} className='space-y-6'>
       {loading && <Loader />}
+      {profileCompletion && (
+        <div className="mb-6 bg-indigo-50/80 border border-indigo-200 rounded-2xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-semibold text-gray-800">
+              Profile completion: <span className="text-indigo-700">{profileCompletion.score}%</span>
+            </p>
+            <p className="text-xs text-gray-600">
+              {profileCompletion.completedTasks}/{profileCompletion.totalTasks} steps completed
+            </p>
+          </div>
+          <div className="w-full bg-indigo-100 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-[#6A38C2] to-[#F83002] h-2 rounded-full transition-all duration-500"
+              style={{ width: `${profileCompletion.score}%` }}
+            />
+          </div>
+          {profileCompletion.pendingTasks && profileCompletion.pendingTasks.length > 0 && (
+            <ul className="mt-3 text-xs text-gray-700 list-disc list-inside space-y-1">
+              {profileCompletion.pendingTasks.map((task) => (
+                <li key={task}>{task}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       <div className='flex items-start gap-6'>
         <div className='flex flex-col items-center'>
           <div className='relative mb-4'>
@@ -351,28 +399,91 @@ function PasswordTab() {
 }
 
 function NotificationsTab() {
+  const dispatch = useDispatch();
+  const { jobAlerts } = useSelector((state) => state.user);
+  const [enabled, setEnabled] = useState(false);
+  const [frequency, setFrequency] = useState("daily");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    dispatch(getJobAlerts());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (jobAlerts) {
+      setEnabled(Boolean(jobAlerts.enabled));
+      setFrequency(jobAlerts.frequency || "daily");
+    }
+  }, [jobAlerts]);
+
+  const handleSave = () => {
+    setSaving(true);
+    dispatch(
+      updateJobAlerts({
+        enabled,
+        frequency,
+      })
+    )
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          toast.success("Notification preferences updated");
+        } else {
+          toast.error(res?.payload?.message || "Failed to update preferences");
+        }
+      })
+      .catch((err) => {
+        toast.error(
+          err?.response?.data?.message || "Failed to update preferences"
+        );
+      })
+      .finally(() => setSaving(false));
+  };
+
   return (
     <div className='space-y-6'>
-      <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
-        <label className='flex items-center gap-3 cursor-pointer hover:bg-gray-100/50 rounded-lg p-3 transition-colors duration-200'>
-          <input type='checkbox' className='w-5 h-5 text-[#6A38C2] border-gray-300 rounded focus:ring-[#6A38C2] focus:ring-2 cursor-pointer' />
-          <span className='font-semibold text-gray-900'>Email me about new applicants</span>
+      <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60 space-y-4'>
+        <div className='flex items-center justify-between'>
+          <div>
+            <p className='font-semibold text-gray-900'>Job Alerts</p>
+            <p className='text-xs text-gray-600'>
+              Get periodic emails with new jobs that match your interests.
+            </p>
+          </div>
+          <label className='inline-flex items-center cursor-pointer'>
+            <input
+              type='checkbox'
+              className='sr-only peer'
+              checked={enabled}
+              onChange={(e) => setEnabled(e.target.checked)}
+            />
+            <div className='w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#6A38C2]/40 rounded-full peer peer-checked:bg-[#6A38C2] relative transition-colors'>
+              <span className='absolute top-[2px] left-[2px] w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 peer-checked:translate-x-5' />
+            </div>
         </label>
       </div>
-      <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
-        <label className='flex items-center gap-3 cursor-pointer hover:bg-gray-100/50 rounded-lg p-3 transition-colors duration-200'>
-          <input type='checkbox' className='w-5 h-5 text-[#6A38C2] border-gray-300 rounded focus:ring-[#6A38C2] focus:ring-2 cursor-pointer' />
-          <span className='font-semibold text-gray-900'>Notify me of interview reminders</span>
-        </label>
+
+        <div className='mt-3'>
+          <p className='text-xs font-semibold text-gray-700 mb-1'>
+            Alert frequency
+          </p>
+          <select
+            value={frequency}
+            onChange={(e) => setFrequency(e.target.value)}
+            disabled={!enabled}
+            className='mt-1 block w-full rounded-xl border-2 border-gray-200/60 p-2 text-sm focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none bg-white/80 disabled:bg-gray-100 disabled:text-gray-400'
+          >
+            <option value='daily'>Daily</option>
+            <option value='weekly'>Weekly</option>
+          </select>
       </div>
-      <div className='bg-gray-50/80 rounded-xl p-4 border border-gray-200/60'>
-        <label className='flex items-center gap-3 cursor-pointer hover:bg-gray-100/50 rounded-lg p-3 transition-colors duration-200'>
-          <input type='checkbox' className='w-5 h-5 text-[#6A38C2] border-gray-300 rounded focus:ring-[#6A38C2] focus:ring-2 cursor-pointer' />
-          <span className='font-semibold text-gray-900'>Job recommendations</span>
-        </label>
       </div>
-      <button className='mt-4 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300'>
-        Save Preferences
+
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className='mt-4 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed'
+      >
+        {saving ? "Saving..." : "Save Preferences"}
       </button>
     </div>
   );
@@ -401,6 +512,310 @@ function PrivacyTab() {
         <button className='text-red-600 hover:text-red-700 font-semibold px-4 py-2 rounded-xl hover:bg-red-50 transition-all duration-200'>
           Delete My Account
         </button>
+      </div>
+    </div>
+  );
+}
+
+function SavedSearchesTab() {
+  const dispatch = useDispatch();
+  const { savedSearches } = useSelector((state) => state.user);
+  const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    keywords: "",
+    location: "",
+    jobType: "",
+    minSalary: "",
+    maxSalary: "",
+    alertEnabled: false,
+  });
+
+  useEffect(() => {
+    dispatch(getSavedSearches());
+  }, [dispatch]);
+
+  const handleSave = async () => {
+    if (!formData.name) {
+      toast.error("Please enter a name for this search");
+      return;
+    }
+    setLoading(true);
+    try {
+      await dispatch(saveSavedSearch(formData)).unwrap();
+      toast.success("Search saved successfully!");
+      setShowForm(false);
+      setFormData({
+        name: "",
+        keywords: "",
+        location: "",
+        jobType: "",
+        minSalary: "",
+        maxSalary: "",
+        alertEnabled: false,
+      });
+    } catch (error) {
+      toast.error(error?.message || "Failed to save search");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (searchId) => {
+    if (!window.confirm("Are you sure you want to delete this saved search?")) return;
+    setLoading(true);
+    try {
+      await dispatch(deleteSavedSearch(searchId)).unwrap();
+      toast.success("Search deleted successfully!");
+    } catch (error) {
+      toast.error(error?.message || "Failed to delete search");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-[#6A38C2] to-[#F83002] bg-clip-text text-transparent">
+          Saved Searches
+        </h2>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-6 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+        >
+          {showForm ? "Cancel" : "+ New Search"}
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="bg-gray-50/80 rounded-xl p-6 border-2 border-gray-200/60 space-y-4">
+          <input
+            type="text"
+            placeholder="Search name (e.g., 'React Developer Jobs')"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none"
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Keywords (comma-separated)"
+              value={formData.keywords}
+              onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
+              className="rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none"
+            />
+            <input
+              type="text"
+              placeholder="Location"
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              className="rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none"
+            />
+            <input
+              type="text"
+              placeholder="Job Type"
+              value={formData.jobType}
+              onChange={(e) => setFormData({ ...formData, jobType: e.target.value })}
+              className="rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none"
+            />
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.alertEnabled}
+                onChange={(e) => setFormData({ ...formData, alertEnabled: e.target.checked })}
+                className="w-5 h-5 text-[#6A38C2]"
+              />
+              <label className="font-semibold text-gray-900">Enable alerts for this search</label>
+            </div>
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-6 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+          >
+            {loading ? "Saving..." : "Save Search"}
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {savedSearches && savedSearches.length > 0 ? (
+          savedSearches.map((search) => (
+            <div
+              key={search._id}
+              className="bg-white/80 rounded-xl p-4 border-2 border-gray-200/60 hover:border-[#6A38C2]/30 transition-all"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">{search.name}</h3>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    {search.keywords?.length > 0 && (
+                      <p><strong>Keywords:</strong> {search.keywords.join(", ")}</p>
+                    )}
+                    {search.location && <p><strong>Location:</strong> {search.location}</p>}
+                    {search.jobType && <p><strong>Job Type:</strong> {search.jobType}</p>}
+                    {search.alertEnabled && (
+                      <span className="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold mt-2">
+                        Alerts Enabled
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDelete(search._id)}
+                  className="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 text-center py-8">No saved searches yet. Create one to get started!</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function QuickTemplatesTab() {
+  const dispatch = useDispatch();
+  const { quickTemplates } = useSelector((state) => state.user);
+  const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    coverLetter: "",
+  });
+
+  useEffect(() => {
+    dispatch(getQuickTemplates());
+  }, [dispatch]);
+
+  const handleSave = async () => {
+    if (!formData.title || !formData.coverLetter) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      if (editingId) {
+        await dispatch(updateQuickTemplate({ templateId: editingId, data: formData })).unwrap();
+        toast.success("Template updated successfully!");
+      } else {
+        await dispatch(createQuickTemplate(formData)).unwrap();
+        toast.success("Template created successfully!");
+      }
+      setShowForm(false);
+      setEditingId(null);
+      setFormData({ title: "", coverLetter: "" });
+    } catch (error) {
+      toast.error(error?.message || "Failed to save template");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (template) => {
+    setFormData({ title: template.title, coverLetter: template.coverLetter || "" });
+    setEditingId(template._id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (templateId) => {
+    if (!window.confirm("Are you sure you want to delete this template?")) return;
+    setLoading(true);
+    try {
+      await dispatch(deleteQuickTemplate(templateId)).unwrap();
+      toast.success("Template deleted successfully!");
+    } catch (error) {
+      toast.error(error?.message || "Failed to delete template");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-[#6A38C2] to-[#F83002] bg-clip-text text-transparent">
+          Quick Apply Templates
+        </h2>
+        <button
+          onClick={() => {
+            setShowForm(!showForm);
+            if (showForm) {
+              setEditingId(null);
+              setFormData({ title: "", coverLetter: "" });
+            }
+          }}
+          className="bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-6 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+        >
+          {showForm ? "Cancel" : "+ New Template"}
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="bg-gray-50/80 rounded-xl p-6 border-2 border-gray-200/60 space-y-4">
+          <input
+            type="text"
+            placeholder="Template title (e.g., 'Software Engineer Application')"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none"
+          />
+          <textarea
+            placeholder="Cover letter text..."
+            value={formData.coverLetter}
+            onChange={(e) => setFormData({ ...formData, coverLetter: e.target.value })}
+            rows={8}
+            className="w-full rounded-xl border-2 border-gray-200/60 p-3 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 outline-none resize-none"
+          />
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white px-6 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+          >
+            {loading ? "Saving..." : editingId ? "Update Template" : "Create Template"}
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {quickTemplates && quickTemplates.length > 0 ? (
+          quickTemplates.map((template) => (
+            <div
+              key={template._id}
+              className="bg-white/80 rounded-xl p-4 border-2 border-gray-200/60 hover:border-[#6A38C2]/30 transition-all"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">{template.title}</h3>
+                  <p className="text-sm text-gray-600 line-clamp-3">{template.coverLetter}</p>
+                </div>
+                <div className="flex gap-2 ml-4">
+                  <button
+                    onClick={() => handleEdit(template)}
+                    className="text-[#6A38C2] hover:text-[#5b30a6] p-2 hover:bg-purple-50 rounded-lg transition-colors"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(template._id)}
+                    className="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 text-center py-8">No templates yet. Create one to speed up your applications!</p>
+        )}
       </div>
     </div>
   );

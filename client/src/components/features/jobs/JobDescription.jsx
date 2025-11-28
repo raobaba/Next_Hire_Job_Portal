@@ -7,6 +7,7 @@ import ReactHelmet from "../../common/ReactHelmet";
 import { useNavigate } from "react-router-dom";
 import { getJobById, getSimilarJobs } from "@/redux/slices/job.slice";
 import { applyJob } from "@/redux/slices/application.slice";
+import { getSkillGapInsights } from "@/redux/slices/user.slice";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../../common/Loader";
 import { getToken } from "@/utils/constant";
@@ -20,6 +21,9 @@ const JobDescription = () => {
   const [singleJob, setSingleJob] = useState(null);
   const [similarJobs, setSimilarJobs] = useState([]);
   const [isApplied, setIsApplied] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [skillGap, setSkillGap] = useState(null);
+  const [showSkillGap, setShowSkillGap] = useState(false);
   const user = useSelector((state) => state.user.user);
 
   // Fetch job details
@@ -49,7 +53,12 @@ const JobDescription = () => {
   const applyJobHandler = () => {
     const token = getToken();
     if (!token) return navigate("/login");
-    dispatch(applyJob(jobId))
+    if (!jobId) {
+      toast.error("Job ID is missing");
+      return;
+    }
+    setApplying(true);
+    dispatch(applyJob({ jobId }))
       .then((res) => {
         if (res?.payload?.status === 200) {
           toast.success(res?.payload?.message);
@@ -62,12 +71,28 @@ const JobDescription = () => {
         toast.error(
           error?.response?.data?.message || "Failed to apply for job."
         );
+      })
+      .finally(() => {
+        setApplying(false);
       });
   };
 
 
   const viewCompanyDetails = () => {
     navigate(`/company-dashboard/${singleJob?.company}`); 
+  };
+
+  const fetchSkillGap = async () => {
+    if (!jobId || !user) return;
+    try {
+      const res = await dispatch(getSkillGapInsights(jobId));
+      if (res?.payload?.status === 200) {
+        setSkillGap(res.payload);
+        setShowSkillGap(true);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch skill gap insights");
+    }
   };
 
   if (!singleJob) return <Loader />;
@@ -117,14 +142,14 @@ const JobDescription = () => {
             <div className='flex flex-col sm:flex-row gap-4 mb-8'>
               <Button
                 onClick={isApplied ? null : applyJobHandler}
-                disabled={isApplied}
+                disabled={isApplied || applying}
                 className={`flex-1 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ${
                   isApplied
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white"
                 }`}
               >
-                {isApplied ? "✓ Applied" : "Apply Now"}
+                {isApplied ? "✓ Applied" : applying ? "Applying..." : "Apply Now"}
               </Button>
 
               <Button
@@ -133,7 +158,67 @@ const JobDescription = () => {
               >
                 View Company Details
               </Button>
+
+              {user?.role === "student" && (
+                <Button
+                  onClick={fetchSkillGap}
+                  className='flex-1 rounded-xl bg-white border-2 border-[#F83002] text-[#F83002] hover:bg-[#F83002] hover:text-white font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300'
+                >
+                  Check Skill Gap
+                </Button>
+              )}
             </div>
+
+            {showSkillGap && skillGap && (
+              <div className='mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border-2 border-blue-200/60'>
+                <h3 className='font-extrabold text-xl mb-4 bg-gradient-to-r from-[#6A38C2] to-[#F83002] bg-clip-text text-transparent'>
+                  Skill Gap Analysis
+                </h3>
+                {skillGap.missingSkills && skillGap.missingSkills.length > 0 ? (
+                  <div className='space-y-4'>
+                    <div>
+                      <p className='font-semibold text-gray-900 mb-2'>Missing Skills:</p>
+                      <div className='flex flex-wrap gap-2'>
+                        {skillGap.missingSkills.map((skill, idx) => (
+                          <span key={idx} className='bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'>
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {skillGap.suggestedResources && skillGap.suggestedResources.length > 0 && (
+                      <div>
+                        <p className='font-semibold text-gray-900 mb-2'>Suggested Resources:</p>
+                        <div className='space-y-2'>
+                          {skillGap.suggestedResources.map((resource, idx) => (
+                            <a
+                              key={idx}
+                              href={resource.url}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='block bg-white/80 rounded-xl p-3 border border-gray-200 hover:border-[#6A38C2] hover:shadow-md transition-all'
+                            >
+                              <p className='font-semibold text-[#6A38C2]'>{resource.title}</p>
+                              {resource.category && (
+                                <p className='text-sm text-gray-600'>{resource.category}</p>
+                              )}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className='text-green-700 font-semibold'>Great! You have all the required skills for this position.</p>
+                )}
+                <button
+                  onClick={() => setShowSkillGap(false)}
+                  className='mt-4 text-gray-600 hover:text-gray-900 text-sm font-semibold'
+                >
+                  Close
+                </button>
+              </div>
+            )}
 
             <h2 className='border-b-2 border-gray-200 font-bold text-xl py-4 mb-6 text-gray-900'>
               Job Description
