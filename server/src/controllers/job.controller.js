@@ -267,15 +267,11 @@ const getAdminJobs = asyncErrorHandler(async (req, res) => {
     .lean() // Use lean() for better performance
     .sort({ createdAt: -1 }); // Sort by newest first
 
-  if (jobs.length === 0) {
-    const error = new ErrorHandler("Jobs Not Found", 404);
-    return error.sendError(res);
-  }
-
   return res.status(200).json({
     jobs,
     success: true,
     status: 200,
+    message: jobs.length ? "Jobs retrieved successfully." : "You have not posted any jobs yet.",
   });
 });
 

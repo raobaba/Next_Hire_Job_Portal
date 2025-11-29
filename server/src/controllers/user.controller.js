@@ -307,8 +307,7 @@ const collectAlertJobsForUser = async (user) => {
 const buildJobAlertEmail = (user, jobs) => {
   const frontendUrl =
     process.env.FRONTEND_URL ||
-    process.env.CLIENT_URL ||
-    "https://nexthire-portal.netlify.app";
+    process.env.CLIENT_URL 
 
   const jobItemsHtml = jobs
     .map((job) => {
@@ -508,7 +507,7 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
   user.verificationToken = verificationToken;
   await user.save();
 
-  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "https://nexthire-portal.netlify.app";
+  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL ;
   const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
   const emailBody = {
@@ -1164,7 +1163,7 @@ const loginUser = asyncErrorHandler(async (req, res, next) => {
     
     // Send verification email if email configuration is available
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS && email && user.fullname) {
-      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "https://nexthire-portal.netlify.app";
+      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL ;
       const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
       const emailBody = {
@@ -1278,7 +1277,7 @@ const forgetPassword = asyncErrorHandler(async (req, res, next) => {
   user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
   await user.save({ validateBeforeSave: false });
 
-  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "https://nexthire-portal.netlify.app";
+  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL ;
   const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
   const emailBody = {

@@ -85,10 +85,10 @@ const AdminJobsTable = ({ jobs, onDeleteJob }) => {
                   variant='outline'
                   className='bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500 text-sm px-1 py-1 min-w-[80px]'
                   onClick={() =>
-                    navigate(`/profile/admin/jobs/${job?._id}/update`)
+                    navigate(`/profile/admin/jobs/${job?._id}/edit`)
                   }
                 >
-                  ✏️ Edit
+                  <Edit2 className='w-4 h-4 mr-1' /> Edit
                 </Button>
 
                 <Button

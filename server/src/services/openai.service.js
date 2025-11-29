@@ -89,7 +89,7 @@ async function notifyUsersToCompleteProfile() {
     });
 
     for (const user of usersWithEmptySkills) {
-      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "https://nexthire-portal.netlify.app";
+      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL ;
       const userProfileLink = `${frontendUrl}/profile`;
       const emailContent = `
       Subject: Enhance Your Profile for Better Job Suggestions

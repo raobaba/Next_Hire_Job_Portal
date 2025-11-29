@@ -50,8 +50,44 @@ export const getPrepResourcesApi = async (params = {}) => {
   return await fetchFromApiServer("GET", url, {}, { params });
 };
 
+export const createPrepResourceApi = async (data) => {
+  const url = `api/v1/prep-resources`;
+  return await fetchFromApiServer("POST", url, data);
+};
+
+export const updatePrepResourceApi = async (resourceId, data) => {
+  const url = `api/v1/prep-resources/${resourceId}`;
+  return await fetchFromApiServer("PUT", url, data);
+};
+
+export const deletePrepResourceApi = async (resourceId) => {
+  const url = `api/v1/prep-resources/${resourceId}`;
+  return await fetchFromApiServer("DELETE", url);
+};
+
 // Highlights for landing page
 export const getHighlightsApi = async () => {
   const url = `api/v1/highlights`;
   return await fetchFromApiServer("GET", url);
+};
+
+export const createHighlightApi = async (data) => {
+  const url = `api/v1/highlights`;
+  return await fetchFromApiServer("POST", url, data);
+};
+
+export const updateHighlightApi = async (highlightId, data) => {
+  const url = `api/v1/highlights/${highlightId}`;
+  return await fetchFromApiServer("PUT", url, data);
+};
+
+export const deleteHighlightApi = async (highlightId) => {
+  const url = `api/v1/highlights/${highlightId}`;
+  return await fetchFromApiServer("DELETE", url);
+};
+
+// Update job
+export const updateJobApi = async (jobId, data) => {
+  const url = `api/v1/job/update/${jobId}`;
+  return await fetchFromApiServer("PUT", url, data);
 };

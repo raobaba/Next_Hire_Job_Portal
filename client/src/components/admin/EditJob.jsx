@@ -11,18 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-
 import { Loader2 } from "lucide-react";
 import ReactHelmet from "../common/ReactHelmet";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { getCompanies } from "@/redux/slices/company.slice";
-import { postJob } from "@/redux/slices/job.slice";
+import { updateJob, getJobById } from "@/redux/slices/job.slice";
 import Loader from "../common/Loader";
 
-const PostJob = () => {
+const EditJob = () => {
   const dispatch = useDispatch();
+  const { id } = useParams();
   const [company, setCompany] = useState([]);
   const [input, setInput] = useState({
     title: "",
@@ -31,12 +31,50 @@ const PostJob = () => {
     salary: "",
     location: "",
     jobType: "",
-    experienceLevel: "",
+    experience: "",
     position: 0,
     companyId: "",
   });
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch job details
+    dispatch(getJobById(id))
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          const job = res.payload.job;
+          setInput({
+            title: job.title || "",
+            description: job.description || "",
+            requirements: job.requirements || "",
+            salary: job.salary || "",
+            location: job.location || "",
+            jobType: job.jobType || "",
+            experience: job.experienceLevel?.toString() || "",
+            position: job.position || 0,
+            companyId: job.company?._id || "",
+          });
+        }
+        setFetching(false);
+      })
+      .catch(() => {
+        toast.error("Failed to fetch job details");
+        setFetching(false);
+      });
+
+    // Fetch companies
+    dispatch(getCompanies())
+      .then((res) => {
+        if (res?.payload?.status === 200) {
+          setCompany(res?.payload);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching companies:", error);
+      });
+  }, [dispatch, id]);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -44,89 +82,31 @@ const PostJob = () => {
 
   const selectChangeHandler = (value) => {
     const selectedCompany = company?.companies?.find(
-      (company) => company?.companyName === value // Use optional chaining
+      (company) => company?.companyName === value
     );
     setInput({
       ...input,
-      companyId: selectedCompany?._id, // Use optional chaining for safety
+      companyId: selectedCompany?._id,
     });
-  };
-
-  useEffect(() => {
-    setLoading(true);
-    dispatch(getCompanies())
-      .then((res) => {
-        if (res?.payload?.status === 200) {
-          setCompany(res?.payload);
-          if (!res?.payload?.companies?.length) {
-            toast.info("Create a company first to continue posting jobs.");
-            navigate("/profile/admin/companies/create");
-          }
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching companies:", error);
-      })
-      .finally(() => setLoading(false));
-  }, [dispatch, navigate]);
-
-  const validateForm = () => {
-    const requiredFields = [
-      "title",
-      "description",
-      "requirements",
-      "salary",
-      "location",
-      "jobType",
-      "experienceLevel",
-    ];
-
-    for (const field of requiredFields) {
-      if (!input[field] || String(input[field]).trim().length === 0) {
-        toast.error(`Please provide a valid ${field}.`);
-        return false;
-      }
-    }
-
-    if (!input.companyId) {
-      toast.error("Please select a company before posting the job.");
-      return false;
-    }
-
-    if (Number(input.salary) <= 0 || Number.isNaN(Number(input.salary))) {
-      toast.error("Salary must be a positive number.");
-      return false;
-    }
-
-    if (Number(input.position) <= 0 || Number.isNaN(Number(input.position))) {
-      toast.error("Number of positions must be at least 1.");
-      return false;
-    }
-
-    if (Number(input.experienceLevel) < 0 || Number.isNaN(Number(input.experienceLevel))) {
-      toast.error("Experience level must be zero or a positive number.");
-      return false;
-    }
-
-    return true;
   };
 
   const submitHandler = (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
     setLoading(true);
 
     const formData = {
       ...input,
+      experienceLevel: input.experience ? parseFloat(input.experience) : undefined,
     };
-    dispatch(postJob(formData))
+
+    dispatch(updateJob({ jobId: id, data: formData }))
       .then((res) => {
         if (res?.payload?.status === 200) {
-          toast.success(res?.payload?.message ?? "Job posted successfully.");
+          toast.success(res?.payload?.message ?? "Job updated successfully.");
           setLoading(false);
           navigate(-1);
         } else {
-          toast.error("An error occurred while posting the job.");
+          toast.error("An error occurred while updating the job.");
           setLoading(false);
         }
       })
@@ -137,9 +117,17 @@ const PostJob = () => {
       });
   };
 
+  if (fetching) {
+    return (
+      <div>
+        <Navbar />
+        <Loader />
+      </div>
+    );
+  }
+
   return (
     <div className='min-h-screen bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden'>
-      {/* Background decorations */}
       <div className='absolute inset-0 -z-10 overflow-hidden'>
         <div className='absolute top-0 left-1/4 w-96 h-96 bg-[#6A38C2]/5 rounded-full blur-3xl'></div>
         <div className='absolute bottom-0 right-1/4 w-96 h-96 bg-[#F83002]/5 rounded-full blur-3xl'></div>
@@ -148,9 +136,9 @@ const PostJob = () => {
       <Navbar />
       {loading && <Loader />}
       <ReactHelmet
-        title='Post a Job - Next_Hire'
-        description='Easily post job openings to attract qualified candidates. Fill out the job details, including role, responsibilities, and requirements, to find the perfect fit for your team.'
-        canonicalUrl='/post-job'
+        title='Edit Job - Next_Hire'
+        description='Update job details including role, responsibilities, and requirements.'
+        canonicalUrl='/edit-job'
       />
 
       <div className='flex items-center justify-center w-full my-5 px-4 pt-24 pb-8 md:px-0 relative z-10'>
@@ -160,10 +148,10 @@ const PostJob = () => {
         >
           <h1 className='text-3xl md:text-4xl font-extrabold mb-6 text-center'>
             <span className='bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'>
-              Post a{" "}
+              Edit{" "}
             </span>
             <span className='bg-gradient-to-r from-[#6A38C2] to-[#F83002] bg-clip-text text-transparent'>
-              New Job
+              Job
             </span>
           </h1>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -234,15 +222,14 @@ const PostJob = () => {
               />
             </div>
             <div>
-              <Label className='font-bold text-gray-900 mb-2'>Experience Level (Years)</Label>
+              <Label className='font-bold text-gray-900 mb-2'>Experience Level</Label>
               <Input
-                type='number'
-                name='experienceLevel'
-                value={input.experienceLevel}
+                type='text'
+                name='experience'
+                value={input.experience}
                 onChange={changeEventHandler}
                 className='w-full rounded-xl border-2 border-gray-200/60 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 bg-white/80 backdrop-blur-sm'
-                placeholder='e.g., 2'
-                min='0'
+                placeholder='e.g., 2-5 years'
               />
             </div>
             <div>
@@ -259,17 +246,20 @@ const PostJob = () => {
             {company?.companies?.length > 0 && (
               <div>
                 <Label className='font-bold text-gray-900 mb-2'>Select Company</Label>
-                <Select onValueChange={selectChangeHandler}>
+                <Select
+                  value={
+                    company?.companies?.find((c) => c._id === input.companyId)
+                      ?.companyName || ""
+                  }
+                  onValueChange={selectChangeHandler}
+                >
                   <SelectTrigger className='w-full rounded-xl border-2 border-gray-200/60 focus:border-[#6A38C2] focus:ring-2 focus:ring-[#6A38C2]/20 bg-white/80 backdrop-blur-sm'>
                     <SelectValue placeholder='Select a Company' />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       {company?.companies?.map((company) => (
-                        <SelectItem
-                          key={company?._id}
-                          value={company?.companyName}
-                        >
+                        <SelectItem key={company?._id} value={company?.companyName}>
                           {company?.companyName}
                         </SelectItem>
                       ))}
@@ -281,25 +271,19 @@ const PostJob = () => {
           </div>
 
           {loading ? (
-            <Button className='w-full my-6 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300' disabled>
+            <Button
+              className='w-full my-6 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300'
+              disabled
+            >
               <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait
             </Button>
           ) : (
             <Button
               type='submit'
               className='w-full my-6 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300'
-              disabled={!company?.companies?.length}
             >
-              Post New Job
+              Update Job
             </Button>
-          )}
-
-          {company?.companies?.length === 0 && (
-            <div className='bg-red-50/80 backdrop-blur-sm border-2 border-red-200 rounded-xl p-4 text-center'>
-              <p className='text-sm text-red-700 font-semibold'>
-                *Please register a company first before posting a job
-              </p>
-            </div>
           )}
         </form>
       </div>
@@ -307,4 +291,5 @@ const PostJob = () => {
   );
 };
 
-export default PostJob;
+export default EditJob;
+

@@ -53,8 +53,12 @@ const getCompany = asyncErrorHandler(async (req, res, next) => {
     .sort({ createdAt: -1 }); // Sort by newest first
 
   if (!companies.length) {
-    const error = new ErrorHandler("No companies found for this user", 404);
-    return error.sendError(res);
+    return res.status(200).json({
+      companies: [],
+      message: "You haven't created any companies yet.",
+      success: true,
+      status: 200,
+    });
   }
 
   return res.status(200).json({
@@ -107,15 +111,11 @@ const getJobsByCompanyId = asyncErrorHandler(async (req, res, next) => {
     return error.sendError(res);
   }
 
-  if (!jobs.length) {
-    const error = new ErrorHandler("No jobs found for this company", 404);
-    return error.sendError(res);
-  }
-
   return res.status(200).json({
     jobs,
     success: true,
     status: 200,
+    message: jobs.length ? "Jobs fetched successfully." : "No jobs found for this company yet.",
   });
 });
 
@@ -133,8 +133,25 @@ const updateCompany = asyncErrorHandler(async (req, res, next) => {
 
   // Check if a new logo file is uploaded
   if (req.files && req.files.logo && req.files.logo.tempFilePath) {
+    const { logo } = req.files;
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+    const maxSizeBytes = 2 * 1024 * 1024; // 2MB
+
+    if (!allowedMimeTypes.includes(logo.mimetype)) {
+      const error = new ErrorHandler(
+        "Logo must be a PNG, JPG, or WEBP image.",
+        400
+      );
+      return error.sendError(res);
+    }
+
+    if (logo.size > maxSizeBytes) {
+      const error = new ErrorHandler("Logo must be smaller than 2MB.", 400);
+      return error.sendError(res);
+    }
+
     const myCloud = await cloudinary.uploader.upload(
-      req.files.logo.tempFilePath,
+      logo.tempFilePath,
       {
         folder: "logos",
         width: 150,

@@ -7,20 +7,30 @@ const OtherJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1); // Pagination state
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(true);
 
   useEffect(() => {
     const fetchJobData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const adzunaBaseUrl = import.meta.env.VITE_ADZUNA_API_URL || "https://api.adzuna.com/v1/api";
-        const response = await axios.get(
-          `${adzunaBaseUrl}/jobs/in/search/${page}?app_id=${
-            import.meta.env.VITE_APPLICATION_ID
-          }&app_key=${import.meta.env.VITE_APPLICATION_KEY}`
-        );
-        setJobs(response.data.results);
+        const rawBase =
+          import.meta.env.VITE_BACKEND_URL ||
+          import.meta.env.VITE_API_URL ||
+          "";
+        const normalizedBase = rawBase.replace(/\/+$/, "");
+        const endpoint = normalizedBase
+          ? `${normalizedBase}/api/v1/external-jobs`
+          : `/api/v1/external-jobs`;
+
+        const response = await axios.get(endpoint, {
+          params: { page },
+          withCredentials: false,
+        });
+        const incomingJobs = response?.data?.jobs || [];
+        setJobs(incomingJobs);
+        setHasNext(Boolean(response?.data?.links?.next));
       } catch (error) {
         setError("Failed to load jobs");
         console.error("Error fetching job data:", error);
@@ -37,7 +47,9 @@ const OtherJobs = () => {
   };
 
   const handleNext = () => {
-    setPage((prev) => prev + 1);
+    if (hasNext) {
+      setPage((prev) => prev + 1);
+    }
   };
 
   return (
@@ -98,7 +110,23 @@ const OtherJobs = () => {
           {/* Job Cards Grid */}
           {!loading && !error && (
             <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'>
-              {jobs?.map((job, index) => (
+              {jobs?.map((job, index) => {
+                const cleanDescription = job?.description
+                  ?.replace(/<[^>]+>/g, "")
+                  ?.slice(0, 220);
+                const title = job?.title || job?.position || "Untitled Role";
+                const companyName = job?.company || job?.company_name || "Company Not Specified";
+                const jobTags = job?.tags || [];
+                const location = Array.isArray(job?.location)
+                  ? job.location.join(", ")
+                  : job?.location || "Remote / Flexible";
+                const salaryDisplay = job?.salary
+                  ? job.salary
+                  : job?.salary_min && job?.salary_max
+                    ? `₹${Math.round(job.salary_min).toLocaleString()} - ₹${Math.round(job.salary_max).toLocaleString()}`
+                    : "Not specified";
+
+                return (
                 <div
                   key={index}
                   className='group relative bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-200/60 hover:border-[#6A38C2]/30 hover:-translate-y-2 overflow-hidden'
@@ -110,12 +138,12 @@ const OtherJobs = () => {
                     <div className='flex items-start justify-between mb-4'>
                       <div className='flex-1'>
                         <h3 className='text-xl font-extrabold text-gray-900 group-hover:text-[#6A38C2] transition-colors duration-200 line-clamp-2 mb-2'>
-                          {job.title}
+                          {title}
                         </h3>
                         <div className='flex items-center gap-2'>
                           <div className='w-2.5 h-2.5 bg-gradient-to-r from-[#6A38C2] to-[#F83002] rounded-full'></div>
                           <p className='text-gray-600 font-semibold'>
-                            {job.company?.display_name || 'Company Not Specified'}
+                            {companyName}
                           </p>
                         </div>
                       </div>
@@ -135,9 +163,9 @@ const OtherJobs = () => {
                           </svg>
                         </div>
                         <div>
-                          <p className='text-xs text-gray-500 font-medium'>Contract Type</p>
+                          <p className='text-xs text-gray-500 font-medium'>Work Setup</p>
                           <p className='font-semibold text-gray-800'>
-                            {job.contract_type || "N/A"} / {job.contract_time || "N/A"}
+                            {job.remote ? "Remote Friendly" : location}
                           </p>
                         </div>
                       </div>
@@ -150,25 +178,33 @@ const OtherJobs = () => {
                         </div>
                         <div>
                           <p className='text-xs text-gray-500 font-medium'>Salary Range</p>
-                          <p className='font-semibold text-[#6A38C2]'>
-                            {job.salary_min
-                              ? `₹${Math.round(job.salary_min).toLocaleString()} - ₹${Math.round(job.salary_max).toLocaleString()}`
-                              : "Not specified"}
-                          </p>
+                          <p className='font-semibold text-[#6A38C2]'>{salaryDisplay}</p>
                         </div>
                       </div>
+                      {!!jobTags.length && (
+                        <div className="flex flex-wrap gap-2">
+                          {jobTags.slice(0, 4).map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-3 py-1 rounded-full bg-indigo-50 text-xs font-semibold text-indigo-600"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Job Description */}
                     <div className='mb-6'>
                       <p className='text-gray-600 text-sm line-clamp-3 leading-relaxed'>
-                        {job.description}
+                        {cleanDescription}
                       </p>
                     </div>
 
                     {/* Action Button */}
                     <a
-                      href={job.redirect_url}
+                      href={job.url || job.apply_url}
                       target='_blank'
                       rel='noopener noreferrer'
                       className='group/btn w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
@@ -180,7 +216,7 @@ const OtherJobs = () => {
                     </a>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           )}
 
@@ -210,7 +246,12 @@ const OtherJobs = () => {
               
               <button
                 onClick={handleNext}
-                className='group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
+                disabled={!hasNext}
+                className={`group flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  hasNext
+                    ? "bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] hover:from-[#5b30a6] hover:to-[#4a2580] text-white shadow-lg hover:shadow-xl transform hover:scale-105"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                }`}
               >
                 Next
                 <svg className='w-4 h-4 transition-transform duration-200 group-hover:translate-x-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -226,3 +267,4 @@ const OtherJobs = () => {
 };
 
 export default OtherJobs;
+

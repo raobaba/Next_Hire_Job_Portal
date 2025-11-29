@@ -14,10 +14,15 @@ import CompanySetup from "./components/admin/CompanySetup";
 import AdminJobs from "./components/admin/AdminJob";
 import PostJob from "./components/admin/PostJob";
 import Applicants from "./components/admin/Applicants";
+import AdminPrepResources from "./components/admin/AdminPrepResources";
+import AdminHighlights from "./components/admin/AdminHighlights";
+import EditJob from "./components/admin/EditJob";
 import ResetPassword from "./components/auth/ResetPassword";
 import EmailVarification from "./components/auth/EmailVarification";
 import OtherJobs from "./components/features/jobs/OtherJobs";
 import Settings from "./components/features/profile/Settings";
+import NotFound from "./components/common/NotFound";
+import CareerResources from "./components/features/resources/CareerResources";
 
 // Router setup
 const appRouter = createBrowserRouter([
@@ -70,6 +75,10 @@ const appRouter = createBrowserRouter([
     element: <OtherJobs />,
   },
   {
+    path: "/resources",
+    element: <CareerResources />,
+  },
+  {
     path: "/profile",
     element: <Profile />,
   },
@@ -120,6 +129,34 @@ const appRouter = createBrowserRouter([
         <Applicants />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: "/profile/admin/prep-resources",
+    element: (
+      <ProtectedRoute>
+        <AdminPrepResources />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/profile/admin/highlights",
+    element: (
+      <ProtectedRoute>
+        <AdminHighlights />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/profile/admin/jobs/:id/edit",
+    element: (
+      <ProtectedRoute>
+        <EditJob />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 

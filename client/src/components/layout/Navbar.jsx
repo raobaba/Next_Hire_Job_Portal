@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { RiMenu2Fill } from "react-icons/ri";
 import NextHireLogo from "@/assets/nexthire.png";
 import { getProfilePic, getToken } from "@/utils/constant";
-import { FaUser, FaCog, FaShieldAlt, FaSignOutAlt } from "react-icons/fa";
+import { FaUser, FaCog, FaShieldAlt, FaSignOutAlt, FaBook, FaStar } from "react-icons/fa";
 import { logoutUser } from "@/redux/slices/user.slice";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -139,14 +139,14 @@ const Navbar = () => {
               </li>
               <li>
                 <Link
-                  to='/browse-jobs'
+                  to='/resources'
                   className={`px-4 py-2 rounded-lg transition-all duration-200 ${
-                    isActive("/browse-jobs")
+                    isActive("/resources")
                       ? "bg-[#F83002]/10 text-[#F83002] font-semibold shadow-sm"
                       : "text-gray-600 hover:text-[#F83002] hover:bg-gray-50"
                   }`}
                 >
-                  Browse Jobs
+                  Resources
                 </Link>
               </li>
               <li>
@@ -302,15 +302,15 @@ const Navbar = () => {
               </li>
               <li>
                 <Link
-                  to='/browse-jobs'
+                  to='/resources'
                   onClick={handleLinkClick}
                   className={`block px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
-                    isActive("/browse-jobs")
+                    isActive("/resources")
                       ? "bg-[#F83002]/10 text-[#F83002]"
                       : "text-gray-800 hover:text-[#F83002] hover:bg-gray-50"
                   }`}
                 >
-                  Browse Jobs
+                  Resources
                 </Link>
               </li>
               <li>
@@ -349,16 +349,41 @@ const Navbar = () => {
                     </li>
                   )}
                   {user?.role === "recruiter" && (
-                    <li>
-                      <Link
-                        to="/profile/admin/jobs/create"
-                        onClick={handleLinkClick}
-                        className='block px-4 py-2 rounded-lg bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] text-white font-medium hover:from-[#5b30a6] hover:to-[#4a2580] transition-all duration-200 text-center'
-                      >
-                        <FaBriefcase className='inline mr-2' />
-                        Post Job
-                      </Link>
-                    </li>
+                    <>
+                      <li>
+                        <Link
+                          to="/profile/admin/jobs/create"
+                          onClick={handleLinkClick}
+                          className='block px-4 py-2 rounded-lg bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] text-white font-medium hover:from-[#5b30a6] hover:to-[#4a2580] transition-all duration-200 text-center'
+                        >
+                          <FaBriefcase className='inline mr-2' />
+                          Post Job
+                        </Link>
+                      </li>
+                      <div className='border-t border-gray-200 w-full my-2'></div>
+                      <li className='text-xs font-semibold text-gray-500 px-4 py-2 uppercase'>
+                        Admin Panel
+                      </li>
+                      <li>
+                        <Link
+                          to="/profile/admin/prep-resources"
+                          onClick={handleLinkClick}
+                          className='flex items-center text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
+                        >
+                          <FaBook className='mr-3 text-sm' /> Prep Resources
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/profile/admin/highlights"
+                          onClick={handleLinkClick}
+                          className='flex items-center text-gray-800 hover:text-[#F83002] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium'
+                        >
+                          <FaStar className='mr-3 text-sm' /> Highlights
+                        </Link>
+                      </li>
+                      <div className='border-t border-gray-200 w-full my-2'></div>
+                    </>
                   )}
                   <li>
                     <Link

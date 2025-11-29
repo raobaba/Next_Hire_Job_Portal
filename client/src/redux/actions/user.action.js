@@ -131,3 +131,9 @@ export const getSkillGapInsightsApi = async (jobId) => {
   const url = `api/v1/user/profile/skill-gap?jobId=${jobId}`;
   return await fetchFromApiServer("GET", url);
 };
+
+// Read document content (for resume parsing)
+export const readDocumentContentApi = async (data) => {
+  const url = `api/v1/user/read-content`;
+  return await fetchFromApiServer("POST", url, data);
+};

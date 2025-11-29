@@ -226,16 +226,13 @@ const Login = () => {
                   </Link>
                 </p>
 
-                {errorMessage === "Incorrect Password" && (
-                  <div className='mt-3'>
-                    <p className='text-sm text-gray-600'>
-                      Forgot your password?{" "}
-                      <Link to='/forget-password' className='text-[#6A38C2] hover:text-[#F83002] font-semibold transition-colors'>
-                        Reset here
-                      </Link>
-                    </p>
-                  </div>
-                )}
+                <p className='text-sm text-gray-600'>
+                  Forgot your password?{" "}
+                  <Link to='/forget-password' className='text-[#6A38C2] hover:text-[#F83002] font-semibold transition-colors'>
+                    Reset here
+                  </Link>
+                </p>
+
                 {errorMessage && errorMessage.includes("verify your email") && (
                   <div className='mt-4 p-4 bg-yellow-50/80 backdrop-blur-sm border-2 border-yellow-200 rounded-xl'>
                     <p className='text-sm text-yellow-800 font-bold mb-2'>

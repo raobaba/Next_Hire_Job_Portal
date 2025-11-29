@@ -8,6 +8,8 @@ import { getAllJobs, getFitlerOptions } from "@/redux/slices/job.slice";
 import { getRecommendedJobs } from "@/redux/slices/user.slice";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../../common/Loader";
+import { Link } from "react-router-dom";
+import { FaFilter } from "react-icons/fa";
 
 const Jobs = () => {
   const dispatch = useDispatch();
@@ -212,7 +214,27 @@ const Jobs = () => {
         description='Explore the latest job opportunities tailored to your skills and experience. Find your perfect role and apply today with Next_Hire.'
         canonicalUrl='/job'
       />
-      <div className='max-w-7xl mt-24 mx-auto px-4 py-8 relative z-10'>
+      <div className='max-w-7xl mt-24 mx-auto px-4 py-8 relative z-10 space-y-6'>
+        <div className='bg-white/90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-lg p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+          <div className='flex items-start gap-4'>
+            <div className='w-12 h-12 rounded-2xl bg-[#6A38C2]/10 text-[#6A38C2] flex items-center justify-center text-xl'>
+              <FaFilter />
+            </div>
+            <div>
+              <h2 className='text-lg font-semibold text-gray-900'>Need advanced filtering?</h2>
+              <p className='text-sm text-gray-600'>
+                Use the Browse Jobs workspace to save filters, set alerts, and explore curated job clusters without losing your current view.
+              </p>
+            </div>
+          </div>
+          <Link
+            to='/browse-jobs'
+            className='inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-[#6A38C2] to-[#5b30a6] text-white font-semibold shadow hover:from-[#5b30a6] hover:to-[#4a2580] transition'
+          >
+            Open Browse Jobs
+          </Link>
+        </div>
+
         <div className='flex flex-col md:flex-row gap-6'>
           {currentCategory !== "searchedBased" ? (
             <div className='w-full md:w-1/4 lg:w-1/5'>

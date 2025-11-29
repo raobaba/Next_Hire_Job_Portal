@@ -79,7 +79,17 @@ const JobDescription = () => {
 
 
   const viewCompanyDetails = () => {
-    navigate(`/company-dashboard/${singleJob?.company}`); 
+    const companyId =
+      typeof singleJob?.company === "string"
+        ? singleJob.company
+        : singleJob?.company?._id;
+
+    if (!companyId) {
+      toast.error("Company details are unavailable.");
+      return;
+    }
+
+    navigate(`/company-dashboard/${companyId}`);
   };
 
   const fetchSkillGap = async () => {

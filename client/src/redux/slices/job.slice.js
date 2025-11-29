@@ -9,7 +9,14 @@ import {
   filterOptionData,
   carouselData,
   getHighlightsApi,
+  createHighlightApi,
+  updateHighlightApi,
+  deleteHighlightApi,
   getPrepResourcesApi,
+  createPrepResourceApi,
+  updatePrepResourceApi,
+  deletePrepResourceApi,
+  updateJobApi,
 } from "../actions/job.action";
 
 export const postJob = createAsyncThunk(
@@ -144,6 +151,90 @@ export const getPrepResources = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(error?.response?.data || "Failed to fetch prep resources");
+    }
+  }
+);
+
+export const createPrepResource = createAsyncThunk(
+  "job/createPrepResource",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await createPrepResourceApi(data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to create prep resource");
+    }
+  }
+);
+
+export const updatePrepResource = createAsyncThunk(
+  "job/updatePrepResource",
+  async ({ resourceId, data }, { rejectWithValue }) => {
+    try {
+      const response = await updatePrepResourceApi(resourceId, data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to update prep resource");
+    }
+  }
+);
+
+export const deletePrepResource = createAsyncThunk(
+  "job/deletePrepResource",
+  async (resourceId, { rejectWithValue }) => {
+    try {
+      const response = await deletePrepResourceApi(resourceId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to delete prep resource");
+    }
+  }
+);
+
+export const createHighlight = createAsyncThunk(
+  "job/createHighlight",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await createHighlightApi(data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to create highlight");
+    }
+  }
+);
+
+export const updateHighlight = createAsyncThunk(
+  "job/updateHighlight",
+  async ({ highlightId, data }, { rejectWithValue }) => {
+    try {
+      const response = await updateHighlightApi(highlightId, data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to update highlight");
+    }
+  }
+);
+
+export const deleteHighlight = createAsyncThunk(
+  "job/deleteHighlight",
+  async (highlightId, { rejectWithValue }) => {
+    try {
+      const response = await deleteHighlightApi(highlightId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to delete highlight");
+    }
+  }
+);
+
+export const updateJob = createAsyncThunk(
+  "job/updateJob",
+  async ({ jobId, data }, { rejectWithValue }) => {
+    try {
+      const response = await updateJobApi(jobId, data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || "Failed to update job");
     }
   }
 );
@@ -295,6 +386,49 @@ const jobSlice = createSlice({
         state.prepResources = action.payload.resources || [];
       })
       .addCase(getPrepResources.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Create/Update/Delete prep resources
+      .addCase(createPrepResource.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updatePrepResource.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(deletePrepResource.fulfilled, (state) => {
+        state.loading = false;
+      })
+      // Create/Update/Delete highlights
+      .addCase(createHighlight.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updateHighlight.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(deleteHighlight.fulfilled, (state) => {
+        state.loading = false;
+      })
+      // Update job
+      .addCase(updateJob.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateJob.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update the job in the jobs array if it exists
+        const updatedJob = action.payload.job;
+        if (updatedJob) {
+          const index = state.jobs.findIndex((j) => j._id === updatedJob._id);
+          if (index !== -1) {
+            state.jobs[index] = updatedJob;
+          }
+          if (state.job?._id === updatedJob._id) {
+            state.job = updatedJob;
+          }
+        }
+      })
+      .addCase(updateJob.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

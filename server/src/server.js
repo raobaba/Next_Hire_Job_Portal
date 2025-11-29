@@ -13,6 +13,7 @@ const prepResourceRouter = require("./routes/prepResource.route");
 const highlightRouter = require("./routes/highlight.route");
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const externalJobsRouter = require("./routes/externalJobs.route");
 const app = express();
 
 // Configure file upload FIRST to handle multipart/form-data before other parsers
@@ -76,7 +77,11 @@ app.use(
   })
 );
 
-Connection();
+if (process.env.SKIP_DB === "true") {
+  console.warn("Skipping database connection (SKIP_DB=true).");
+} else {
+  Connection();
+}
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/job", jobRouter);
@@ -84,6 +89,7 @@ app.use("/api/v1/company", companyRouter);
 app.use("/api/v1/application", applicationRouter);
 app.use("/api/v1/prep-resources", prepResourceRouter);
 app.use("/api/v1/highlights", highlightRouter);
+app.use("/api/v1/external-jobs", externalJobsRouter);
 
 // Health check endpoint
 app.get("/", (req, res) => {
